@@ -16,7 +16,9 @@ import {Run} from "datagate.web"
 Run();
  
 然后
+
 npm intall
+
 npm run dev
 
 一个简单的，前后端完全分离式的管理系统类一体化前后端解决方案。
