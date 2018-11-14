@@ -1,0 +1,16 @@
+﻿[
+  {
+    "Key": "Test",
+    "Name": "用于单元测试",
+    "Filter": "Id=@Id",
+    "OpType": "Save",
+    "Model": "TstTestRecord"
+  },
+  {
+    "Key": "TestIn",
+    "Name": "用于单元测试IN",
+    "Filter": "Id IN(@Ids)",
+    "OpType": "GetArray",
+    "Model": "TstTestRecord"
+  }
+]

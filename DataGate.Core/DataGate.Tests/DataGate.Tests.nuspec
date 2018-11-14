@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>0.1.4</version>
+    <title>$title$</title>
+    <authors>$authors$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>http://opensource.org/licenses/MS-PL</licenseUrl>
+    <projectUrl>http://www.jurassic.com.cn</projectUrl>
+    <iconUrl>http://www.jurassic.com.cn/favicon.ico</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>使用此包中的BaseTest和AppDataTest基础类来创建自己的测试类.</description>
+    <copyright>$copyright$</copyright>
+    <releaseNotes>
+      0.1.2：调整命名空间。
+    </releaseNotes>
+    <tags>DataGate TestFrame</tags>
+    <!-- Dependencies are automatically installed when the package is installed -->
+    <dependencies>
+      <dependency id="Autofac" version="4.8.1" />
+      <dependency id="Autofac.Extensions.DependencyInjection" version="4.3.0" />
+      <dependency id="Microsoft.AspNetCore.Cors" version="2.1.1" />
+      <dependency id="Microsoft.VisualStudio.Web.CodeGeneration.Design" version="2.1.1" />
+      <dependency id="Newtonsoft.Json" version="11.0.2" />
+      <dependency id="Microsoft.AspNet.WebApi.Client" version="5.2.6" />
+      <dependency id="Microsoft.AspNetCore.App" version="2.1.1" />
+      <dependency id="Microsoft.AspNetCore.TestHost" version="2.1.1" />
+      <dependency id="Microsoft.NET.Test.Sdk" version="15.8.0" />
+      <dependency id="xunit.runner.visualstudio" version="2.3.1" />
+      <dependency id="DataGate.Com" version="0.1.4" />
+      <dependency id="DataGate.App" version="0.1.4" />
+      <dependency id="DataGate.Api" version="0.1.4" />
+    </dependencies> 
+  </metadata>
+</package>

@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>0.1.4</version>
+    <title>$title$</title>
+    <authors>$authors$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>http://opensource.org/licenses/MS-PL</licenseUrl>
+    <projectUrl>http://www.jurassic.com.cn</projectUrl>
+    <iconUrl>http://www.jurassic.com.cn/favicon.ico</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>DataGate API服务,承载DataGate.App的服务宿主</description>
+    <copyright>$copyright$</copyright>
+    <releaseNotes>v0.1.3</releaseNotes>
+    <tags>DataGate API SSOLogin</tags>
+    <dependencies>
+      <dependency id="Autofac" version="4.8.1" />
+      <dependency id="Autofac.Extensions.DependencyInjection" version="4.3.0" />
+      <dependency id="Microsoft.AspNetCore.App"  version="2.1.1" />
+      <dependency id="Microsoft.AspNetCore.Cors" version="2.1.1" />
+      <dependency id="Microsoft.VisualStudio.Web.CodeGeneration.Design" version="2.1.1" />
+      <dependency id="Newtonsoft.Json" version="11.0.2" />
+      <dependency id="DataGate.Com" version="0.1.4" />
+      <dependency id="DataGate.App" version="0.1.4" />
+    </dependencies>
+    <contentFiles>
+      <!-- Embed image resources -->
+      <!--<files include="any/any/images/dnf.png" buildAction="EmbeddedResource" />
+      <files include="any/any/images/ui.png" buildAction="EmbeddedResource" />
+
+      --><!-- Embed all image resources under contentFiles/cs/ --><!--
+      <files include="cs/**/*.png" buildAction="EmbeddedResource" />
+
+      --><!-- Copy config.xml to the root of the output folder --><!--
+      <files include="cs/uap/config/config.xml" buildAction="None" copyToOutput="true" flatten="true" />
+
+      --><!-- Copy run.cmd to the output folder and keep the directory structure --><!--
+      <files include="cs/commands/run.cmd" buildAction="None" copyToOutput="true" flatten="false" />-->
+
+      <!-- Include everything in the scripts folder except exe files -->
+      <files include="App_Data/*.json" buildAction="None" copyToOutput="true"  flatten="false" />
+      <files include="db/oracle/*.*" buildAction="None" copyToOutput="false"  flatten="false" />
+    </contentFiles>
+  </metadata>
+</package>

@@ -1,0 +1,108 @@
+﻿[
+  {
+    "Key": "GetAllUsers",
+    "Name": "获取所有用户",
+    "Model": "AppUser>AppUserRole>AppRole",
+    "Filter": "",
+    "OpType": "GetPage",
+    "OrderBy": "AppUser.createDate DESC"
+  },
+  {
+    "Key": "SelectUsers",
+    "Name": "获取用户下拉列表",
+    "Model": "AppUser",
+    "Filter": "account like @keyword or name like @keyword or id=@keyword",
+    "OpType": "GetPage",
+    "OrderBy": "account"
+  },
+  {
+    "Key": "SaveUser",
+    "Name": "保存用户信息",
+    "Model": "AppUser",
+    "OpType": "Save"
+  },
+  {
+    "Key": "SaveUserRole",
+    "Name": "保存用户角色",
+    "Model": "AppUserRole",
+    "OpType": "Save"
+  },
+  {
+    "Key": "GetAllRoles",
+    "Name": "获取所有角色",
+    "Model": "AppRole",
+    "OpType": "GetArray",
+    "OrderBy": "ORD"
+  },
+  {
+    "Key": "SaveRole",
+    "Name": "保存角色",
+    "Model": "AppRole",
+    "OpType": "Save"
+  },
+  {
+    "Key": "GetAllRoleMenus",
+    "Name": "获取所有角色和对应菜单",
+    "Model": "AppRole>AppRoleMenu>AppMenu",
+    "Filter": "AppMenu.AuthType='Auth'",
+    "OpType": "GetArray",
+    "OrderBy": "AppRole.Ord"
+  },
+  {
+    "Key": "SaveRoleMenu",
+    "Name": "保存角色菜单对应关系",
+    "Model": "AppRoleMenu",
+    "OpType": "Save"
+  },
+  {
+    "Key": "GetAuthMenus",
+    "Name": "获取所有需要授权的菜单",
+    "Model": "AppMenu",
+    "Filter": "AuthType='Auth'",
+    "OpType": "GetArray",
+    "OrderBy": "Ord"
+  },
+  {
+    "Key": "GetAllMenus",
+    "Name": "获取所有菜单和功能列表",
+    "Model": "AppMenu",
+    "Filter": "",
+    "OpType": "GetArray",
+    "OrderBy": "Ord"
+  },
+  {
+    "Key": "GetUserMenuIds",
+    "Name": "获取用户有权限的菜单和功能的ID",
+    "Model": "AppMenu>AppRoleMenu>AppRole>AppUserRole",
+    "Filter": "(AppMenu.AuthType='Auth' AND AppUserRole.UserId=@userId) OR AppMenu.AuthType='AllUsers'",
+    "QueryFields": "AppMenu.id",
+    "OpType": "GetArray"
+  },
+  {
+    "Key": "SaveMenu",
+    "Name": "保存菜单的更改",
+    "Model": "AppMenu",
+    "OpType": "Save"
+  },
+  {
+    "Key": "GetSysDict",
+    "Name": "获取字典内容",
+    "OpType": "GetArray",
+    "Filter": "1=1",
+    "OrderBy": "ORD",
+    "Model": "SysDict"
+  },
+  {
+    "Key": "SaveSysDict",
+    "Name": "提交字典修改",
+    "OpType": "Save",
+    "Model": "SysDict"
+  },
+  {
+    "Key": "UpdateLastLoginTime",
+    "Name": "保存用户最后登录时间",
+    "Model": "AppUser",
+    "OpType": "Save"
+  }
+
+]

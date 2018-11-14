@@ -1,0 +1,225 @@
+<template>
+<div v-on:keyup.enter="search">
+  <!-- @*筛选条件组件*@ -->
+  <el-form :inline="true" size="mini">
+    <el-form-item v-for="meta in metaFilter" :key="meta.name" :label="meta.title">
+      <div v-if="meta.uitype=='List'" class="search-input">
+        <el-select v-model="meta.value" multiple filterable allow-create default-first-option style="width:100%"
+          :placeholder="meta.title">
+          <el-option v-for="sel in meta.options" :key="sel.value" :label="sel.text" :value="sel.value">
+          </el-option>
+        </el-select>
+      </div>
+      <div v-else-if="meta.uitype=='DropdownList'" class="search-input">
+        <el-select v-model="meta.value" clearable filterable allow-create default-first-option
+          :placeholder="meta.title">
+          <el-option v-for="sel in meta.options" :key="sel.value" :label="sel.text" :value="sel.value">
+          </el-option>
+        </el-select>
+      </div>
+        <el-checkbox v-else-if="meta.uitype=='CheckBox'" v-model="meta.value" :true-label="'1'"
+        :indeterminate="meta.value !=1 && meta.value!=0"
+          :false-label="'0'">
+        </el-checkbox>
+      <div v-else-if="meta.uitype=='Date'|| meta.uitype=='DateTime'">
+        <div v-if="meta.operator=='bt'">
+          <span>
+            <el-date-picker v-model="meta.value" type="date" clearable placeholder="起始日期">
+            </el-date-picker>
+          </span> ~ <span>
+            <el-date-picker v-model="meta.value1" type="date" clearable placeholder="结束日期">
+            </el-date-picker>
+          </span>
+        </div>
+        <span v-else>
+          <el-date-picker v-model="meta.value" type="date" clearable :placeholder="meta.title">
+          </el-date-picker>
+        </span>
+      </div>
+      <div v-else class="search-input">
+        <el-input v-model="meta.value" clearable :placeholder="meta.title">
+        </el-input>
+      </div>
+    </el-form-item>
+    <el-form-item>
+      <el-button type="primary" v-on:click="search">查询</el-button>
+      <el-button type="primary" v-on:click="reset">重置</el-button>
+    </el-form-item>
+  </el-form>
+</div>
+</template>
+<script>
+import util from "../common/util.js";
+import editTask from "../common/editTask.js";
+export default {
+  props: {
+    //传入的待搜索的元数据定义
+    metadata: {
+      type: Array,
+      default: function() {
+        return [];
+      }
+    }
+  },
+  inject: ["urlQuery"],
+  data() {
+    return {};
+  },
+  computed: {
+    metaFilter() {
+      //按照原order顺序排序，如果order是负数则取绝对值
+      //因为原不显示出来的字段可能也要参加搜索
+      return util.sort(this.metadata, m => Math.abs(m.order));
+    }
+  },
+  created: function() {
+    if (!this.metadata || this.metadata.length == 0) {
+    }
+    // if (this.value.length == 0) {
+    //   this.value.push({
+    //     title: "标题",
+    //     name: "title",
+    //     operator: "inc",
+    //     value: ""
+    //   });
+    //   this.value.push({
+    //     title: "成果类型",
+    //     name: "pt",
+    //     operator: "equal",
+    //     value: ""
+    //   });
+    // }
+  },
+  watch: {
+    metadata(val) {
+      var task = new editTask();
+      val.forEach(meta => {
+        if (!meta.operator) {
+          meta.operator = this.getOperators(meta)[0].value;
+        }
+        if ((meta.uitype || "").indexOf("List") >= 0) task.updateOptions(meta);
+        this.$set(meta, "value1", null);
+      });
+    }
+  },
+  methods: {
+    getOperators: function(meta) {
+      switch (meta.uitype) {
+        case "Date":
+          return [
+            {
+              text: "介于",
+              value: "bt"
+            },
+            {
+              text: "等于",
+              value: "de"
+            },
+            {
+              text: "早于",
+              value: "lte"
+            },
+            {
+              text: "晚于",
+              value: "gte"
+            }
+          ];
+        case "List":
+          return [
+            {
+              text: "包含",
+              value: "in"
+            },
+            {
+              text: "不包含",
+              value: "nin"
+            }
+          ];
+        default:
+          return [
+            {
+              text: "包含",
+              value: "i"
+            },
+            {
+              text: "不包含",
+              value: "ni"
+            },
+            {
+              text: "等于",
+              value: "e"
+            },
+            {
+              text: "为空",
+              value: "n"
+            },
+            {
+              text: "不为空",
+              value: "nn"
+            }
+          ];
+      }
+    },
+    //TODO：数据检验
+    validate: function(callback) {
+      return callback(true);
+    },
+    search: function() {
+      var filter = [];
+      this.metadata.forEach(meta => {
+        if (!(meta.value || meta.operator == "n" || meta.operator == "nn")) {
+          return;
+        }
+        var wp = {
+          o: meta.operator,
+          n: meta.name,
+          v: meta.value
+        };
+        if (meta.value1) wp.v1 = meta.value1;
+        filter.push(wp);
+      });
+      // filter = filter
+      //   .map(f => {
+      //     var str = `${f.n}|${f.o}|${f.v}`;
+      //     if (f.v1) str += "|" + f.v1;
+      //     return str;
+      //   })
+      //   .join("`");
+      this.validate(valid => {
+        if (valid && this.$emitPass("search", filter).passed) {
+          if (filter.length) {
+            var f = JSON.stringify(filter);
+            if (f.length >= 2000) {
+              this.$message.error("您输入的查询条件过长，请适当减少一些字符。");
+              return;
+            }
+            this.urlQuery._filter = f;
+          } else {
+            this.$delete(this.urlQuery, "_filter");
+          }
+          this.$router.replace({
+            path: this.$route.path,
+            query: this.urlQuery
+          });
+        }
+      });
+    },
+    reset: function() {
+      this.metadata.forEach(meta => {
+        meta.value = null;
+        meta.value1 = null;
+      });
+      this.search();
+    }
+  }
+};
+</script>
+<style scoped lang="scss">
+.el-date-editor.el-input,
+.el-date-editor.el-input__inner {
+  width: 140px;
+}
+.search-input {
+  width: 140px;
+}
+</style>

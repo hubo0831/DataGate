@@ -1,0 +1,131 @@
+
+.uploader .queueList {
+    border: 2px dashed #e6e6e6;
+}
+.uploader .queueList.filled {
+    padding: 17px;
+    margin: 0;
+    border: 2px dashed transparent;
+}
+.uploader .queueList.webuploader-dnd-over {
+    border: 2px dashed #999999;
+}
+
+.uploader p {margin: 0;}
+
+.element-invisible {
+    position: absolute !important;
+    clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+    clip: rect(1px,1px,1px,1px);
+}
+
+.uploader .placeholder {
+    min-height: 40px;
+    color: #cccccc;
+    position: relative;
+    margin-top: 5px;
+    display: flex;
+    padding:5px;
+    align-items:center;
+}
+
+.uploader .placeholder .webuploader-pick {
+    background: #00b7ee;
+    border-radius: 3px;
+    padding: 5px;
+    color: #fff;
+    display: inline-block;
+    cursor: pointer;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.uploader .placeholder .webuploader-pick-hover {
+    background: #00a2d4;
+}
+
+.uploader .placeholder .flashTip {
+    color: #666666;
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    bottom: 20px;
+}
+.uploader .placeholder .flashTip a {
+    color: #0785d1;
+    text-decoration: none;
+}
+.uploader .placeholder .flashTip a:hover {
+    text-decoration: underline;
+}
+
+@-webkit-keyframes progressmove {
+    0% {
+       background-position: 0 0;
+    }
+    100% {
+       background-position: 17px 0;
+    }
+}
+@-moz-keyframes progressmove {
+    0% {
+       background-position: 0 0;
+    }
+    100% {
+       background-position: 17px 0;
+    }
+}
+@keyframes progressmove {
+    0% {
+       background-position: 0 0;
+    }
+    100% {
+       background-position: 17px 0;
+    }
+}
+
+.uploader .filelist div.file-panel {
+    position: absolute;
+    height: 0;
+    filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#80000000', endColorstr='#80000000')\0;
+    background: rgba( 0, 0, 0, 0.5 );
+    width: 100%;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    z-index: 300;
+}
+
+.uploader .webuploader-pick,
+.uploader .uploadBtn,
+.uploader .uploadBtn.state-uploading,
+.uploader .uploadBtn.state-paused {
+    background: #ffffff;
+    border: 1px solid #cfcfcf;
+    color: #565656;
+    padding: 5px;
+    display: inline-block;
+    border-radius: 3px;
+    margin-left: 0px;
+    cursor: pointer;
+    float: left;
+}
+.uploader .webuploader-pick-hover,
+.uploader .uploadBtn:hover,
+.uploader .uploadBtn.state-uploading:hover,
+.uploader .uploadBtn.state-paused:hover {
+    background: #f0f0f0;
+}
+
+.uploader .uploadBtn {
+    background: #00b7ee;
+    color: #fff;
+    border-color: transparent;
+}
+.uploader .uploadBtn:hover {
+    background: #00a2d4;
+}
+
+.uploader .uploadBtn.disabled {
+    pointer-events: none;
+    opacity: 0.6;
+}
