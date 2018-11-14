@@ -4,8 +4,11 @@ DataGate.Core --asp.net core api 应用程序
 3. 在visual studio中启动DataGate.Api.
 
 DataGate.Web -- Vue+Vue-Router+ElementUI的后台管理的前端框架，配合DataGate.Core的API.
+
 第一步：运行，
+
 vue init webpack
+
 npm install datagate.web
 
 第二步： 修改入口文件main.js:删除原有代码，只复制粘贴以下两行
