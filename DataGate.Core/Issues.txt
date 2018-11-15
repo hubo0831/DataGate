@@ -1,1 +1,2 @@
 Issues:
+解决Github警告的aspnetcoreapp版本过低有安全风险的问题。
