@@ -33,6 +33,13 @@ namespace DataGate.Tests
             _db = Get<DBHelper>();
 
         }
+        protected async Task<HttpClient> CreateClientAsync()
+        {
+            var client = _testServer.CreateClient();
+            var result = await PostLoginTest("system", "123456");
+            client.DefaultRequestHeaders.Add("token", result.Token);
+            return client;
+        }
 
         /// <summary>
         /// 根据类型返回实例的泛型方法
