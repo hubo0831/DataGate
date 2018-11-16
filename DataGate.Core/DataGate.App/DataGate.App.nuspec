@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>$id$</id>
-    <version>0.1.4</version>
+    <version>0.1.5</version>
     <title>$title$</title>
     <authors>$author$</authors>
     <owners>$author$</owners>
@@ -20,7 +20,7 @@
     <!-- Dependencies are automatically installed when the package is installed -->
     <dependencies>
       <dependency id="Newtonsoft.Json" version="11.0.2" />
-      <dependency id="DataGate.Com" version="0.1.4" />
+      <dependency id="DataGate.Com" version="0.1.5" />
     </dependencies>
   </metadata>
 </package>

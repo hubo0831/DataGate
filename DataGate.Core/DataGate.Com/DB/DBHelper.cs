@@ -34,7 +34,7 @@ namespace DataGate.Com.DB
         {
             sp = sp ?? new IDataParameter[0];
             string sps = String.Join(",", sp.Select(p => $"{p.ParameterName}={p.Value}"));
-            Debug.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss} \n{sql}\n{sp}");
+            Debug.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss} \n{sql}\n{sps}");
         };
 
         /// <summary>

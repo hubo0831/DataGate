@@ -475,7 +475,11 @@ namespace DataGate.App.DataService
                     {
                         return;
                     }
-                    if (!dt.Columns.Contains(col.Name))
+                    if (col.ForeignField.IsEmpty() && !dt.Columns.Contains(col.DbName))
+                    {
+                        return;
+                    }
+                    if (!col.ForeignField.IsEmpty() && !dt.Columns.Contains(col.Name))
                     {
                         return;
                     }

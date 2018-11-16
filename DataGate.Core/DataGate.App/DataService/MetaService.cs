@@ -317,7 +317,12 @@ namespace DataGate.App.DataService
                     allFields.Add(otherFields);
                 }
             }
+#if DEBUG
+            if (mainTable.Name == "WProject")
+            {
 
+            }
+#endif
             var mainFields = string.Join(",", mainTable.Fields.Select(f =>
             {
                 if (f.IsArray)
