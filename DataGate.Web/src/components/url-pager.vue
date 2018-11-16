@@ -36,7 +36,7 @@ export default {
       //如果不想url分页，则调用此事件,并args.passed=false
       if (this.$emitPass("page-change").passed) {
         //直接url跳转
-        this.$router.push({ path: this.$route.path, query: this.urlQuery });
+        this.$router.replace({ path: this.$route.path, query: this.urlQuery });
       }
     },
     handleCurrentChange(val) {
