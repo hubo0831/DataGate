@@ -2,13 +2,14 @@
 <template>
   <div @keyup.enter="submitRow()" @keyup.escape="cancelEdit()">
     <el-form :inline="true" :model="rowBuffer" ref="gridForm" :rules="task.rules" status-icon :show-message="false">
-      <el-table size="mini" v-bind:data="dataList" ref="dataGrid" border fit highlight-current-row v-on:current-change="doCurrentChange"
+      <el-table v-bind:data="dataList" ref="dataGrid" border fit highlight-current-row 
+      @current-change="doCurrentChange" @sort-change="doSortChange"
         @selection-change="doSelectionChange" @row-dblclick="doRowDblClick" @row-click="doRowClick" :height="height"
         tooltip-effect="light" style="width: 100%;">
         <el-table-column type="selection" v-if="multiSelect"></el-table-column>
         <el-table-column type="index" v-if="showIndex"></el-table-column>
-        <el-table-column :prop="meta.name" :label="meta.title" :min-width="meta.width" :show-overflow-tooltip="meta.width>100"
-          v-for="meta in metaFilter" :key="meta.name">
+        <el-table-column :prop="meta.name" :label="meta.title" :min-width="meta.width" :show-overflow-tooltip="meta.width>120"
+          v-for="meta in metaFilter" :key="meta.name" :sortable="meta.sortable">
           <template slot-scope="scope">
             <!-- 非当前编辑行或只读字段只显示 -->
             <template v-if="(scope.row != editingRow) || scope.row.readonly || editMode !='inline'">
@@ -87,7 +88,10 @@ export default {
     height: Number, //高度(px)
     multiSelect: Boolean, //多选,默认false
     multiEdit: Boolean, //是否支持同时编辑多项,默认false
-    showIndex: Boolean, //显示行号
+    showIndex: {
+      type: Boolean, //显示行号
+      default: true
+    },
     editMode: {
       //编辑模式： inline-行内编辑, side-侧边栏编辑, popup-弹出窗, newpage-新页面,none-不能编辑
       type: String,
@@ -103,6 +107,7 @@ export default {
       newItem: null //点击新增按钮时的新增对象暂存
     };
   },
+  inject: ["urlQuery"],
   watch: {
     //切换任务（如分页时）重置标志
     task() {
@@ -152,6 +157,19 @@ export default {
       this.$emit("format-array", args);
       return args.value;
     },
+    //用户点击列标题排序的事件
+    doSortChange(cpo) {
+      if (!cpo.prop) this.$delete(this.urlQuery, "_sort");
+      else
+        this.urlQuery._sort =
+          cpo.prop + " " + ((cpo.order || "").startsWith("d") ? "d" : "a");
+
+      this.$router.replace({
+        path: this.$route.path,
+        query: this.urlQuery
+      });
+    },
+    //勾选事件
     doSelectionChange(items) {
       this.submitRow(true);
       if (this.multiEdit) this.task.setSelection(items);

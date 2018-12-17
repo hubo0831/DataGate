@@ -1,6 +1,6 @@
 {
   "name": "datagate.web",
-  "version": "0.1.7",
+  "version": "0.1.9",
   "description": "A Vue.js + elementUI project for datagate management system clientside",
   "author": "bwangel@163.com",
   "private": false,
@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",
-    "echarts": "^3.7.1",
     "element-ui": "^2.0.7",
     "font-awesome": "^4.7.0",
     "jquery": "^3.3.1",

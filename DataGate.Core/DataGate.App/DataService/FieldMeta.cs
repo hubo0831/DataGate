@@ -145,5 +145,16 @@ namespace DataGate.App.DataService
         /// </summary>
         [JsonProperty("options")]
         public JArray Options { get; set; }
+
+        /// <summary>
+        /// 排序标志,
+        /// </summary>
+        [JsonProperty("sortable")]
+        public bool Sortable { get; set; } = true;
+
+        /// <summary>
+        /// 注释或备注
+        /// </summary>
+        public string Remark { get; set; }
     }
 }

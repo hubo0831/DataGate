@@ -63,29 +63,23 @@ namespace DataGate.Com.DB
             }
         }
 
-        IDBComm CreateDBComm(string connStr, string provider)
-        {
-            this.ConnStr = connStr;
-            switch (provider)
-            {
-                case "System.Data.SqlClient": return new DBCommSql();
-                //case "IBM.Data.DB2":return new DBCommDB2(); 
-                //case "System.Data.Oledb": return new DBCommOleDb();
-                case "Oracle.ManagedDataAccess.Client": return new DBCommOracle();
-                default:
-                    {
-                        throw new Exception(@"无法识别的ProviderName, 默认只支持Oracle.ManagedDataAccess.Client
-如果使用其他数据驱动，您需要用该驱动实现IDBComm接口，再在使用前手动初始化DBComm属性。");
-                    }
-            }
-        }
-
         /// <summary>
         /// <summary>
         /// 创建一个默认的数据库帮助类
         /// </summary>
         public DBHelper()
         {
+        }
+
+        /// <summary>
+        /// 根据连接字符串和数据接口类创建一个DBHelper
+        /// </summary>
+        /// <param name="connStr"></param>
+        /// <param name="dbComm"></param>
+        public DBHelper(string connStr, IDBComm dbComm)
+        {
+            this.ConnStr = connStr;
+            this.DBComm = dbComm;
         }
 
         /// <summary>
@@ -546,7 +540,7 @@ namespace DataGate.Com.DB
         /// <param name="value">值</param>
         void SetValue(object obj, PropertyInfo pi, object value)
         {
-            pi.SetValue(obj, HackType(value, pi.PropertyType), null);
+            pi.SetValue(obj, CommOp.HackType(value, pi.PropertyType), null);
         }
 
         public void Dispose()

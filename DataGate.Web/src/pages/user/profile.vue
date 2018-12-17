@@ -21,15 +21,11 @@
 
 <script>
 import * as API from "../../api";
-import userState from "../../userState.js";
 
 export default {
   data() {
     return {
       form: {
-        account:userState.currentUser.account,
-        name: userState.currentUser.name,
-        email: userState.currentUser.email
       },
       rules: {
         name: [{ required: true, message: "请输入姓名", trigger: "blur" }],
@@ -44,6 +40,9 @@ export default {
       }
     };
   },
+  created(){
+    this.form = $.extend({}, this.userProfile.currentUser);
+  },
   methods: {
     doSave() {
       let that = this;
@@ -54,7 +53,7 @@ export default {
             email: that.form.email
           };
           API.POST("/api/check/ChangeProfile", args).done(r => {
-            $.extend(userState.currentUser, args);
+            $.extend(this.userProfile.currentUser, args);
             this.$message.success("用户信息保存成功！");
           });
         }

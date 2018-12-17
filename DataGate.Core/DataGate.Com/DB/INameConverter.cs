@@ -12,11 +12,18 @@ namespace DataGate.Com.DB
     public interface INameConverter
     {
         /// <summary>
-        /// 转换方法
+        /// 将属性Pascal或Camel命名方式转为全大写，并添加下划线在原来大写字母前面
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="propName"></param>
         /// <returns></returns>
-        string ConvertToDBName(string name);
+        string ToDBName(string propName);
+
+        /// <summary>
+        /// 将带下划分隔符风格的数据库大写属性转为camel命名方式，并去掉下划分隔符
+        /// </summary>
+        /// <param name="dbName"></param>
+        /// <returns></returns>
+        string ToPropName(string dbName);
 
     }
 }

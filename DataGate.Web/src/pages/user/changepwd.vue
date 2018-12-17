@@ -2,10 +2,10 @@
   <el-row class="warp">
     <el-col :span="12" class="warp-main">
       <el-form ref="form" status-icon :model="form" label-width="100px" :rules="rules" size="mini">
-         <el-form-item label="账号">
-          <label>{{form.account}}</label>
+        <el-form-item label="账号">
+          <label>{{userProfile.currentUser.account}}</label>
         </el-form-item>
-       <el-form-item label="原密码" prop="oldPwd">
+        <el-form-item label="原密码" prop="oldPwd">
           <el-input type="password" v-model="form.oldPwd"></el-input>
         </el-form-item>
         <el-form-item label="新密码" prop="newPwd">
@@ -23,7 +23,6 @@
 </template>
 <script>
 import * as API from "../../api";
-import userState from "../../userState.js";
 export default {
   data() {
     var validatePass0 = (rule, value, callback) => {
@@ -42,10 +41,9 @@ export default {
       if (value === "") {
         callback(new Error("请输入密码"));
       } else {
-        if (this.form.oldPwd == value){
+        if (this.form.oldPwd == value) {
           callback(new Error("不能和原密码相同"));
-        }
-        else if (this.form.confirmPwd !== "") {
+        } else if (this.form.confirmPwd !== "") {
           this.$refs.form.validateField("confirmPwd");
         }
         callback();
@@ -63,7 +61,6 @@ export default {
 
     return {
       form: {
-        account: userState.currentUser.account,
         oldPwd: "",
         newPwd: "",
         confirmPwd: ""
@@ -75,13 +72,16 @@ export default {
       }
     };
   },
+
   methods: {
     doChangepwd() {
       this.$refs.form.validate(v => {
         if (!v) return;
-        API.POST("/api/check/ChangePassword", { p: this.form.newPwd }).done(r => {
-          this.$message.success("密码修改成功！");
-        });
+        API.POST("/api/check/ChangePassword", { p: this.form.newPwd }).done(
+          r => {
+            this.$message.success("密码修改成功！");
+          }
+        );
       });
     }
   }

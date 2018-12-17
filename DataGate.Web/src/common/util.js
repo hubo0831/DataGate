@@ -14,10 +14,10 @@ function padding(s, len) {
 
 export default {
   /*
-   * 根据平行数据处理成内嵌的数据对象,会新增一个children存放子节点对象集合
+   * 根据平行数据处理成树型结构对象,会新增一个children存放子节点对象集合
    * [
    *  属性原有字段...
-   *  children;[{},{}]
+   *  children:[{},{}]
    * ]
    * dataList = 数组集合
    * id=数据主键id
@@ -31,7 +31,7 @@ export default {
     var getTreeChildrenNodes = function (nodeItem, list) {
       nodeItem.children = []; //先赋值清空 ，否则下次出现双份
       list.forEach(function (item, index) {
-        if (nodeItem[id] == item[parentId]) {
+        if ((nodeItem[id] == item[parentId]) && item[parentId]) {
           nodeItem.children.push(item);
           getTreeChildrenNodes(item, list);
         }

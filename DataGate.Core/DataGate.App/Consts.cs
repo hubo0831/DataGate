@@ -5,6 +5,9 @@ using System.Text;
 
 namespace DataGate.App
 {
+    /// <summary>
+    /// 常量或常量对象
+    /// </summary>
     public static class Consts
     {
         /// <summary>
@@ -46,6 +49,11 @@ namespace DataGate.App
         /// 提交查询时代表查询表达式的的Url地址栏参数名
         /// </summary>
         public const string FilterKey = "_filter";
+
+        /// <summary>
+        /// 提交查询时代表排序定义的Url地址栏参数名
+        /// </summary>
+        public const  string SortKey = "_sort";
 
         /// <summary>
         /// 表格列的元数据描述中，作为操作列或按钮列的列的UIType

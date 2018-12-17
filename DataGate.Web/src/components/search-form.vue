@@ -1,7 +1,7 @@
 <template>
 <div v-on:keyup.enter="search">
   <!-- @*筛选条件组件*@ -->
-  <el-form :inline="true" size="mini">
+  <el-form :inline="true">
     <el-form-item v-for="meta in metaFilter" :key="meta.name" :label="meta.title">
       <div v-if="meta.uitype=='List'" class="search-input">
         <el-select v-model="meta.value" multiple filterable allow-create default-first-option style="width:100%"
@@ -35,11 +35,24 @@
           <el-date-picker v-model="meta.value" type="date" clearable :placeholder="meta.title">
           </el-date-picker>
         </span>
-      </div>
-      <div v-else class="search-input">
+       </div>
+        <div v-else-if="meta.uitype=='TextBox'" class="search-input">
         <el-input v-model="meta.value" clearable :placeholder="meta.title">
         </el-input>
       </div>
+      <!-- Custom自定义组件暂时用文本框 -->
+      <div v-else-if="meta.uitype=='Custom'" class="search-input">
+        <el-input v-model="meta.value" clearable :placeholder="meta.title">
+        </el-input>
+      </div>
+      <!-- 自定义输入组件 -->
+     <component v-else-if="meta.uitype" :is="meta.uitype" v-model="meta.value" :meta="meta" :obj="meta"
+           :placeholder="meta.title"></component>
+      <!-- 没有明确定义的组件 -->
+    <div v-else class="search-input">
+      <el-input v-model="meta.value" clearable :placeholder="meta.title">
+      </el-input>
+    </div>
     </el-form-item>
     <el-form-item>
       <el-button type="primary" v-on:click="search">查询</el-button>
@@ -190,7 +203,7 @@ export default {
           if (filter.length) {
             var f = JSON.stringify(filter);
             if (f.length >= 2000) {
-              this.$message.error("您输入的查询条件过长，请适当减少一些字符。");
+              this.$message.error("您输入的查询条件过长，请适当减少一些条件。");
               return;
             }
             this.urlQuery._filter = f;
@@ -218,6 +231,9 @@ export default {
 .el-date-editor.el-input,
 .el-date-editor.el-input__inner {
   width: 140px;
+}
+.el-form-item {
+    margin-bottom: 10px;
 }
 .search-input {
   width: 140px;

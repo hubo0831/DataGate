@@ -5,12 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using DataGate.Com.DB;
 using DataGate.App.Models;
+using DataGate.App.DataService;
 
 namespace DataGate.App
 {
     public class UserMan : DBCrud<AppUser>
     {
-        public UserMan(DBHelper helper) : base(helper) { }
+        public UserMan() : base(MetaService.CreateDBHelper("Default")) { }
 
         public async Task<AppUser> GetAsync(string account)
         {

@@ -23,16 +23,17 @@ namespace DataGate.App.DataService
         /// <summary>
         /// 带限定符的数据库中的名称，如sqlserver带[], oracle带""
         /// </summary>
+        [JsonIgnore]
         public string FixDbName { get; set; }
 
-        private IEnumerable<FieldMeta> _fields;
-        public IEnumerable<FieldMeta> Fields
+        private IList<FieldMeta> _fields;
+        public IList<FieldMeta> Fields
         {
             get { return _fields; }
             set
             {
                 _fields = value;
-                var pkey = Fields.FirstOrDefault(f => f.PrimaryKey);
+                var pkey = Fields.FirstOrDefault(f => f.PrimaryKey ==true);
                 if (pkey == null)
                 {
                     pkey = Fields.FirstOrDefault(f => 
@@ -49,6 +50,14 @@ namespace DataGate.App.DataService
             }
         }
 
+        /// <summary>
+        /// 注释或备注
+        /// </summary>
+        public string Remark { get; set; }
+
+        /// <summary>
+        /// 字段名称集合
+        /// </summary>
         [JsonIgnore]
         public IEnumerable<string> PropNames
         {
@@ -61,6 +70,7 @@ namespace DataGate.App.DataService
         /// <summary>
         /// 获取主键集合
         /// </summary>
+        [JsonIgnore]
         public IEnumerable<FieldMeta> PrimaryKeys
         {
             get { return Fields.Where(f => f.PrimaryKey); }

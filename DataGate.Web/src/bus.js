@@ -31,4 +31,5 @@ Vue.use((Vue, options) => {
 // logout 退出登录
 // app-start App应用程序开始运行
 // login 登录
+// register 注册新组件
 export default new Vue()

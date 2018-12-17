@@ -6,7 +6,7 @@ import 'font-awesome/css/font-awesome.css'
 import Vue from 'vue'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
-
+import './assets/styles/main.scss'
 import appConfig from './appConfig.js'
 
 Vue.config.productionTip = false;
@@ -56,6 +56,11 @@ Vue.component("LoginBottom", LoginBottom)
 
 Vue.component("Login", Login)
 
+//提供外部注册组件的事件
+bus.$on("register", (name, component)=>{
+  Vue.component(name, component);
+});
+
 //导出常用状态和工具类
 export const RouterObj = routerObj; //主要用到RouterObj.addPages(path, pageComponent)
 export const UserState = userState;
@@ -64,7 +69,7 @@ export const Util = util;
 export const EditTask = editTask;
 export const API = api;
 export const Bus = bus;
-export const PubMixin = pubmixin; 
+export const PubMixin = pubmixin;
 export const TaskMixin = taskmixin;
 
 //eslint-disable no-new
@@ -73,6 +78,22 @@ export const Run = () => new Vue({
   el: '#app',
   router: routerObj.router,
   template: '<App/>',
+  mounted() {
+    //解决IE下点导航不跳转的问题
+    //https://blog.csdn.net/lllo3o/article/details/79929458?utm_source=copy
+    function checkIE() {
+      return '-ms-scroll-limit' in document.documentElement.style && '-ms-ime-align' in document.documentElement.style
+    }
+    if (checkIE()) {
+      var that = this;
+      window.addEventListener('hashchange', function () {
+        var currentPath = window.location.hash.slice(1);
+        if (that.$route.path !== currentPath) {
+          that.$router.push(currentPath)
+        }
+      }, false);
+    }
+  },
   components: {
     App
   }

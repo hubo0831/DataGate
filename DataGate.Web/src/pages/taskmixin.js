@@ -34,7 +34,7 @@ export default {
     //根据url的参数进行查询
     apiUrlPageQuery(key) {
       return API.QUERY(key, this.urlQuery).done(result => {
-        this.task.clearData();
+        this.task.clearData(result.total > result.data.length);
         this.total = result.total;
         this.task.products = result.data;
       });

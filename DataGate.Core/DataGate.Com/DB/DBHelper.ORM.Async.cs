@@ -67,13 +67,13 @@ namespace DataGate.Com.DB
                 DataTable schemaTable = reader.GetSchemaTable();
                 PropertyInfo[] infos = typeof(T).GetProperties();
                 List<T> listT = new List<T>();
-                var readerCols = schemaTable.Rows.Cast<DataRow>().Select(dr => dr["ColumnName"].ToString());
+                var readerCols = schemaTable.Rows.Cast<DataRow>().Select(dr => dr["ColumnName"].ToString().ToLower());
                 while (reader.Read())
                 {
                     T t = new T();
                     foreach (PropertyInfo info in infos)
                     {
-                        var fieldName = GetDbObjName(info.Name);
+                        var fieldName = GetDbObjName(info.Name).ToLower();
                         if (readerCols.Contains(fieldName))
                         {
                             SetValue(t, info, reader[fieldName]);
@@ -106,7 +106,7 @@ namespace DataGate.Com.DB
             DataTable dt = await this.ExecDataTableAsync(sb.ToString(), CreateParameter("ID", id));
             if (dt.Rows.Count > 0)
             {
-                return ReaderToModel<T>(dt.Rows[0]);
+                return RowToModel<T>(dt.Rows[0]);
             }
             return model;
         }
@@ -127,7 +127,7 @@ where T : new()
             DataTable dt = await this.ExecDataTableAsync(strSql.ToString(), param);
             if (dt.Rows.Count > 0)
             {
-                return ReaderToModel<T>(dt.Rows[0]);
+                return RowToModel<T>(dt.Rows[0]);
             }
             return default(T);
         }
@@ -146,7 +146,7 @@ where T : new()
             DataTable dt = await this.ExecDataTableAsync(sql, param);
             if (dt.Rows.Count > 0)
             {
-                return ReaderToModel<T>(dt.Rows[0]);
+                return RowToModel<T>(dt.Rows[0]);
             }
             return default(T);
         }

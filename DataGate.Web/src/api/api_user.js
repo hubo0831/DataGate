@@ -9,12 +9,12 @@ import bus from "../bus"
 //获取用户完整信息，包括有权限的菜单
 function getUserInfo() {
   return new Promise((resolve, reject) => {
-    if (userState.currentUser) {
+    if (userState.currentUser && userState.currentUser.name) {
       resolve(userState.currentUser);
       return;
     }
     API.GET('/api/Check/GetUser').then(user => {
-      if (user.$code == 0) {
+      if (!user.$code) {
         userState.currentUser = user;
         resolve(user);
       } else {
@@ -29,10 +29,9 @@ function login(account) {
   return new Promise((resolve, reject) => {
     API.POST('/api/Check/Login', account)
       .then(result => {
-        if (result.$code == 0) {
+        if (!result.$code) {
           userState.token = result.token;
-          var returnUrl = util.getQueryStringByName("returnUrl");
-          bus.$emit("login", returnUrl);
+          bus.$emit("login");
           resolve();
         } else {
           reject(result);
@@ -45,14 +44,8 @@ function login(account) {
 function logout() {
   function releaseUser() {
     userState.token = null;
-    userState.currentUser = null;
-    var returnUrl = window.location.hash.substring(2);
-    if (returnUrl) {
-      returnUrl = "?returnUrl=" + returnUrl;
-    } else {
-      returnUrl = '';
-    }
-    bus.$emit('logout', returnUrl);
+    userState.currentUser = {};
+    bus.$emit('logout');
   }
   if (!userState.token) {
     releaseUser();

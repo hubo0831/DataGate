@@ -1,7 +1,7 @@
 import appConfig from './appConfig.js'
 import util from "./common/util.js"
 const keyName = appConfig.appSecret + "_Token";
-let currentUser, _token = util.getCookie(keyName);
+let currentUser = {}, _token = util.getCookie(keyName);
 
 export default {
   get token() {

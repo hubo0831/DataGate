@@ -33,6 +33,11 @@ namespace DataGate.App.Models
         public string Url { get; set; }
 
         /// <summary>
+        /// 导航路由定义
+        /// </summary>
+        public string Route { get; set; }
+
+        /// <summary>
         /// 排序号
         /// </summary>
         public double Ord { get; set; }

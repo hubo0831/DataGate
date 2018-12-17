@@ -88,7 +88,7 @@ namespace DataGate.Com.DB
             DataTable dt = this.ExecDataTable(sb.ToString(), CreateParameter("ID", id));
             if (dt.Rows.Count > 0)
             {
-                return ReaderToModel<T>(dt.Rows[0]);
+                return RowToModel<T>(dt.Rows[0]);
             }
             return model;
         }
@@ -108,7 +108,7 @@ namespace DataGate.Com.DB
             DataTable dt = this.ExecDataTable(strSql.ToString(), param);
             if (dt.Rows.Count > 0)
             {
-                return ReaderToModel<T>(dt.Rows[0]);
+                return RowToModel<T>(dt.Rows[0]);
             }
             return default(T);
         }
@@ -126,7 +126,7 @@ namespace DataGate.Com.DB
             DataTable dt = this.ExecDataTable(sql, param);
             if (dt.Rows.Count > 0)
             {
-                return ReaderToModel<T>(dt.Rows[0]);
+                return RowToModel<T>(dt.Rows[0]);
             }
             return default(T);
         }
@@ -370,7 +370,7 @@ namespace DataGate.Com.DB
         /// <summary>
         /// 将对象属性名转成字段名的转换器
         /// </summary>
-        public INameConverter FieldNameConverter { get; set; }
+        public INameConverter DbNameConverter { get; set; }
 
         Dictionary<string, string> _propFieldDict = new Dictionary<string, string>();
 
@@ -385,8 +385,8 @@ namespace DataGate.Com.DB
         }
 
         /// <summary>
-        /// 根据Pascal风格的属性名获取数据库中的名称
-        /// 如果属性名不是Pascal风格则原样返回
+        /// 根据DbNameConverter,将对象属性名获取数据库中的名称
+        /// 如果没有定义根据DbNameConverter则原样返回
         /// </summary>
         /// <param name="propName"></param>
         /// <returns></returns>
@@ -396,9 +396,9 @@ namespace DataGate.Com.DB
             {
                 return _propFieldDict[propName];
             }
-            if (FieldNameConverter != null)
+            if (DbNameConverter != null)
             {
-                _propFieldDict[propName] = FieldNameConverter.ConvertToDBName(propName);
+                _propFieldDict[propName] = DbNameConverter.ToDBName(propName);
                 return _propFieldDict[propName];
             }
             return propName;
@@ -411,7 +411,7 @@ namespace DataGate.Com.DB
         /// <returns></returns>
         public string AddFix(string propName)
         {
-            if (FieldNameConverter != null)
+            if (DbNameConverter != null)
             {
                 propName = GetDbObjName(propName);
             }
@@ -428,7 +428,7 @@ namespace DataGate.Com.DB
         /// <typeparam name="T"></typeparam>
         /// <param name="dr"></param>
         /// <returns></returns>
-        T ReaderToModel<T>(DataRow dr) where T : new()
+        T RowToModel<T>(DataRow dr) where T : new()
         {
             T model = new T();
             foreach (PropertyInfo pi in model.GetType().GetProperties(BindingFlags.GetProperty | BindingFlags.Public | BindingFlags.Instance))
@@ -438,36 +438,11 @@ namespace DataGate.Com.DB
                 {
                     if (!CommOp.IsEmpty(dr[fieldName]))
                     {
-                        pi.SetValue(model, HackType(dr[fieldName], pi.PropertyType), null);
+                        pi.SetValue(model, CommOp.HackType(dr[fieldName], pi.PropertyType), null);
                     }
                 }
             }
             return model;
-        }
-
-        /// <summary>
-        /// 这个类对可空类型进行判断转换，要不然会报错
-        /// </summary>
-        /// <param name="value">值</param>
-        /// <param name="conversionType">转换目标类型</param>
-        /// <returns></returns>
-        object HackType(object value, Type conversionType)
-        {
-            if (conversionType.IsGenericType && conversionType.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
-            {
-                if (value == null || value == DBNull.Value)
-                    return null;
-                System.ComponentModel.NullableConverter nullableConverter = new System.ComponentModel.NullableConverter(conversionType);
-                conversionType = nullableConverter.UnderlyingType;
-            }
-            if (conversionType.IsValueType)
-            {
-                if (value == null || value == DBNull.Value)
-                {
-                    value = 0;
-                }
-            }
-            return Convert.ChangeType(value, conversionType);
         }
 
     }

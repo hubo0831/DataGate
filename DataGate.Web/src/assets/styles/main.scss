@@ -1,19 +1,20 @@
 $top-bgcolor: #2668ad;
-$side-bgcolor: #0d3e70;
+$side-bgcolor: rgb(47,56,64);
 $side-hover: #185799;
 
 body {
   padding: 0px;
   margin: 0px auto;
-  font-size:14px;
+  font-size: 14px;
 }
 
-a {
+a, a:visited {
   text-decoration: none;
+  color:$top-bgcolor
 }
 
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: 'Microsoft YaHei', '微软雅黑';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: left;
@@ -21,16 +22,20 @@ a {
 }
 
 //home.vue
-.el-menu-item, .el-submenu__title {
+.el-menu-item,
+.el-submenu__title {
   color: #fff;
 }
 
-.el-menu .el-menu-item, .el-submenu .el-submenu__title {
+.el-menu .el-menu-item,
+.el-submenu .el-submenu__title {
   height: 46px;
   line-height: 46px;
 }
 
-.el-menu-item:hover, .el-submenu .el-menu-item:hover, .el-submenu__title:hover {
+.el-menu-item:hover,
+.el-submenu .el-menu-item:hover,
+.el-submenu__title:hover {
   background-color: #185799;
 }
 
@@ -42,23 +47,29 @@ a {
   background-color: #4A5064;
 }
 
-.el-submenu .el-menu-item.is-active, .el-menu-item.is-active,
-.el-submenu .el-menu-item.is-active:hover, .el-menu-item.is-active:hover {
+.el-submenu .el-menu-item.is-active,
+.el-menu-item.is-active,
+.el-submenu .el-menu-item.is-active:hover,
+.el-menu-item.is-active:hover {
   background-color: #185799;
   color: #fff;
 }
-.el-icon-arrow-down:before{
-  color:#fff;
+
+.el-icon-arrow-down:before {
+  color: #fff;
 }
+
 .el-menu .fa {
   vertical-align: baseline;
   margin-right: 6px;
-  color:#fff
+  color: #fff
 }
-.el-submenu__icon-arrow{
-  color:#fff
+
+.el-submenu__icon-arrow {
+  color: #fff
 }
-.warp-breadcrum{
+
+.warp-breadcrum {
   margin: 5px 10px 15px 0px;
 }
 
@@ -83,7 +94,66 @@ a {
   }
 }
 
-.el-form-item--mini .el-form-item__content, .el-form-item--mini .el-form-item__label {
+/*el-ui的卡片*/
+.el-card__header {
+  padding: 10px 12px;
+  background: #eaf7ff
+}
+
+.el-form-item--mini .el-form-item__content,
+.el-form-item--mini .el-form-item__label {
   line-height: 28px;
-  font-size:12px;
+}
+
+/* 设置ElUI所有btn的文字信息偏移*/
+.el-button span {
+  padding-left: 5px;
+}
+
+/* 设置ElUI穿梭Grid的宽度样式*/
+.frame-transfer-panel .el-transfer-panel {
+  width: 38%;
+}
+
+.el-dialog__body {
+  padding: 0px 20px
+}
+
+.el-dialog__header {
+  padding: 10px 20px;
+}
+
+.el-dialog__title {
+  line-height: 24px;
+  color: #609ee9;
+  font-weight: 700;
+}
+
+.el-dialog__headerbtn {
+  top: 8px;
+  right: 8px;
+  font-size: 18px;
+}
+
+.el-card__body {
+  padding: 10px;
+}
+
+.el-table {
+
+  th {
+    background-color: #f0f5f8;
+    padding: 6px 0;
+
+    div {
+      white-space: nowrap;
+      word-break: keep-all;
+      word-wrap: none;
+      overflow: hidden
+    }
+  }
+
+  td {
+    padding: 8px 0
+  }
 }

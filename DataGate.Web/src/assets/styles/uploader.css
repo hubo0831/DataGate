@@ -107,7 +107,6 @@
     border-radius: 3px;
     margin-left: 0px;
     cursor: pointer;
-    float: left;
 }
 .uploader .webuploader-pick-hover,
 .uploader .uploadBtn:hover,

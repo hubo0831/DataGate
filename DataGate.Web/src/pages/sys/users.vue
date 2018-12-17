@@ -4,14 +4,14 @@
     <el-col :span="24">
       <div class="dg-toolbar">
         <el-button-group>
-          <el-button size="mini" type="primary" icon="fa fa-file-text-o" v-on:click='doCmd("doAdd")'>新增</el-button>
-          <el-button size="mini" type="primary" icon="fa fa-edit" v-on:click='doCmd("doEdit")'>修改</el-button>
-          <el-button size="mini" type="primary" icon="fa fa-edit" v-on:click='disable()'>禁用</el-button>
-          <el-button size="mini" type="primary" icon="fa fa-trash-o" v-on:click='doCmd("doDel")'>删除</el-button>
+          <el-button type="primary" icon="fa fa-file-text-o" v-on:click='doCmd("doAdd")'>新增</el-button>
+          <el-button type="primary" icon="fa fa-edit" v-on:click='doCmd("doEdit")'>修改</el-button>
+          <el-button type="primary" icon="fa fa-edit" v-on:click='disable()'>禁用</el-button>
+          <el-button type="primary" icon="fa fa-trash-o" v-on:click='doCmd("doDel")'>删除</el-button>
         </el-button-group>
       </div>
       <search-form :metadata="searchMeta"></search-form>
-      <edit-grid :task="task" v-loading="loading" :height="pageHeight-215" ref="editGrid" edit-mode="popup"
+      <edit-grid :task="task" v-loading="loading" :height="pageHeight-240" ref="editGrid" edit-mode="popup"
       multi-select 
       @format-array="doformatArray"
       @before-del-rows="confirmDel"

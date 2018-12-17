@@ -20,7 +20,7 @@ function showError(xhr, err, e) {
   if (ex && appConfig.debug) {
     this.$notify.error({
       title: ex.exceptionType,
-      message: ex.message + "<br />点击查看详情",
+      message: ex.message + "\n点击查看详情",
       onClick: () => bus.$emit("server-exception", ex)
     })
   } else {
@@ -45,6 +45,7 @@ export const POST = (url, params) => {
       headers: {
         token: userState.token
       },
+      cache:false,
       data: params,
       url: url,
       crossDomain: true,
@@ -62,6 +63,7 @@ export const GET = (url, params) => {
       headers: {
         token: userState.token
       },
+      cache:false,
       data: params,
       url: url,
       crossDomain: true,
@@ -83,6 +85,7 @@ export const JPOST = (url, params) => {
       headers: {
         token: userState.token
       },
+      cache:false,
       data: JSON.stringify(params),
       url: url,
       crossDomain: true,

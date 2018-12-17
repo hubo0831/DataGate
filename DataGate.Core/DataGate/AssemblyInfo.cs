@@ -6,8 +6,6 @@ using System.Reflection;
 
 //关于.netcore2.0 以下标签报 ‘XXX特性重复’的问题，参考：
 //http://www.qingpingshan.com/m/view.php?aid=331255 
-//关于.netcore2.0 以下标签报 ‘XXX特性重复’的问题，参考：
-//http://www.qingpingshan.com/m/view.php?aid=331255 
 [assembly: AssemblyConfiguration(Frame.Build)]
 [assembly: AssemblyDescription(AssemblyRef.Description)]
 [assembly: AssemblyTitle(AssemblyRef.Name)]
@@ -23,7 +21,7 @@ using System.Reflection;
 
 class AssemblyRef
 {
-    internal const string Name = "哑巴程序";
-    internal const string Product = "哑巴程序";
-    internal const string Description = @"什么都不做，请下载DataGate.*的程序包";
+    internal const string Name = "DataGate控制台工具";
+    internal const string Product = "DataGate";
+    internal const string Description = @"自动生成API所需的数据模型文件*Models.json和数据操作文件*Keys.json";
 }

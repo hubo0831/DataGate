@@ -7,13 +7,32 @@ import util from './common/util'
 import NotFound from "./pages/notfound"
 import UnAuth from "./pages/unauth"
 Vue.use(Router)
-
+import userState from "./userState"
 let sysComps = {};
-
+let preDefinedRoutes = []; //预定义的完整路由信息
 let router = new Router({
-  // mode: 'history',
+  // mode: 'history', //history模式需要服务端支持
 
+  //浏览器前进后退时，保留上次滚动到的位置
+  scrollBehavior(to, from, savedPosition) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve(savedPosition||{x:0,y:0})
+      }, 500)
+    })
+  }
 });
+
+
+//供项目注入自己的页面,只能在路由生成之前调用
+function addPage(url, pathFunc) {
+  if (typeof url == "object") {
+    preDefinedRoutes.push(url);
+  } else {
+    url = getComponentPath(url);
+    sysComps[url] = pathFunc;
+  }
+}
 
 //使用此语法可以分块打包以动态加载模块
 // sysComps['/index'] = resolve=> require(['./pages/index'], resolve);
@@ -21,9 +40,9 @@ let router = new Router({
 //首页
 import Home from './pages/index'
 
-sysComps['/index'] = Home;
-sysComps['/user/changepwd'] = UserChangePwd;
-sysComps['/user/profile'] = UserProfile;
+addPage('/index', Home);
+addPage('/user/changepwd', UserChangePwd);
+addPage('/user/profile', UserProfile);
 
 
 import SysDepts from './pages/sys/depts'
@@ -34,18 +53,12 @@ import SysLog from './pages/sys/log'
 import SysMenus from './pages/sys/menus'
 
 //系统管理
-sysComps['/sys/depts'] = SysDepts
-sysComps['/sys/dicts'] = SysDicts
-sysComps['/sys/roles'] = SysRoles
-sysComps['/sys/users'] = SysUers
-sysComps['/sys/log'] = SysLog
-sysComps['/sys/menus'] = SysMenus
-
-//供项目注入自己的页面,只能在路由生成之前调用
-function addPage(url, pathFunc) {
-  url = getComponentPath(url);
-  sysComps[url] = pathFunc;
-}
+addPage('/sys/depts', SysDepts)
+addPage('/sys/dicts', SysDicts)
+addPage('/sys/roles', SysRoles)
+addPage('/sys/users', SysUers)
+addPage('/sys/log', SysLog)
+addPage('/sys/menus', SysMenus)
 
 //获取去掉参数后组件的加载路径
 function getComponentPath(url) {
@@ -76,14 +89,18 @@ let authedIds = [];
 //因为Vue-router不支持动态清空路由，所以这里可能会报路由重得添加的错
 function createRoutes(menus) {
   authedIds = menus.map(m => m.id);
+  if (!routeCreated) {
+    router.addRoutes(preDefinedRoutes);
+  }
+
   menus.forEach(menu => {
-    menu.url = menu.url ||'';
+    menu.url = menu.url || '';
     //如果是绝对路径，则忽略
     if (menu.url.indexOf('//') >= 0) {
       return;
     }
 
-    var cpath = getComponentPath(menu.url);
+    var cpath = getComponentPath(menu.route || menu.url);
 
     //解决某些带参数的路由，后台配置成具体的参数而形成的路由
     //比如 /sys/users/123
@@ -99,9 +116,8 @@ function createRoutes(menus) {
     if (exists) {
       return;
     }
-
     var rtr = {
-      path: menu.url,
+      path: menu.route || menu.url,
       component: sysComps[cpath],
       name: menu.name,
       props: true, //能通过URL传参给组件的props
@@ -115,20 +131,21 @@ function createRoutes(menus) {
   if (routeCreated) return;
   routeCreated = true;
   router.addRoutes([{
-    path: '/unauth',
-    name: '没有权限',
-    component: UnAuth
-  }, 
-  //notfound应该加在最后面，否则个个页面都会notfound
-  {
-    path: '*',
-    name: '没有找到资源',
-    component: NotFound
-  }]);
+      path: '/unauth',
+      name: '没有权限',
+      component: UnAuth
+    },
+    //notfound应该加在最后面，否则个个页面都会notfound
+    {
+      path: '*',
+      name: '没有找到资源',
+      component: NotFound
+    }
+  ]);
 }
 
 router.beforeEach((to, from, next) => {
-  if (!to.meta.id  || authedIds.includes(to.meta.id)) {
+  if (!to.meta.id || !userState.token || authedIds.includes(to.meta.id)) {
     next();
   } else {
     next('/unauth');

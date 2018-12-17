@@ -15,7 +15,7 @@
         <div class="topbar-account topbar-btn">
           <el-dropdown trigger="click">
             <span class="el-dropdown-link userinfo-inner">
-              <i class="fa fa-user-o"></i> {{user.name}}
+            <i class="fa fa-user-circle-o" aria-hidden="true" style="font-size:20px"></i> {{user.name}}
               <i class="el-icon-arrow-down el-icon--right"></i></span>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item v-for="item in selfMenu" :key="item.id">
@@ -41,14 +41,17 @@
             <template v-for="item in currentMenu.children">
               <el-submenu v-if="item.children && item.children.length" index="item.id" :key="item.id">
                 <template slot="title">
-                  <i class="el-icon-caret-right"></i> <span slot="title">{{item.name}}</span>
+                   <i :class="item.iconCls || 'fa fa-file-o'"></i>
+                    <span slot="title">{{item.name}}</span>
                 </template>
                 <el-menu-item v-for="term in item.children" :key="term.id" :index="term.id">
-                  <span slot="title">{{term.name}}</span>
+                               <i :class="term.iconCls || 'fa fa-file-o'"></i>
+               <span slot="title">{{term.name}}</span>
                 </el-menu-item>
               </el-submenu>
               <el-menu-item v-else :index="item.id" :key="item.id">
-                <i class="el-icon-caret-right"></i> <span slot="title">{{item.name}}</span>
+                <i :class="item.iconCls || 'fa fa-file-o'"></i>
+                 <span slot="title">{{item.name}}</span>
               </el-menu-item>
             </template>
           </el-menu>
@@ -68,7 +71,7 @@
                 </el-breadcrumb-item>
               </el-breadcrumb>
             </el-col>
-            <el-col :span="24" class="content-wrapper">
+            <el-col :span="24" class="content-wrapper" v-if="logined">
               <transition name="fade" mode="out-in">
                 <router-view></router-view>
               </transition>
@@ -100,6 +103,7 @@ import * as API from "./api/index.js";
 import ErrorPage from "./pages/errorpage";
 import bus from "./bus";
 import "./assets/styles/app.scss";
+import appConfig from "./appConfig"
 
 export default {
   name: "app",
@@ -115,7 +119,8 @@ export default {
       userPages: [], //用户能访问的所有页面的数组
       breadCrumbMenu: [], //面包屑导航
       selfMenu: [], //用户设置菜单
-      currentMenu: {} //当前的子菜单
+      currentMenu: {}, //当前的子菜单
+      logined :false //是否已完成登录全过程
     };
   },
   components: {
@@ -131,7 +136,8 @@ export default {
       }, 2000);
     };
     var getUser = () => {
-      this.user = {};
+      this.user = {}; //加此句使得登录框不会刷新页面时闪过
+      this.logined = false;
       UserAPI.getUserInfo()
         .then(user => {
           this.user = user;
@@ -139,9 +145,10 @@ export default {
           routerObj.createRoutes(user.menus);
           var menuTree = util.buildNestData(user.menus.filter(m => m.showType));
           this.mainMenu = menuTree;
-          var home = this.mainMenu.find(m => m.url == "/");
+          var home = this.userPages.find(m => m.url == "/");
           this.selfMenu = this.userPages.filter(m => m.parentId == home.id);
           this.restoreMenu();
+          this.logined = true;
         })
         .catch(reLogin);
     };
@@ -176,7 +183,7 @@ export default {
     bus.$on("login", getUser);
     bus.$on("logout", () => {
       this.user = null;
-      this.$router.replace("/");
+   //   this.$router.replace("/");
       //  location.reload(); //没办法
     });
 
@@ -232,11 +239,11 @@ export default {
       if (subMenu && subMenu.url) this.$router.push(subMenu.url);
     },
     //折叠导航栏
-    collapse: function() {
+    collapse() {
       this.collapsed = !this.collapsed;
     },
     //生成面包屑导航
-    createBreadCrumb: function(menu) {
+    createBreadCrumb(menu) {
       var breadcrumb = [];
       var i = 0; //防止死循环
       while (menu && i < 8) {
@@ -259,9 +266,9 @@ export default {
       this.breadCrumbMenu = breadcrumb;
     },
     //修改面包屑最后一层和窗口标题
-    updateTitle: function(displayName) {
+    updateTitle(displayName) {
       this.breadCrumbMenu[this.breadCrumbMenu.length - 1].name = displayName;
-      window.document.title = displayName + " - " + appConfig.appName;
+      window.document.title = displayName + " - " + appConfig.systemName;
     },
     logout() {
       UserAPI.logout();

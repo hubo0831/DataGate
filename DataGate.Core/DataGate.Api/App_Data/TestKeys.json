@@ -1,7 +1,7 @@
 ﻿[
   {
     "Key": "Test",
-    "Name": "用于单元测试",
+    "Name": "用于单元测试, 无需输出到运行目录",
     "Filter": "Id=@Id",
     "OpType": "Save",
     "Model": "TstTestRecord"

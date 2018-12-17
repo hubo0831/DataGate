@@ -209,8 +209,7 @@ ORDER BY {0}",
             await Helper.ExecNonQueryAsync(strSql);
         }
 
-
-        public string TypeMappingName(Type type, int maxLength)
+        string TypeMappingName(Type type, int maxLength)
         {
             switch (type.Name.ToLower())
             {

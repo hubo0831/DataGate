@@ -29,11 +29,33 @@ namespace DataGate.Tests
         public AppDataTest()
         {
             Consts.IsTesting = true;
-            _testServer = new TestServer(WebHost.CreateDefaultBuilder().UseStartup<Startup>());
-            _db = Get<DBHelper>();
-
+            _testServer = new TestServer(WebHost.CreateDefaultBuilder().UseStartup(StartupType));
+            _db = MetaService.CreateDBHelper("Default");
         }
-        protected async Task<HttpClient> CreateClientAsync()
+
+        protected virtual Type StartupType
+        {
+            get { return typeof(Startup); }
+        }
+
+        /// <summary>
+        /// 生成web客户端
+        /// </summary>
+        /// <returns></returns>
+        protected HttpClient CreateClient()
+        {
+            var client = _testServer.CreateClient();
+            //var result = await PostLoginTest("system", "123456");
+            //client.DefaultRequestHeaders.Add("token", result.Token);
+            return client;
+        }
+
+        /// <summary>
+        /// 生成带登录后Token的Web客户端
+        /// </summary>
+        /// <returns></returns>
+
+        protected async Task<HttpClient> CreateLoginedClientAsync()
         {
             var client = _testServer.CreateClient();
             var result = await PostLoginTest("system", "123456");
@@ -137,7 +159,7 @@ namespace DataGate.Tests
                 dict[ps[i].ToString()] = ps[i + 1];
             }
             var parameters = _db.GetParameter(dict);
-            DataTable dt = await _db.ExecDataTableAsync("select * from app_user where ACCOUNT=@ACCOUNT", parameters.ToArray());
+            DataTable dt = await _db.ExecDataTableAsync(sql, parameters.ToArray());
             Assert.True(dt.Rows.Count > 0);
         }
 
@@ -145,6 +167,7 @@ namespace DataGate.Tests
         void TestDataReader()
         {
             int i = 0;
+
             IDataReader reader = _db.ExecReader("select * from app_user where ACCOUNT=@ACCOUNT", _db.CreateParameter("account", "system"));
             using (reader)
             {
@@ -194,15 +217,15 @@ namespace DataGate.Tests
         [InlineData("GetAllRoleMenus")]
         [InlineData("GetAuthMenus")]
         [Theory]
-        public async Task<JArray> Query(string key, object parm = null)
+        public async Task<JToken> Query(string key, object parm = null)
         {
             var client = _testServer.CreateClient();
             string sql = $"/api/dg/{key}{SerialzeToUrl(parm)}";
             HttpResponseMessage response = await client.GetAsync(sql);
-            var result = await response.Content.ReadAsAsync<JArray>();
+            var result = await response.Content.ReadAsAsync<JToken>();
             string resultStr = result.ToString();
             Debug.WriteLine("QUERY-RESULT-STRING=" + resultStr);
-            Debug.WriteLine("QUERY-RESULT-COUNT=" + result.Count);
+            Debug.WriteLine("QUERY-RESULT-COUNT=" + result.Count());
             return result;
         }
 
@@ -211,7 +234,7 @@ namespace DataGate.Tests
         public async Task TestGetUserMenus(string userId)
         {
             var array = await Query("GetUserMenuIds", new { userId });
-            Assert.True(array.Count > 0);
+            Assert.True(array.Count() > 0);
         }
 
         /// <summary>
@@ -238,13 +261,14 @@ namespace DataGate.Tests
         [Theory]
         [InlineData("GetSysDict")]
         [InlineData("test")]
-        public async Task GetMetadata(string key)
+        public async Task<string> GetMetadata(string key)
         {
             var client = _testServer.CreateClient();
 
             HttpResponseMessage response = await client.GetAsync($"/api/dg/m/{key}");
             var result = await response.Content.ReadAsStringAsync();
             Debug.WriteLine("Metadata-RESULT=" + result);
+            return result;
         }
 
         [Fact]
@@ -376,7 +400,8 @@ namespace DataGate.Tests
             {
                 pageIndex,
                 pageSize,
-                _filter = JsonConvert.SerializeObject(_filter)
+                _filter = JsonConvert.SerializeObject(_filter),
+                _sort = "name d"
             });
             string resultStr = result.ToString();
             Console.WriteLine(resultStr);

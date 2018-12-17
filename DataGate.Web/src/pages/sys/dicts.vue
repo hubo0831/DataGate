@@ -1,40 +1,40 @@
 <template>
 <!-- 系统字典管理 -->
   <el-row :gutter="10">
-    <el-col :span="9">
+    <el-col :span="10">
       <div class="dg-toolbar">
         <el-button-group>
-          <el-button size="mini" type="primary" icon="fa fa-file-text-o" v-on:click='doGroupCmd("doAdd")'>新增组</el-button>
-          <el-button size="mini" type="primary" icon="fa fa-edit" v-on:click='doGroupCmd("doEdit")'>编辑组</el-button>
-          <el-button size="mini" type="primary" icon="fa fa-trash-o" v-on:click='doGroupCmd("doDel")'>删除组</el-button>
+          <el-button type="primary" icon="fa fa-file-text-o" v-on:click='doGroupCmd("doAdd")'>新增组</el-button>
+          <el-button type="primary" icon="fa fa-edit" v-on:click='doGroupCmd("doEdit")'>编辑组</el-button>
+          <el-button type="primary" icon="fa fa-trash-o" v-on:click='doGroupCmd("doDel")'>删除组</el-button>
         </el-button-group>
         <el-button-group>
-          <el-button size="mini" type="primary" icon="fa fa-long-arrow-up" v-on:click='doGroupCmd("doUp")'>上移</el-button>
-          <el-button size="mini" type="primary" icon="fa fa-long-arrow-down" v-on:click='doGroupCmd("doDown")'>下移</el-button>
+          <el-button type="primary" icon="fa fa-long-arrow-up" v-on:click='doGroupCmd("doUp")'>上移</el-button>
+          <el-button type="primary" icon="fa fa-long-arrow-down" v-on:click='doGroupCmd("doDown")'>下移</el-button>
         </el-button-group>
       </div>
-      <edit-grid :task="task" show-index :height="pageHeight-140" ref="groupEdit" :metadata="groupMeta" :data="groupFilter"
+      <edit-grid :task="task" show-index :height="pageHeight-150" ref="groupEdit" :metadata="groupMeta" :data="groupFilter"
        @current-change="doGroupCurrentChange"></edit-grid>
     </el-col>
-    <el-col :span="15">
+    <el-col :span="14">
       <div class="dg-toolbar">
         <el-button-group>
-          <el-button :disabled="!currentGroup" size="mini" type="primary" icon="fa fa-file-text-o"
+          <el-button :disabled="!currentGroup" type="primary" icon="fa fa-file-text-o"
            v-on:click='doItemCmd("doAdd")'>新增字典项</el-button>
-          <el-button :disabled="!currentGroup" size="mini" type="primary" icon="fa fa-file-text-o"
+          <el-button :disabled="!currentGroup" type="primary" icon="fa fa-file-text-o"
            v-on:click='showBatchAdd=true'>批量新增</el-button>
-          <el-button size="mini" type="primary" icon="fa fa-edit" v-on:click='doItemCmd("doEdit")'>编辑</el-button>
-          <el-button size="mini" type="primary" icon="fa fa-trash-o" v-on:click='doItemCmd("doDel")'>删除</el-button>
+          <el-button type="primary" icon="fa fa-edit" v-on:click='doItemCmd("doEdit")'>编辑</el-button>
+          <el-button type="primary" icon="fa fa-trash-o" v-on:click='doItemCmd("doDel")'>删除</el-button>
         </el-button-group>
         <el-button-group>
-          <el-button size="mini" type="primary" icon="fa fa-long-arrow-up" v-on:click='doItemCmd("doUp")'>上移</el-button>
-          <el-button size="mini" type="primary" icon="fa fa-long-arrow-down" v-on:click='doItemCmd("doDown")'>下移</el-button>
+          <el-button type="primary" icon="fa fa-long-arrow-up" v-on:click='doItemCmd("doUp")'>上移</el-button>
+          <el-button type="primary" icon="fa fa-long-arrow-down" v-on:click='doItemCmd("doDown")'>下移</el-button>
         </el-button-group>
          <el-button-group>
-          <el-button size="mini" :disabled="!this.task.changed" type="primary" icon="fa fa-save" v-on:click='doSave()'>保存</el-button>
+          <el-button :disabled="!this.task.changed" type="primary" icon="fa fa-save" v-on:click='doSave()'>保存</el-button>
         </el-button-group>
      </div>
-      <edit-grid :task="task" show-index :height="pageHeight-140" multi-select ref="itemEdit"
+      <edit-grid :task="task" show-index :height="pageHeight-150" multi-select ref="itemEdit"
        :metadata="itemMeta" :data="itemFilter"
        @new-row="doNewItemRow"></edit-grid>
   </el-col>
@@ -108,13 +108,13 @@ export default {
   },
   computed: {
     groupFilter() {
-      return util.sort(this.task.products.filter(p => !p.parentId), a => a.ord);
+      return util.sort(this.task.products.filter(p => !p.parentCode), a => a.ord);
     },
 
     itemFilter() {
       if (!this.currentGroup) return [];
       return util.sort(
-        this.task.products.filter(p => p.parentId == this.currentGroup.id),
+        this.task.products.filter(p => p.parentCode == this.currentGroup.code),
         a => a.ord
       );
     }
@@ -157,7 +157,7 @@ export default {
           code: cs[0],
           name: cs[1],
           remark: cs[2],
-          parentId: this.currentGroup.id,
+          parentCode: this.currentGroup.code,
           ord: maxOrder++
         });
         this.task.changeStatus(item, "added");

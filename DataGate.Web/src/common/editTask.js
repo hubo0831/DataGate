@@ -12,7 +12,7 @@ export default function editTask() {
 
   //清除元数据以外的数据
   //此方法运用不当可能会造成页面闪动
-  this.clearData = () => {
+  this.clearData = (paged) => {
     this.products = []; //当前的主表
     this.addedProducts = []; //新增的记录
     this.changedProducts = []; //修改过的记录
@@ -21,6 +21,11 @@ export default function editTask() {
     this.selection = []; //勾选中的成果列表，应该是products的子集
     this.editBuffer = {}; //根据selection合并后组成的单个成果，用以绑定form表单的值
     this.details = {}; //主从表中的子表
+
+    //如果是分页查询，则设置排序为custom
+    if (paged) {
+      this.metadata.forEach(meta => meta.sortable && (meta.sortable = "custom"));
+    }
   }
   this.clearData();
 
@@ -61,12 +66,24 @@ export default function editTask() {
       //没有声明显示顺序的主键都不显示
       if (m.primarykey && !m.order && m.order != 0) m.order = -1;
       else if (!m.order) m.order = 0;
+
+      //外表字段不参与编辑
       if (m.foreignfield && !m.formorder) m.formorder = -1;
+
+      //没有声明编辑顺序则编辑顺序等于列表顺序
       if (!m.formorder && m.formorder != 0) m.formorder = m.order;
+
+      //没有声明datatype则推测
       if (!m.datatype) m.datatype = guessDataType(m);
+
+      //没有声明uitype则推测
       if (!m.uitype) m.uitype = guessUIType(m);
+
+      //没有声明显示标题则默认为字段名
       if (!m.title) m.title = m.name;
-      if (!m.width) m.width = 100;
+
+      //没有声明显示宽度则默认100
+      if (!m.width) m.width = (appConfig.elSize > 1 ? 120 : 100);
     });
 
     this.metadata = mtemp;

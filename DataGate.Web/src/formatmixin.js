@@ -1,10 +1,12 @@
 import util from "./common/util"
 import Vue from "vue";
 import appConfig from "./appConfig"
+import userState from "./userState"
 Vue.mixin({
   data() {
     return {
-      appConfig
+      appConfig,
+      userProfile:userState,
     }
   },
   //Vue.mixin全局混入，用于常用格式化
@@ -52,7 +54,8 @@ Vue.mixin({
     },
     // 百分数
     formatPercent(row, col, num, idx) {
-      return num * 100 + '%';
+      var v = parseInt(num * 1000000);
+      return v  / 10000 + '%';
     },
   }
 });

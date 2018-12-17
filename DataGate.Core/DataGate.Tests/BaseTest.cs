@@ -2,6 +2,8 @@
 using DataGate.Com;
 using System.Diagnostics;
 using Xunit;
+using Newtonsoft.Json;
+using System.IO;
 
 namespace DataGate.Tests
 {
@@ -28,12 +30,48 @@ namespace DataGate.Tests
         [InlineData("TST_DATA_URL.C_NAME", "TstDataUrl.cName")]
         [InlineData("ID", "Id")]
         [InlineData("ID", "id")]
+        [InlineData("DELEGATE_FILEID", "delegate_fileid")]
         [Theory]
         public void ConvertFieldName(string upper, string pascal)
         {
             UpperNameConverter conv = new UpperNameConverter();
-            string f = conv.ConvertToDBName(pascal);
+            string f = conv.ToDBName(pascal);
             Assert.Equal(upper, f);
+        }
+
+        [InlineData("TEST_ORM_FIELD", "testOrmField")]
+        [InlineData("EMPLOYEE2_ID", "employee2Id")]
+        [InlineData("W_TASK.EMPLOYEE2_ID", "wTask.employee2Id")]
+        [InlineData("W_TASK", "wTask")]
+        [InlineData("DELEGATE_FILEID", "delegateFileid")]
+        [InlineData("ID", "id")]
+        [InlineData("TST_DATA_URL.C_NAME", "tstDataUrl.cName")]
+        [Theory]
+        public void ConvertDBNameTOPropName(string dbName, string camel)
+        {
+            UpperNameConverter tran = new UpperNameConverter();
+           string camelResult = tran.ToPropName(dbName);
+            Assert.Equal(camel, camelResult);
+        }
+
+        [Fact]
+        public void ConvertJson()
+        {
+            var obj = new
+            {
+                PARENT_CODE_DEF = "C001",
+                TEST_ORM_FIELD = "F002"
+            };
+
+            string result = JsonConvert.SerializeObject(obj);
+        }
+
+        [Fact]
+        public void TestDir()
+        {
+            string dir = "..\\..\\TestDir";
+            DirectoryInfo di = new DirectoryInfo(dir);
+            Debug.WriteLine("DIR RESOLVED=" + di.FullName);
         }
 
         /// <summary>

@@ -1,26 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
 
 namespace DataGate.Com
 {
     /// <summary>
-    /// DataSet和DataTable的帮助类
+    /// DataTable的帮助类
     /// </summary>
-    public static class DataHelper
+    public static class DataTableHelper
     {
         /// <summary>
         /// copy content from source to destination row 
         /// they must be of the same type 
         /// </summary>
-        /// <param name="objSource">source reference to a row</param>
-        /// <param name="objDestination">reference to a destination row</param>
-        public static void CopyRow(object objSource, object objDestination)
+        /// <param name="objS">source reference to a row</param>
+        /// <param name="objD">reference to a destination row</param>
+        public static void CopyRow(this DataRow objS, DataRow objD)
         {
             int intCounter = 0;
-            DataRow objS = (DataRow)objSource;
-            DataRow objD = (DataRow)objDestination;
-
             // Starts an edit operation on objD.
             objD.BeginEdit();
 
@@ -38,15 +36,13 @@ namespace DataGate.Com
         /// copy content from source to destination row 
         /// they must be of the same type 
         /// </summary>
-        /// <param name="objSource">source reference to a row</param>
-        /// <param name="objDestination">reference to a destination row</param>
-        public static void CopyRow_ByFieldName(object objSource, object objDestination)
+        /// <param name="objS">source reference to a row</param>
+        /// <param name="objD">reference to a destination row</param>
+        public static void CopyRowByFieldName(this DataRow objS, DataRow objD)
         {
             int intCounter = 0;
             int intCounter2 = 0;
             string strFieldName = "";
-            DataRow objS = (DataRow)objSource;
-            DataRow objD = (DataRow)objDestination;
 
             // Starts an edit operation on objD.
             objD.BeginEdit();
@@ -76,12 +72,10 @@ namespace DataGate.Com
         /// copy content from souece datatable to destination data.
         /// they must be of the same type
         /// </summary>
-        /// <param name="objSource">source table</param>
-        /// <param name="objDestination">destination table</param>
-        public static void CopyDataTable(object objSource, object objDestination)
+        /// <param name="objS">source table</param>
+        /// <param name="objD">destination table</param>
+        public static void CopyDataTable(this DataTable objS, DataTable objD)
         {
-            DataTable objS = (DataTable)objSource;
-            DataTable objD = (DataTable)objDestination;
             DataRow objRowD = null;
 
             foreach (DataRow objRowS in objS.Rows)
@@ -89,7 +83,7 @@ namespace DataGate.Com
                 if (objRowS.RowState != DataRowState.Deleted && objRowS.RowState != DataRowState.Detached)
                 {
                     objRowD = objD.NewRow();
-                    DataHelper.CopyRow(objRowS, objRowD);
+                    DataTableHelper.CopyRow(objRowS, objRowD);
 
                     // add new row
                     objD.Rows.Add(objRowD);
@@ -104,7 +98,7 @@ namespace DataGate.Com
         /// <param name="objSource">source table</param>
         /// <param name="objDestination">destination table</param>
         /// <param name="sourceFilter">filter string for source table</param>
-        public static void CopyDataTable(DataTable objSource, DataTable objDestination, string sourceFilter)
+        public static void CopyDataTable(this DataTable objSource, DataTable objDestination, string sourceFilter)
         {
             DataView objS = new DataView(objSource);
             DataTable objD = (DataTable)objDestination;
@@ -116,7 +110,7 @@ namespace DataGate.Com
                 if (objRowS.Row.RowState != DataRowState.Deleted && objRowS.Row.RowState != DataRowState.Detached)
                 {
                     objRowD = objD.NewRow();
-                    DataHelper.CopyRow(objRowS.Row, objRowD);
+                    DataTableHelper.CopyRow(objRowS.Row, objRowD);
 
                     // add new row
                     objD.Rows.Add(objRowD);
@@ -127,23 +121,21 @@ namespace DataGate.Com
         /// <summary>
         /// copy content from souece datatable to destination data.
         /// </summary>
-        /// <param name="objSource"></param>
+        /// <param name="source"></param>
         /// <param name="objDestination"></param>
-        public static void CopyDataTable_ByFieldName(object objSource, object objDestination)
+        public static void CopyDataTableByFieldName(DataTable sourceTable, DataTable destTable)
         {
-            DataTable objS = (DataTable)objSource;
-            DataTable objD = (DataTable)objDestination;
             DataRow objRowD = null;
 
-            foreach (DataRow objRowS in objS.Rows)
+            foreach (DataRow objRowS in sourceTable.Rows)
             {
                 if (objRowS.RowState != DataRowState.Deleted && objRowS.RowState != DataRowState.Detached)
                 {
-                    objRowD = objD.NewRow();
-                    DataHelper.CopyRow_ByFieldName(objRowS, objRowD);
+                    objRowD = destTable.NewRow();
+                    DataTableHelper.CopyRowByFieldName(objRowS, objRowD);
 
                     // add new row
-                    objD.Rows.Add(objRowD);
+                    destTable.Rows.Add(objRowD);
                 }
             }
         }
@@ -159,7 +151,7 @@ namespace DataGate.Com
                 return;
 
             // 行是否可用
-            if (DataHelper.RowIsAvailable(sourceRow) && DataHelper.RowIsAvailable(mergeRow))
+            if (DataTableHelper.RowIsAvailable(sourceRow) && DataTableHelper.RowIsAvailable(mergeRow))
             {
                 // 得到记录的表信息。
                 DataTable sourceTable = sourceRow.Table;
@@ -193,7 +185,7 @@ namespace DataGate.Com
                 DataRow mergeRow = mergeTable.Rows[rowIndex];    // 目标行
 
                 // 执行行合并操作。
-                DataHelper.MergeRecord(sourceRow, mergeRow);
+                DataTableHelper.MergeRecord(sourceRow, mergeRow);
             }
         }
         /// <summary>
@@ -229,7 +221,7 @@ namespace DataGate.Com
 
             foreach (DataRow rowItem in sourceRow)
             {
-                if (!DataHelper.RowIsAvailable(rowItem))
+                if (!DataTableHelper.RowIsAvailable(rowItem))
                     continue;
 
                 if (rowItem[fieldName] == DBNull.Value)
@@ -254,7 +246,7 @@ namespace DataGate.Com
 
             foreach (DataRow rowItem in sourceRow)
             {
-                if (!DataHelper.RowIsAvailable(rowItem))
+                if (!DataTableHelper.RowIsAvailable(rowItem))
                     continue;
 
                 if (rowItem[fieldName] == DBNull.Value)
@@ -280,7 +272,7 @@ namespace DataGate.Com
 
             foreach (DataRow rowItem in sourceTable.Rows)
             {
-                if (!DataHelper.RowIsAvailable(rowItem))
+                if (!DataTableHelper.RowIsAvailable(rowItem))
                     continue;
 
                 if (rowItem[fieldName] == DBNull.Value)
@@ -297,29 +289,29 @@ namespace DataGate.Com
         /// <summary>
         /// find row in the datatable
         /// </summary>
-        /// <param name="strFilter">filter</param>
-        /// <param name="objTable">table</param>
+        /// <param name="table">table</param>
+        /// <param name="filter">filter</param>
         /// <returns></returns>
-        public static DataRow FindRow(string strFilter, System.Data.DataTable objTable)
+        public static DataRow FindRow(this System.Data.DataTable table, string filter)
         {
-            return DataHelper.FindRow(strFilter, objTable, DataViewRowState.CurrentRows);
+            return table.FindRow(filter, DataViewRowState.CurrentRows);
         }
         /// <summary>
         /// find row in the datatable
         /// </summary>
-        /// <param name="strFilter">filter</param>
-        /// <param name="objTable">table</param>
+        /// <param name="table">table</param>
+        /// <param name="filter">filter</param>
         /// <param name="rowVersion">row data version</param>
         /// <returns></returns>
-        public static DataRow FindRow(string strFilter, System.Data.DataTable objTable, DataViewRowState rowVersion)
+        public static DataRow FindRow(this System.Data.DataTable table, string filter, DataViewRowState rowVersion)
         {
-            if (objTable == null || objTable.Rows.Count <= 0)
+            if (table == null || table.Rows.Count <= 0)
             {
                 return null;
             }
 
             System.Data.DataRow objRowReturn = null;
-            System.Data.DataRow[] objRow = objTable.Select(strFilter, null, rowVersion);
+            System.Data.DataRow[] objRow = table.Select(filter, null, rowVersion);
 
             if (((objRow != null)) && objRow.Length > 0)
             {
@@ -332,31 +324,31 @@ namespace DataGate.Com
         /// <summary>
         /// find row in the dataview
         /// </summary>
-        /// <param name="objKey">key value</param>
-        /// <param name="objDataView">dataview</param>
-        /// <param name="strSort">sort</param>
+        /// <param name="dataView">dataview</param>
+        /// <param name="key">key value</param>
+        /// <param name="sort">sort</param>
         /// <returns></returns>
-        public static DataRowView FindRow(object objKey, System.Data.DataView objDataView, string strSort)
+        public static DataRowView FindRow(this System.Data.DataView dataView, object key, string sort)
         {
-            if (objDataView == null || objDataView.Count <= 0)
+            if (dataView == null || dataView.Count <= 0)
             {
                 return null;
             }
 
             System.Data.DataRowView[] objRow = null;
             System.Data.DataRowView objRowReturn = null;
-            if (!string.IsNullOrEmpty(strSort.Trim()))
+            if (!string.IsNullOrEmpty(sort.Trim()))
             {
-                objDataView.Sort = strSort;
+                dataView.Sort = sort;
             }
 
             // Sort can't is empty 
-            if (string.IsNullOrEmpty(objDataView.Sort.Trim()))
+            if (string.IsNullOrEmpty(dataView.Sort.Trim()))
             {
                 return null;
             }
 
-            objRow = objDataView.FindRows(objKey);
+            objRow = dataView.FindRows(key);
             if (((objRow != null)) && objRow.Length > 0)
             {
                 objRowReturn = objRow[0];
@@ -368,13 +360,13 @@ namespace DataGate.Com
         /// <summary>
         /// find rows in the dataview
         /// </summary>
+        /// <param name="dataView">dataview</param>
         /// <param name="objKey">key value</param>
-        /// <param name="objDataView">dataview</param>
         /// <param name="strSort">sort</param>
         /// <returns></returns>
-        public static DataRowView FindRow(object[] objKey, System.Data.DataView objDataView, string strSort)
+        public static DataRowView FindRow(this System.Data.DataView dataView, object[] objKey, string strSort)
         {
-            if (objDataView == null || objDataView.Count <= 0)
+            if (dataView == null || dataView.Count <= 0)
             {
                 return null;
             }
@@ -385,16 +377,16 @@ namespace DataGate.Com
 
             if (!string.IsNullOrEmpty(strSort.Trim()))
             {
-                objDataView.Sort = strSort;
+                dataView.Sort = strSort;
             }
 
             // Sort can't is empty 
-            if (string.IsNullOrEmpty(objDataView.Sort.Trim()))
+            if (string.IsNullOrEmpty(dataView.Sort.Trim()))
             {
                 return null;
             }
 
-            objRow = objDataView.FindRows(objKey);
+            objRow = dataView.FindRows(objKey);
             if (((objRow != null)) && objRow.Length > 0)
             {
                 objRowReturn = objRow[0];
@@ -406,10 +398,10 @@ namespace DataGate.Com
         /// <summary>
         /// find rows in the datatable
         /// </summary>
-        /// <param name="strFilter">filter</param>
         /// <param name="objTable">table</param>
+        /// <param name="strFilter">filter</param>
         /// <returns></returns>
-        public static DataRow[] FindRows(string strFilter, System.Data.DataTable objTable)
+        public static DataRow[] FindRows(this System.Data.DataTable objTable, string strFilter)
         {
             // Parameters : 
             // 
@@ -419,17 +411,17 @@ namespace DataGate.Com
             // Return : 
             // Author/Date : 2008-10-08, Cuttlebone
 
-            return DataHelper.FindRows(strFilter, DataViewRowState.CurrentRows, objTable);
+            return objTable.FindRows(strFilter, DataViewRowState.CurrentRows);
         }
 
         /// <summary>
         /// find rows in the datatable
         /// </summary>
+        /// <param name="objTable">table</param>
         /// <param name="strFilter">filter</param>
         /// <param name="rowState">data row state</param>
-        /// <param name="objTable">table</param>
         /// <returns></returns>
-        public static DataRow[] FindRows(string strFilter, DataViewRowState rowState, System.Data.DataTable objTable)
+        public static DataRow[] FindRows(this System.Data.DataTable objTable, string strFilter, DataViewRowState rowState)
         {
             if (objTable == null || objTable.Rows.Count <= 0)
             {
@@ -442,11 +434,11 @@ namespace DataGate.Com
         /// <summary>
         /// find rows in the dataview
         /// </summary>
-        /// <param name="objKey">key value</param>
         /// <param name="objDataView">dataview</param>
+        /// <param name="objKey">key value</param>
         /// <param name="strSort">sort</param>
         /// <returns></returns>
-        public static DataRowView[] FindRows(object objKey, System.Data.DataView objDataView, string strSort)
+        public static DataRowView[] FindRows(this System.Data.DataView objDataView, object objKey, string strSort)
         {
             if (objDataView == null || objDataView.Count <= 0)
             {
@@ -470,11 +462,11 @@ namespace DataGate.Com
         /// <summary>
         /// find rows in the dataview
         /// </summary>
-        /// <param name="objKey">key value</param>
         /// <param name="objDataView">dataview</param>
+        /// <param name="objKey">key value</param>
         /// <param name="strSort">sort</param>
         /// <returns></returns>
-        public static DataRowView[] FindRows(object[] objKey, System.Data.DataView objDataView, string strSort)
+        public static DataRowView[] FindRows(this System.Data.DataView objDataView, object[] objKey, string strSort)
         {
             if (objDataView == null || objDataView.Count <= 0)
             {
@@ -500,7 +492,7 @@ namespace DataGate.Com
         /// </summary>
         /// <param name="objRow"></param>
         /// <returns></returns>
-        public static bool RowIsAvailable(DataRow objRow)
+        public static bool RowIsAvailable(this DataRow objRow)
         {
             if (objRow == null)
                 return false;
@@ -512,10 +504,8 @@ namespace DataGate.Com
         /// remove duplicate record for the destination source.
         /// </summary>
         /// <returns></returns>
-        public static void RemoveDuplicate(object objSource, object objDestination, string[] objPrimaryKey)
+        public static void RemoveDuplicate(this DataTable objTableS, DataTable objTableD, string[] objPrimaryKey)
         {
-            DataTable objTableS = objSource as DataTable;
-            DataTable objTableD = objDestination as DataTable;
             DataView objTableView = new DataView(objTableD);
 
             if (objTableS != null && objTableD != null && objPrimaryKey.Length > 0)
@@ -526,7 +516,7 @@ namespace DataGate.Com
                 foreach (DataRow objRowS in objTableS.Rows)
                 {
                     // check row state whether the row is available.
-                    if (DataHelper.RowIsAvailable(objRowS))
+                    if (DataTableHelper.RowIsAvailable(objRowS))
                     {
                         // set key value.
                         for (int intIndex = 0; intIndex <= objPrimaryKey.GetUpperBound(0); intIndex++)
@@ -535,7 +525,7 @@ namespace DataGate.Com
                         }
 
                         // find destination table.
-                        objRowDup = DataHelper.FindRows(objKeyValue, objTableView, objPrimaryKey[0]);
+                        objRowDup = objTableView.FindRows(objKeyValue, objPrimaryKey[0]);
                         if (objRowDup != null)
                         {
                             for (int intIndex = 0; intIndex <= objRowDup.GetUpperBound(0); intIndex++)
@@ -556,9 +546,9 @@ namespace DataGate.Com
         ///  将数据表中的记录全部设置Delete状态。
         /// </summary>
         /// <param name="objTable">目标数据表</param>
-        public static int RemoveAll(object objTable)
+        public static int RemoveAll(this DataTable objTable)
         {
-            return DataHelper.RemoveAll(objTable, "");
+            return objTable.RemoveAll("");
         }
 
         /// <summary>
@@ -567,7 +557,7 @@ namespace DataGate.Com
         /// <param name="objTable">目标数据表</param>
         /// <param name="rowFilter">删除条件</param>
         /// <returns></returns>
-        public static int RemoveAll(object objTable, string rowFilter)
+        public static int RemoveAll(this DataTable objTable, string rowFilter)
         {
             int intCounter = 0;
             if (objTable == null)
@@ -575,7 +565,7 @@ namespace DataGate.Com
                 return 0;
             }
 
-            DataRow[] deleteList = DataHelper.FindRows(rowFilter, (DataTable)objTable);
+            DataRow[] deleteList = objTable.FindRows(rowFilter);
             if (deleteList == null)
                 return 0;
 
@@ -608,7 +598,7 @@ namespace DataGate.Com
         /// </summary>
         /// <param name="dt">DataTable</param>
         /// <param name="xmlFile">Xml文件名</param>
-        public static void DataTableToXml(DataTable dt, String xmlFile)
+        public static void ToXml(this DataTable dt, String xmlFile)
         {
             DataSet ds = dt.DataSet;
             if (ds == null)
@@ -619,6 +609,7 @@ namespace DataGate.Com
             ds.WriteXml(xmlFile);
         }
 
+        #region datarow和datareader转换成简单类型
         /// <summary>
         /// 将reader[Key]转换为字符串
         /// </summary>
@@ -628,6 +619,17 @@ namespace DataGate.Com
         public static string ToStr(this IDataReader reader, string key)
         {
             return CommOp.ToStr(reader[key]);
+        }
+
+        /// <summary>
+        /// 将reader[index]转换为字符串
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static string ToStr(this IDataReader reader, int index)
+        {
+            return CommOp.ToStr(reader[index]);
         }
 
         /// <summary>
@@ -641,6 +643,253 @@ namespace DataGate.Com
             return CommOp.ToInt(reader[key]);
         }
 
+        /// <summary>
+        /// 将reader[index]转换为Int32
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static int ToInt(this IDataReader reader, int index)
+        {
+            return CommOp.ToInt(reader[index]);
+        }
 
+        /// <summary>
+        /// 将DataRow中的值转换成int?
+        /// </summary>
+        /// <param name="dr"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static int? ToIntNull(this DataRow dr, string key)
+        {
+            return CommOp.ToIntNull(dr[key]);
+        }
+
+        /// <summary>
+        /// 将DataRow中的值转换成int?
+        /// </summary>
+        /// <param name="dr"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static int? ToIntNull(this DataRow dr, int index)
+        {
+            return CommOp.ToIntNull(dr[index]);
+        }
+
+        /// <summary>
+        /// 将DataRow中的值转换成Int32
+        /// </summary>
+        /// <param name="dr"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static int ToInt(this DataRow dr, string key)
+        {
+            return CommOp.ToInt(dr[key]);
+        }
+
+        /// <summary>
+        /// 将DataRow中的值转换成double
+        /// </summary>
+        /// <param name="dr"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static double ToDouble(this DataRow dr, int index)
+        {
+            return CommOp.ToDouble(dr[index]);
+        }
+
+        /// <summary>
+        /// 将DataRow中的值转换成double
+        /// </summary>
+        /// <param name="dr"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static double ToDouble(this DataRow dr, string key)
+        {
+            return CommOp.ToDouble(dr[key]);
+        }
+
+        /// <summary>
+        /// 将DataRow中的值转换成Int32
+        /// </summary>
+        /// <param name="dr"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static int ToInt(this DataRow dr, int index)
+        {
+            return CommOp.ToInt(dr[index]);
+        }
+
+        /// <summary>
+        /// 将DataRow中的值转换成去除两边空格后的String,不会返回null
+        /// </summary>
+        /// <param name="dr"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static string ToStr(this DataRow dr, string key)
+        {
+            return CommOp.ToStr(dr[key]);
+        }
+
+        public static string ToStr(this DataRow dr, int index)
+        {
+            return CommOp.ToStr(dr[index]);
+        }
+
+        /// <summary>
+        /// 将DataRow中的值转换成bool类型
+        /// </summary>
+        /// <param name="dr"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static bool ToBool(this DataRow dr, string key)
+        {
+            return CommOp.ToBool(dr[key]);
+        }
+
+        /// <summary>
+        /// 将DataRow中的值转换成bool类型
+        /// </summary>
+        /// <param name="dr"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static bool ToBool(this DataRow dr, int index)
+        {
+            return CommOp.ToBool(dr[index]);
+        }
+
+        /// <summary>
+        /// 将DataRow中的值转换成bool?类型
+        /// </summary>
+        /// <param name="dr"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static bool? ToBoolNull(this DataRow dr, string key)
+        {
+            return CommOp.ToBoolNull(dr[key]);
+        }
+
+        /// <summary>
+        /// 将DataRow中的值转换成bool?类型
+        /// </summary>
+        /// <param name="dr"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static bool? ToBoolNull(this DataRow dr, int index)
+        {
+            return CommOp.ToBoolNull(dr[index]);
+        }
+
+        /// <summary>
+        /// 将DataRow中的值转换为特定类型
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dr"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static T ToValue<T>(this DataRow dr, string key)
+        {
+            return CommOp.HackType<T>(dr[key]);
+        }
+
+        /// <summary>
+        /// 将DataRow中的值转换为特定类型
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dr"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static T ToValue<T>(this DataRow dr, int index)
+        {
+            return CommOp.HackType<T>(dr[index]);
+        }
+
+        #endregion
+
+        #region DataTable和实体类互转
+        //https://www.cnblogs.com/dyfzwj/archive/2011/04/16/2017916.html
+        /// <summary>  
+        /// 填充对象列表：用DataTable填充实体类列表
+        /// </summary> 
+        /// <returns>List[T]</returns>
+        public static List<T> ToList<T>(this DataTable dt) where T : new()
+        {
+            if (dt == null)
+            {
+                return null;
+            }
+            List<T> modelList = new List<T>();
+            foreach (DataRow dr in dt.Rows)
+            {
+                //T model = (T)Activator.CreateInstance(typeof(T));  
+                T model = new T();
+                for (int i = 0; i < dr.Table.Columns.Count; i++)
+                {
+                    PropertyInfo propertyInfo = model.GetType().GetProperty(dr.Table.Columns[i].ColumnName);
+                    if (propertyInfo != null && dr[i] != DBNull.Value)
+                        propertyInfo.SetValue(model, dr[i], null);
+                }
+
+                modelList.Add(model);
+            }
+            return modelList;
+        }
+
+        /// <summary>  
+        /// 填充对象：用DataRow填充实体类
+        /// </summary>  
+        /// <returns>T对象</returns>
+        public static T ToModel<T>(this DataRow dr) where T : new()
+        {
+            if (dr == null)
+            {
+                return default(T);
+            }
+            //T model = (T)Activator.CreateInstance(typeof(T));  
+            T model = new T();
+            for (int i = 0; i < dr.Table.Columns.Count; i++)
+            {
+                PropertyInfo propertyInfo = model.GetType().GetProperty(dr.Table.Columns[i].ColumnName);
+                if (propertyInfo != null && dr[i] != DBNull.Value)
+                    propertyInfo.SetValue(model, dr[i], null);
+            }
+            return model;
+        }
+
+        /// <summary>
+        /// 实体类List转换成DataTable
+        /// </summary>
+        /// <param name="modelList">实体类列表</param>
+        /// <returns>DataTable</returns>
+        public static DataTable ToTable<T>(this IList<T> modelList)
+        {
+            DataTable dt = CreateTable(typeof(T));
+            foreach (T model in modelList)
+            {
+                DataRow dataRow = dt.NewRow();
+                foreach (PropertyInfo propertyInfo in typeof(T).GetProperties())
+                {
+                    dataRow[propertyInfo.Name] = propertyInfo.GetValue(model, null);
+                }
+                dt.Rows.Add(dataRow);
+            }
+            return dt;
+        }
+
+        /// <summary>
+        /// 根据实体类得到表结构
+        /// </summary>
+        /// <param name="type">实体类</param>
+        /// <returns>空的DataTable</returns>
+        private static DataTable CreateTable(Type type)
+        {
+            DataTable dataTable = new DataTable(type.Name);
+            foreach (PropertyInfo propertyInfo in type.GetProperties())
+            {
+                dataTable.Columns.Add(new DataColumn(propertyInfo.Name, propertyInfo.PropertyType));
+            }
+            return dataTable;
+        }
+        #endregion
     }
 }

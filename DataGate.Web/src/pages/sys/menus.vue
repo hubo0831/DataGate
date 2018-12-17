@@ -3,19 +3,19 @@
  <el-row :gutter="5">
     <div class="dg-toolbar">
       <el-button-group>
-        <el-button size="mini" type="primary" icon="fa fa-plus" v-on:click='doCmd("addBrother")'>新增平级</el-button>
-        <el-button size="mini" type="primary" icon="fa fa-plus" v-on:click='doCmd("addChild")'>新增子级</el-button>
-        <el-button size="mini" type="primary" icon="fa fa-plus" v-on:click='doCmd("clone")'>克隆</el-button>
-        <el-button size="mini" type="primary" icon="fa fa-long-arrow-up" v-on:click='doCmd("doUp")'>上移</el-button>
-        <el-button size="mini" type="primary" icon="fa fa-long-arrow-down" v-on:click='doCmd("doDown")'>下移</el-button>
-        <el-button size="mini" type="primary" icon="fa fa-trash-o" v-on:click='doCmd("doDel")'>删除</el-button>
-        <el-button size="mini" type="primary" icon="fa fa-save" :loading="saving" v-on:click='doSave()'>保存</el-button>
+        <el-button type="primary" icon="fa fa-plus" v-on:click='doCmd("addBrother")'>新增平级</el-button>
+        <el-button type="primary" icon="fa fa-plus" v-on:click='doCmd("addChild")'>新增子级</el-button>
+        <el-button type="primary" icon="fa fa-plus" v-on:click='doCmd("clone")'>克隆</el-button>
+        <el-button type="primary" icon="fa fa-long-arrow-up" v-on:click='doCmd("doUp")'>上移</el-button>
+        <el-button type="primary" icon="fa fa-long-arrow-down" v-on:click='doCmd("doDown")'>下移</el-button>
+        <el-button type="primary" icon="fa fa-trash-o" v-on:click='doCmd("doDel")'>删除</el-button>
+        <el-button type="primary" icon="fa fa-save" :loading="saving" v-on:click='doSave()'>保存</el-button>
       </el-button-group>
     </div>
     <el-col :span="12">
       <div class="card">
         <div class="card-header"><i class="fa fa-check-square-o" aria-hidden="true"></i> 功能列表</div>
-        <div class="card-content" id="menusDiv" :style="{height: pageHeight-195+ 'px'}">
+        <div class="card-content" id="menusDiv" :style="{height: pageHeight-205+ 'px'}">
           <!-- <el-input placeholder="输入名称过滤" v-model="filterText">
           </el-input> -->
           <plain-tree :task="task" ref="plainTree">

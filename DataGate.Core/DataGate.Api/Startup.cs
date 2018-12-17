@@ -10,12 +10,14 @@ using Autofac.Extensions.DependencyInjection;
 using DataGate.Api.Filters;
 using DataGate.App;
 using DataGate.App.DataService;
+using DataGate.Com.DB;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -50,13 +52,17 @@ namespace DataGate.Api
             {
                 options.Filters.Add(new TokenValidateFilter());
             })
-            // .AddJsonOptions(options =>
-            //{
-            //    //忽略循环引用
-            //    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            //    //不更改元数据的key的大小写
-            //    options.SerializerSettings.ContractResolver = new DefaultContractResolver();
-            //})
+             .AddJsonOptions(options =>
+            {
+                //忽略循环引用
+                //options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                //不更改元数据的key的大小写
+                //options.SerializerSettings.ContractResolver = new DefaultContractResolver();
+                //不序列化为null的属性
+                options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                //不序列化等于默认值的属性
+                options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
+            })
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             var builder = new ContainerBuilder();//实例化 AutoFac  容器                  
             builder.Populate(services);
@@ -68,8 +74,13 @@ namespace DataGate.Api
             //AutoFac声明以下方法已过时，因此不可能在程序运行中动态改变已注册的注入
             //builder.Update(ApplicationContainer);
 
-            IMetaService metaService = ApplicationContainer.Resolve<IMetaService>();
-            metaService.RegisterDataGate("SaveUser", new UsersGate());
+            MetaService.RegisterDataGate("SaveUser", new UsersGate());
+            MetaService.RegisterDBHelper("Default", () => new DBHelper
+            {
+                //var cfg = Program.Config.GetSection("ConnectionStrings");
+                DBComm = new DBCommOracle(),
+                DbNameConverter = new UpperNameConverter()
+            });
             Consts.ServiceProvider = new AutofacServiceProvider(ApplicationContainer);//第三方IOC接管 core内置DI容器
             return Consts.ServiceProvider;
         }
@@ -130,8 +141,21 @@ namespace DataGate.Api
                     template: "api/dg/{key}",
                     defaults: new { controller = "DataGate", action = "Query" });
 
+                AddRoutes(routes);
+              //  routes.MapRoute(name: "api-default",
+              //template: "api/[controller]/[action]");
+
                 routes.MapRoute(name: "default", template: "{controller=Home}/{action=Index}/{id?}");
             }).UseStaticFiles(); //访问wwwroot下的静态文件
+        }
+
+        /// <summary>
+        /// 添加应用程序自己的一些路由
+        /// </summary>
+        /// <param name="routes"></param>
+        protected virtual void AddRoutes(IRouteBuilder routes)
+        {
+
         }
     }
 }

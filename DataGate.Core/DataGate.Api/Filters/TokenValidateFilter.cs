@@ -57,6 +57,10 @@ namespace DataGate.Api.Filters
             var token = context.HttpContext.Request.Headers["token"].FirstOrDefault();
             if (token == null)
             {
+                token = context.HttpContext.Request.Query["token"];
+            }
+            if (token == null)
+            {
                 context.Result = new JsonResult(MSG.NotLogined);
             }
             else

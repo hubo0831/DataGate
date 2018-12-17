@@ -11,7 +11,7 @@ using System.IO;
 
 namespace DataGate.Com
 {
-    
+
     /// <summary>
     /// 常用工具方法
     /// </summary>
@@ -230,20 +230,19 @@ namespace DataGate.Com
             if (s == null || s == DBNull.Value) return false;
             if (s is bool) return (bool)s;
 
-            bool b = false;
             int i = 0;
 
-            if (bool.TryParse(s.ToString(), out b))
+            if (bool.TryParse(s.ToString(), out bool b))
             { return b; }
             else if (int.TryParse(s.ToString(), out i))
             { return i != 0; }
-            else return s.ToString() == "是";
+            else return false;
         }
 
         /// <summary>
-        /// 转换成bool?值
+        /// 转换成bool?值,空值或DBNull转成null, 非0的数字或'True'转换成true,0或'False'转换成false,其他的转换成null
         /// </summary>
-        /// <param name="s">非0的数字或'True'转换成true,其他的转换成false</param>
+        /// <param name="s"'True'转换成true,其他的转换成false</param>
         /// <returns></returns>
         public static bool? ToBoolNull(object s)
         {
@@ -254,6 +253,8 @@ namespace DataGate.Com
 
             if (bool.TryParse(s.ToString(), out b))
             { return b; }
+            else if (int.TryParse(s.ToString(), out int i))
+            { return i != 0; }
             else
             { return null; }
         }
@@ -1227,6 +1228,12 @@ namespace DataGate.Com
         }
         #endregion
 
+        /// <summary>
+        /// 深度克隆一个对象
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="t"></param>
+        /// <returns></returns>
         public static T DeepClone<T>(T t)
         {
             BinaryFormatter formatter = new BinaryFormatter();
@@ -1307,6 +1314,37 @@ namespace DataGate.Com
             return c;
         }
 
+
+        /// <summary>
+        /// 对类型进行判断转换
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="conversionType">转换目标类型</param>
+        /// <returns></returns>
+        public static object HackType(object value, Type conversionType)
+        {
+            if (conversionType.IsGenericType && conversionType.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
+            {
+                if (value == null || value == DBNull.Value)
+                    return null;
+                System.ComponentModel.NullableConverter nullableConverter = new System.ComponentModel.NullableConverter(conversionType);
+                conversionType = nullableConverter.UnderlyingType;
+            }
+            else if (conversionType.IsValueType)
+            {
+                if (value == null || value == DBNull.Value)
+                {
+                    return Activator.CreateInstance(conversionType);
+                }
+            }
+            return Convert.ChangeType(value, conversionType);
+        }
+
+        public static T HackType<T>(object value)
+        {
+            return (T)HackType(value, typeof(T));
+        }
+
         /// <summary>
         /// 将对象转化成字典
         /// </summary>
@@ -1315,7 +1353,7 @@ namespace DataGate.Com
         public static Dictionary<string, object> ToDictionary(object obj)
         {
             Dictionary<string, object> dict = new Dictionary<string, object>();
-            foreach(var p in obj.GetType().GetProperties())
+            foreach (var p in obj.GetType().GetProperties())
             {
                 dict[p.Name] = p.GetValue(obj, null);
             }

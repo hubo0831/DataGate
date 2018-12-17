@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using DataGate.Com.DB;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,7 +74,13 @@ namespace DataGate.App.DataService
         /// <summary>
         /// 连接串名称，默认为Default
         /// </summary>
-        public string ConnName{ get; internal set; }
+        public string ConnName { get; set; }
+
+        /// <summary>
+        /// 用于缓存数据，或提供测试数据，当此属性不为空时
+        /// 将直接返回此数据
+        /// </summary>
+        public JToken Data { get; set; }
     }
 
     internal class JoinInfo

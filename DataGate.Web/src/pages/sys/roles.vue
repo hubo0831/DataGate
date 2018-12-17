@@ -4,20 +4,20 @@
     <el-col :span="24">
       <div class="dg-toolbar">
         <el-button-group>
-          <el-button size="mini" type="primary" icon="fa fa-plus" v-on:click='doCmd("doAdd")'>新增角色</el-button>
-          <el-button size="mini" type="primary" icon="fa fa-edit" v-on:click='doCmd("doEdit")'>修改</el-button>
-          <el-button size="mini" type="primary" icon="fa fa-trash-o" v-on:click='doCmd("doDel")'>删除</el-button>
-          <el-button size="mini" type="primary" icon="fa fa-save" :loading="saving" v-on:click='doSave()'>保存</el-button>
+          <el-button type="primary" icon="fa fa-plus" v-on:click='doCmd("doAdd")'>新增角色</el-button>
+          <el-button type="primary" icon="fa fa-edit" v-on:click='doCmd("doEdit")'>修改</el-button>
+          <el-button type="primary" icon="fa fa-trash-o" v-on:click='doCmd("doDel")'>删除</el-button>
+          <el-button type="primary" icon="fa fa-save" :loading="saving" v-on:click='doSave()'>保存</el-button>
         </el-button-group>
       </div>
       <el-row :gutter="5">
         <el-col :span="12" v-loading="loading">
-          <edit-grid :task="task" :height="pageHeight-140" ref="dataGrid" edit-mode="inline" show-index @current-change="doCurrentChange"></edit-grid>
+          <edit-grid :task="task" :height="pageHeight-150" ref="dataGrid" edit-mode="inline" show-index @current-change="doCurrentChange"></edit-grid>
         </el-col>
         <el-col :span="12">
           <div class="card">
             <div class="card-header"><i class="fa fa-check-square-o" aria-hidden="true"></i> 功能列表</div>
-            <div class="card-content" id="menuDiv" :style="{height:(pageHeight-195) +'px'}">
+            <div class="card-content" id="menuDiv" :style="{height:(pageHeight-205) +'px'}">
               <el-tree :data="menus" show-checkbox default-expand-all node-key="id" ref="tree" highlight-current :props="defaultProps">
               </el-tree>
             </div>
