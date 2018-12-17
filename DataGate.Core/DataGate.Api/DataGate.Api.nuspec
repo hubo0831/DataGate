@@ -7,7 +7,7 @@
     <authors>$authors$</authors>
     <owners>$author$</owners>
     <licenseUrl>http://opensource.org/licenses/MS-PL</licenseUrl>
-    <projectUrl>http://www.jurassic.com.cn</projectUrl>
+    <projectUrl>https://github.com/bwangel/DataGate</projectUrl>
     <iconUrl>http://www.jurassic.com.cn/favicon.ico</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>DataGate API服务,承载DataGate.App的服务宿主</description>

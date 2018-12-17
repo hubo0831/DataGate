@@ -7,7 +7,7 @@
     <authors>$author$</authors>
     <owners>$author$</owners>
     <licenseUrl>http://opensource.org/licenses/MS-PL</licenseUrl>
-    <projectUrl>http://www.jurassic.com.cn</projectUrl>
+    <projectUrl>https://github.com/bwangel/DataGate</projectUrl>
     <iconUrl>http://www.jurassic.com.cn/favicon.ico</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>

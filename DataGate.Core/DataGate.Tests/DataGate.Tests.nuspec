@@ -7,7 +7,7 @@
     <authors>$authors$</authors>
     <owners>$author$</owners>
     <licenseUrl>http://opensource.org/licenses/MS-PL</licenseUrl>
-    <projectUrl>http://www.jurassic.com.cn</projectUrl>
+    <projectUrl>https://github.com/bwangel/DataGate</projectUrl>
     <iconUrl>http://www.jurassic.com.cn/favicon.ico</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>使用此包中的BaseTest和AppDataTest基础类来创建自己的测试类.</description>
