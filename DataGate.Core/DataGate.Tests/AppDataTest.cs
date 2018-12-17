@@ -414,9 +414,9 @@ namespace DataGate.Tests
             var rand = new Random();
             string pk = CommOp.NewId();
             var roles = await Get<DBCrud<AppRole>>().GetListAsync();
-            if (roles.Count < 2)
+            if (roles.Count < 1)
             {
-                throw new Exception("要完成本次测试，角色表中至少要有两个角色。");
+                throw new Exception("要完成本次测试，角色表中至少要有1个角色。");
             }
             var userRole = new
             {

@@ -18,18 +18,11 @@ namespace DataGate.Api
                    .Where(t => typeof(ISingleton).IsAssignableFrom(t))
                    .SingleInstance();
 
-            //builder.Register(c =>
-            //{
-            //    var db = new DBHelper
-            //    {
-            //        //var cfg = Program.Config.GetSection("ConnectionStrings");
-            //        ConnStr = Consts.Config.GetConnectionString("Default"),
-            //        DBComm = new DBCommOracle(),
-            //        DbNameConverter = new UpperNameConverter()
-            //    };
-            //    return db;
-            //})
-            //.As<DBHelper>();
+            builder.Register(c =>
+            {
+                return MetaService.CreateDBHelper("Default");
+            })
+            .As<DBHelper>();
             //// .SingleInstance(); 由于事务的存在，DBHelper不能单例
 
             builder.RegisterGeneric(typeof(DBCrud<>));
