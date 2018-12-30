@@ -134,7 +134,7 @@
         "uitype": "CheckBox",
         "title": "启用",
         "value": 1,
-        "width": 40,
+        "Column":{"width": 60},
         "order": 6
       }
     ]
@@ -151,28 +151,31 @@
         "name": "account",
         "title": "账号",
         "required": true,
-        "width": 110
+  	  "Column":{"width":180},
       },
       {
         "name": "name",
         "title": "姓名",
-        "required": true
+     	  "Column":{"width":180},
+     "required": true
       },
       {
         "name": "email",
         "width": 120,
-        "title": "邮箱"
+   	  "Column":{"width":240},
+       "title": "邮箱"
       },
       {
         "name": "tel",
+  	  "Column":{"width":180,"align":"center"},
         "title": "电话"
       },
       {
         "name": "roles",
         "title": "角色",
         "uitype": "List",
-        "width": 120,
-        "datatype": "[AppUserRole]",
+		"Column":{"width":200},
+       "datatype": "[AppUserRole]",
         "foreignkey": "userId",
         "valuekey": "roleId",
         "sortable": false
@@ -180,7 +183,8 @@
       {
         "name": "lastLoginDate",
         "title": "最后登录",
-        "datatype": "DateTime",
+   		"Column":{"width":160},
+       "datatype": "DateTime",
         "readonly": true
       },
       {
@@ -195,7 +199,7 @@
         "order": -1,
         "readonly": true,
         "foreignfield": "AppRole.name",
-        "remark": "不在界面上显示，只作为搜索条件之一，因为它只是返回用户的第一个角名称"
+        "remark": "不在界面上显示，只作为搜索条件之一，因为它只是返回用户的第一个角色名称"
       }
     ]
   },

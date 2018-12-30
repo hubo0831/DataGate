@@ -6,7 +6,6 @@ Vue.use((Vue, options) => {
   // 异步：外界给args.promise赋值为一个Promise对象，事件发起方异步通过then调用callback
   // 当callback为空时，事件发起方只能顺序往下根据args.passed自行判断，异步将无效
   Vue.prototype.$emitPass = function (evt, item, callback) {
-
     //当没有传item过来或item不是args类型时，创建一个args
     var args = (!item || (typeof (item.passed) == 'undefined')) ? {
       item,
@@ -31,5 +30,8 @@ Vue.use((Vue, options) => {
 // logout 退出登录
 // app-start App应用程序开始运行
 // login 登录
-// register 注册新组件
+
+// register 注册新组件  两个参数(name, component) 相当于Vue.component(name, component)
+ //直接在项目中Vue.component好象不行 
+ //注册新插件 一个参数 plugins   相当于 Vue.use(plugins)  在使用源代码引用本框架时，直接在项目上中用Vue.use好象不行，原因不明
 export default new Vue()

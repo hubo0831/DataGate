@@ -1,69 +1,96 @@
 <template>
-<div v-on:keyup.enter="search">
-  <!-- @*筛选条件组件*@ -->
-  <el-form :inline="true">
-    <el-form-item v-for="meta in metaFilter" :key="meta.name" :label="meta.title">
-      <div v-if="meta.uitype=='List'" class="search-input">
-        <el-select v-model="meta.value" multiple filterable allow-create default-first-option style="width:100%"
-          :placeholder="meta.title">
-          <el-option v-for="sel in meta.options" :key="sel.value" :label="sel.text" :value="sel.value">
-          </el-option>
-        </el-select>
-      </div>
-      <div v-else-if="meta.uitype=='DropdownList'" class="search-input">
-        <el-select v-model="meta.value" clearable filterable allow-create default-first-option
-          :placeholder="meta.title">
-          <el-option v-for="sel in meta.options" :key="sel.value" :label="sel.text" :value="sel.value">
-          </el-option>
-        </el-select>
-      </div>
-        <el-checkbox v-else-if="meta.uitype=='CheckBox'" v-model="meta.value" :true-label="'1'"
-        :indeterminate="meta.value !=1 && meta.value!=0"
-          :false-label="'0'">
-        </el-checkbox>
-      <div v-else-if="meta.uitype=='Date'|| meta.uitype=='DateTime'">
-        <div v-if="meta.operator=='bt'">
-          <span>
-            <el-date-picker v-model="meta.value" type="date" clearable placeholder="起始日期">
-            </el-date-picker>
-          </span> ~ <span>
-            <el-date-picker v-model="meta.value1" type="date" clearable placeholder="结束日期">
-            </el-date-picker>
+  <div v-on:keyup.enter="search">
+    <!-- @*筛选条件组件*@ -->
+    <el-form :inline="true">
+      <el-form-item v-for="meta in metaFilter" :key="meta.name" :label="meta.title">
+        <div v-if="meta.uitype=='List'" class="search-input">
+          <el-select
+            v-model="meta.value"
+            multiple
+            filterable
+            allow-create
+            default-first-option
+            style="width:100%"
+            :placeholder="meta.title"
+          >
+            <el-option
+              v-for="sel in meta.options"
+              :key="sel.value"
+              :label="sel.text"
+              :value="sel.value"
+            ></el-option>
+          </el-select>
+        </div>
+        <div v-else-if="meta.uitype=='DropdownList'" class="search-input">
+          <el-select
+            v-model="meta.value"
+            clearable
+            filterable
+            allow-create
+            default-first-option
+            :placeholder="meta.title"
+          >
+            <el-option
+              v-for="sel in meta.options"
+              :key="sel.value"
+              :label="sel.text"
+              :value="sel.value"
+            ></el-option>
+          </el-select>
+        </div>
+        <el-checkbox
+          v-else-if="meta.uitype=='CheckBox'"
+          v-model="meta.value"
+          :true-label="'1'"
+          :indeterminate="meta.value !=1 && meta.value!=0"
+          :false-label="'0'"
+        ></el-checkbox>
+        <div v-else-if="meta.uitype=='Date'|| meta.uitype=='DateTime'">
+          <div v-if="meta.operator=='bt'">
+            <span>
+              <el-date-picker v-model="meta.value" type="date" clearable placeholder="起始日期"></el-date-picker>
+            </span> ~
+            <span>
+              <el-date-picker v-model="meta.value1" type="date" clearable placeholder="结束日期"></el-date-picker>
+            </span>
+          </div>
+          <span v-else>
+            <el-date-picker v-model="meta.value" type="date" clearable :placeholder="meta.title"></el-date-picker>
           </span>
         </div>
-        <span v-else>
-          <el-date-picker v-model="meta.value" type="date" clearable :placeholder="meta.title">
-          </el-date-picker>
-        </span>
-       </div>
         <div v-else-if="meta.uitype=='TextBox'" class="search-input">
-        <el-input v-model="meta.value" clearable :placeholder="meta.title">
-        </el-input>
-      </div>
-      <!-- Custom自定义组件暂时用文本框 -->
-      <div v-else-if="meta.uitype=='Custom'" class="search-input">
-        <el-input v-model="meta.value" clearable :placeholder="meta.title">
-        </el-input>
-      </div>
-      <!-- 自定义输入组件 -->
-     <component v-else-if="meta.uitype" :is="meta.uitype" v-model="meta.value" :meta="meta" :obj="meta"
-           :placeholder="meta.title"></component>
-      <!-- 没有明确定义的组件 -->
-    <div v-else class="search-input">
-      <el-input v-model="meta.value" clearable :placeholder="meta.title">
-      </el-input>
-    </div>
-    </el-form-item>
-    <el-form-item>
-      <el-button type="primary" v-on:click="search">查询</el-button>
-      <el-button type="primary" v-on:click="reset">重置</el-button>
-    </el-form-item>
-  </el-form>
-</div>
+          <el-input v-model="meta.value" clearable :placeholder="meta.title"></el-input>
+        </div>
+        <!-- Custom自定义组件暂时用文本框 -->
+        <div v-else-if="meta.uitype=='Custom'" class="search-input">
+          <el-input v-model="meta.value" clearable :placeholder="meta.title"></el-input>
+        </div>
+        <!-- 自定义输入组件 -->
+        <component
+          v-else-if="meta.uitype"
+          :is="meta.uitype"
+          v-model="meta.value"
+          :meta="meta"
+          :obj="meta"
+          :in-edit="true"
+          :placeholder="meta.title"
+        ></component>
+        <!-- 没有明确定义的组件 -->
+        <div v-else class="search-input">
+          <el-input v-model="meta.value" clearable :placeholder="meta.title"></el-input>
+        </div>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" v-on:click="search">查询</el-button>
+        <el-button type="primary" v-on:click="reset">重置</el-button>
+      </el-form-item>
+    </el-form>
+  </div>
 </template>
 <script>
 import util from "../common/util.js";
 import editTask from "../common/editTask.js";
+var task = new editTask();
 export default {
   props: {
     //传入的待搜索的元数据定义
@@ -75,9 +102,6 @@ export default {
     }
   },
   inject: ["urlQuery"],
-  data() {
-    return {};
-  },
   computed: {
     metaFilter() {
       //按照原order顺序排序，如果order是负数则取绝对值
@@ -85,27 +109,8 @@ export default {
       return util.sort(this.metadata, m => Math.abs(m.order));
     }
   },
-  created: function() {
-    if (!this.metadata || this.metadata.length == 0) {
-    }
-    // if (this.value.length == 0) {
-    //   this.value.push({
-    //     title: "标题",
-    //     name: "title",
-    //     operator: "inc",
-    //     value: ""
-    //   });
-    //   this.value.push({
-    //     title: "成果类型",
-    //     name: "pt",
-    //     operator: "equal",
-    //     value: ""
-    //   });
-    // }
-  },
   watch: {
     metadata(val) {
-      var task = new editTask();
       val.forEach(meta => {
         if (!meta.operator) {
           meta.operator = this.getOperators(meta)[0].value;
@@ -113,9 +118,23 @@ export default {
         if ((meta.uitype || "").indexOf("List") >= 0) task.updateOptions(meta);
         this.$set(meta, "value1", null);
       });
+     this.restoreFormValue();
     }
   },
+
   methods: {
+    restoreFormValue() {
+      var query = this.urlQuery._filter;
+      if (query) query = JSON.parse(query);
+      if (!query) return;
+      for (var i in query) {
+        var meta = this.metaFilter.find(f => f.name == query[i].n);
+        if (!meta) continue;
+        meta.value = query[i].v;
+        if (query[i].v1) meta.value1 = query[i].v1;
+      }
+    },
+    //计算比较表达式运算符
     getOperators: function(meta) {
       switch (meta.uitype) {
         case "Date":
@@ -233,7 +252,7 @@ export default {
   width: 140px;
 }
 .el-form-item {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 .search-input {
   width: 140px;

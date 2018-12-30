@@ -68,6 +68,8 @@
 </template>
 <script>
 import WebUploader from "webuploader"
+import "webuploader/css/webuploader.css"
+import "../assets/styles/uploader.css"
 export default {
   props: {
     //原始的文件列表和上传后的文件列表

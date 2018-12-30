@@ -9,7 +9,9 @@
     </el-switch>
     <el-date-picker v-model="obj[meta.name]" v-else-if="meta.uitype=='Date'">
     </el-date-picker>
-    <el-select v-model="obj[meta.name]" v-else-if="meta.uitype=='DropdownList'" filterable allow-create
+    <el-date-picker v-model="obj[meta.name]" type="datetime" v-else-if="meta.uitype=='DateTime'">
+    </el-date-picker>
+   <el-select v-model="obj[meta.name]" v-else-if="meta.uitype=='DropdownList'" filterable allow-create
       default-first-option :placeholder="meta.title" style="width:100%">
       <el-option v-for="sel in meta.items" :key="sel.value" :label="sel.text" :value="sel.value">
       </el-option>
@@ -20,8 +22,7 @@
       </el-option>
     </el-select>
     <!-- 自定义输入组件 -->
-    <component v-else :is="meta.uitype" v-model="obj[meta.name]" :meta="meta" :obj="obj"
-      :placeholder="meta.title" style="width:100%"></component>
+    <component v-else :is="meta.uitype" v-model="obj[meta.name]" :meta="meta" :obj="obj" :in-edit="true" style="width:100%"></component>
   </div>
 </template>
 <script>

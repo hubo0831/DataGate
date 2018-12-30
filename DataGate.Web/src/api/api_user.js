@@ -31,8 +31,9 @@ function login(account) {
       .then(result => {
         if (!result.$code) {
           userState.token = result.token;
+          util.setCookie("remember", result.remember, 14 * 24 * 60); //保存密码两周
           bus.$emit("login");
-          resolve();
+          resolve(result);
         } else {
           reject(result);
         }
@@ -40,13 +41,45 @@ function login(account) {
   });
 }
 
-//退出登录，用试图进入的页面作为登录后的返回页
+//勾了“记住我”后下次的登录
+function rememberLogin() {
+  return new Promise((resolve) => {
+    var remember = util.getCookie("remember");
+    if ((remember || '').length < 10) {
+      resolve(remember);
+      return;
+    }
+    API.POST('/api/Check/Login', {
+        remember
+      })
+      .then(result => {
+        if (!result.$code) {
+          userState.token = result.token;
+          util.setCookie("remember", result.remember, 14 * 24 * 60); //保存密码两周
+          bus.$emit("login");
+          resolve(result);
+        } else {
+          resolve(1);
+        }
+      });
+  });
+}
+
+//退出登录，主动退出或超时退出都会进入此方法，则需要保留是否记住我的勾选状态同时清空记住我的内容
 function logout() {
   function releaseUser() {
     userState.token = null;
     userState.currentUser = {};
+    var remember = util.getCookie("remember");
+    if (remember) {
+      util.setCookie("remember", 1);
+    }
+    else{
+      util.removeCookie("remember");
+    }
     bus.$emit('logout');
   }
+
   if (!userState.token) {
     releaseUser();
   } else {
@@ -58,7 +91,7 @@ export default {
   getUserInfo,
   //登录
   login,
-
+  rememberLogin,
   //登出
   logout,
 }

@@ -6,14 +6,20 @@ import pubmixin from "../pages/pubmixin"
 //公共数据操作类混入对象,用于数据增删改类的顶层页面
 export default {
   mixins: [pubmixin],
-  created: function () {
-    for (var i in this.$route.query) {
-      this.urlQuery[i] = this.$route.query[i];
-    }
+  created() {
+    this.createQuery();
   },
   provide() {
     return {
       urlQuery: this.urlQuery
+    }
+  },
+  beforeRouteLeave: function (to, from, next) {
+    var ok = !this.task.changed || window.confirm('有修改尚未保存，是否放弃修改？');
+    if (ok) {
+      next();
+    } else {
+      next(false);
     }
   },
   data: function () {
@@ -25,19 +31,35 @@ export default {
   },
   watch: {
     //解决翻页时路由改变不刷新的问题
-    '$route': "loadData"
+    // 利用watch方法检测路由变化：
+    //有一个大坑：当路由组件keep-alive时，所有打开过的页面都会触发这个事件
+    '$route': function (to, from) {
+      this.createQuery();
+      this.loadData();
+    }
   },
   methods: {
+    createQuery() {
+      for (var i in this.$route.query) {
+        this.urlQuery[i] = this.$route.query[i];
+      }
+    },
     loadData() {
       //由子类实现
     },
     //根据url的参数进行查询
     apiUrlPageQuery(key) {
-      return API.QUERY(key, this.urlQuery).done(result => {
-        this.task.clearData(result.total > result.data.length);
-        this.total = result.total;
-        this.task.products = result.data;
-      });
+      return API.QUERY(key, this.urlQuery)
+        .then(result => this.apiDataFilter(key, result))
+        .done(result => {
+          this.task.clearData(result.total > result.data.length);
+          this.total = result.total;
+          this.task.products = result.data;
+        });
+    },
+    //由子类实现
+    apiDataFilter(key, data) {
+      return data;
     },
     apiSubmit(saveKey, successTips) {
       //this.$message.success(tips);

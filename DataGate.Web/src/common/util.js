@@ -223,6 +223,7 @@ export default {
   },
   //设置cookie
   setCookie(cname, cvalue, exminutes) {
+    cname  += window.location.port; //防止同一端口不同网站cookie相同
     if (typeof exminutes == 'number') {
       var d = new Date();
       d.setTime(d.getTime() + (exminutes * 60 * 1000));
@@ -238,7 +239,7 @@ export default {
   },
   //获取cookie
   getCookie(cname) {
-    var name = cname + "=";
+    var name = cname + window.location.port + "="; //防止同一端口不同网站cookie相同
     var ca = document.cookie.split(';');
     for (var i = 0; i < ca.length; i++) {
       var c = ca[i];
@@ -260,9 +261,9 @@ export default {
   },
 
   //返回一个无条件pass的promise
-  emptyPromise() {
+  emptyPromise(obj) {
     return new Promise((resolve) => {
-      resolve()
+      resolve(obj)
     });
   },
   //判断一个对象是空值或空数组

@@ -17,5 +17,10 @@ namespace DataGate.App
         /// 过期时间（分钟）
         /// </summary>
         public int ExpireIn { get; set; }
+
+        /// <summary>
+        /// 当用户勾选记住我时，返回客户端的记住我加密信息
+        /// </summary>
+        public string Remember { get; set; }
     }
 }

@@ -104,12 +104,6 @@ namespace DataGate.App.DataService
         public int MaxLength { get; set; }
 
         /// <summary>
-        /// 显示宽度权重
-        /// </summary>
-        [JsonProperty("width")]
-        public int Width { get; set; }
-
-        /// <summary>
         /// 判断此属性是不是数组
         /// </summary>
         [JsonIgnore]
@@ -147,14 +141,16 @@ namespace DataGate.App.DataService
         public JArray Options { get; set; }
 
         /// <summary>
-        /// 排序标志,
+        /// 在表格中呈现时，各种其他属性,比如宽度width, 对齐方式align等，sortable,  格式化方法formatter等
+        /// 对应&lt;el-column&gt;中的属性
         /// </summary>
-        [JsonProperty("sortable")]
-        public bool Sortable { get; set; } = true;
+        [JsonProperty("column")]
+        public Dictionary<string, object> Column { get; set; }
 
         /// <summary>
         /// 注释或备注
         /// </summary>
+        [JsonProperty("remark")]
         public string Remark { get; set; }
     }
 }

@@ -44,7 +44,7 @@
     "Key": "GetAllRoleMenus",
     "Name": "获取所有角色和对应菜单",
     "Model": "AppRole>AppRoleMenu>AppMenu",
-    "Filter": "AppMenu.AuthType='Auth'",
+    "Filter": "AppMenu.AuthType='Auth' OR AppMenu.AuthType IS NULL",
     "OpType": "GetArray",
     "OrderBy": "AppRole.Ord"
   },

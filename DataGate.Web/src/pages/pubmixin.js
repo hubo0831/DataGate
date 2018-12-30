@@ -1,41 +1,62 @@
 import * as API from '../api'
-//公共混入对象,用于顶层页面
+//公共混入对象,用于顶层页面,负责提供loading, saving, pageHeight pageWidth公共对象和自动调整dg-fit的高度
 //不要Vue.mixin全局混入，会产生冲突，如loading
 export default {
   created: function () {
-    var that = this;
     API.setContext(this);
-    var resizeFunc = function () {
-      that.pageHeight = $(window).height();
-      that.pageWidth = $(window).width();
-    };
-    $(window).bind("resize", resizeFunc);
-    resizeFunc();
+    $(window).bind("resize", this.autoSize);
   },
-  watch:{
-    saving(val){
-      if (val){
+  watch: {
+    saving(val) {
+      if (val) {
         this.loading = false;
       }
     }
   },
-  beforeRouteLeave: function (to, from, next) {
-    var ok = !this.task.changed || window.confirm('有修改尚未保存，是否放弃修改？');
-    if (ok) {
-      next();
-    } else {
-      next(false);
-    }
+  mounted() {
+    this.autoSize();
+    $(".dg-scr").slimScroll({});
+  },
+  destoryed() {
+    $(window).unbind("resize", this.autoSize);
   },
   data: function () {
     return {
+      heightFactor: 30,
+      heightSelectors: {},
       pageHeight: 0, //页面高度
       pageWidth: 0,
       loading: false, //显示加载中...  
       saving: false //显示 保存中...
     };
   },
-
   methods: {
+    autoSize() {
+      this.pageHeight = $(window).height();
+      this.pageWidth = $(window).width();
+
+      //自动调整class=dg-fit的元素的高度自适应到页面底部
+      //避免每个页面都要手动调整为pageHeight减一个固定值
+      $('.dg-fit').each((idx, div) => {
+        var d = $(div);
+        var y = d.offset().top;
+        d.height(this.pageHeight - y - this.heightFactor);
+      });
+
+      for (var selector in this.heightSelectors) {
+        this.fitHeight(selector);
+      }
+    },
+    fitHeight(selector) {
+      var d = $(selector);
+      //   console.log(this.heightSelectors); //当命名为_hieghtSelectors找不到对象？
+      if (d.length == 0) {
+        this.$set(this.heightSelectors, selector, null);
+      } else {
+        var y = d.offset().top;
+        this.heightSelectors[selector] = this.pageHeight - y - this.heightFactor;
+      }
+      return this.heightSelectors[selector];
+    }
   }
 }

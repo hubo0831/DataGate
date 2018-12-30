@@ -25,7 +25,7 @@ import Login from "./Login.vue"
 //组件注册
 import UrlPager from './components/url-pager'
 import UserSelect from './components/user-select'
-import Fileupload from "./components/file-upload";
+import FileUpload from "./components/file-upload";
 import DisplayItem from "./components/display-item";
 import EditItem from "./components/edit-item";
 import EditGrid from "./components/edit-grid";
@@ -42,7 +42,7 @@ import LoginBottom from "./components/login-bottom"
 
 Vue.component('UrlPager', UrlPager)
 Vue.component("UserSelect", UserSelect)
-Vue.component("Fileupload", Fileupload)
+Vue.component("FileUpload", FileUpload)
 Vue.component("DisplayItem", DisplayItem)
 Vue.component("EditItem", EditItem)
 Vue.component("EditGrid", EditGrid)
@@ -57,8 +57,12 @@ Vue.component("LoginBottom", LoginBottom)
 Vue.component("Login", Login)
 
 //提供外部注册组件的事件
-bus.$on("register", (name, component)=>{
-  Vue.component(name, component);
+bus.$on("register", (name, component) => {
+  if (typeof name == "function" || typeof name == "object") {
+    Vue.use(name);
+  } else {
+    Vue.component(name, component);
+  }
 });
 
 //导出常用状态和工具类
@@ -71,7 +75,6 @@ export const API = api;
 export const Bus = bus;
 export const PubMixin = pubmixin;
 export const TaskMixin = taskmixin;
-
 //eslint-disable no-new
 //导出Vue根元素
 export const Run = () => new Vue({

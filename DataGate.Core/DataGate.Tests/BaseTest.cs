@@ -8,7 +8,7 @@ using System.IO;
 namespace DataGate.Tests
 {
     /// <summary>
-    /// 基础测试类
+    /// 不包含数据访问的基础测试类，
     /// </summary>
     public class BaseTest
     {

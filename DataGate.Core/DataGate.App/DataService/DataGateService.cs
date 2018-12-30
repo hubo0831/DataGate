@@ -357,7 +357,7 @@ namespace DataGate.App.DataService
 
         private async Task<object> GetObjectAsync(DataGateKey gkey, Dictionary<string, object> parameters)
         {
-            var result =await GetArrayAsync(gkey, parameters);
+            var result = await GetArrayAsync(gkey, parameters);
             if (result is DataTable)
             {
                 DataTable dt = result as DataTable;
@@ -674,11 +674,31 @@ namespace DataGate.App.DataService
         private string GetSortField(string f, DataGateKey gkey)
         {
             string[] qfs = gkey.QueryFieldsTerm.Split(',');
-            f = _db.AddFix(f);
+            var ff = _db.AddFix(f);
             for (var i = 0; i < qfs.Length; i++)
             {
-                if (qfs[i] == f) return qfs[i];
-                if (qfs[i].EndsWith("." + f)) return qfs[i];
+                if (qfs[i] == ff) return qfs[i];
+                if (qfs[i].EndsWith("." + ff)) return qfs[i];
+            }
+            return GetForeignKeyField(f, gkey);
+        }
+
+        /// <summary>
+        /// 在联表查询的对外表字段的排序中，查找title相同或order为相反数的字段的foreignkey作为排序字段
+        /// </summary>
+        /// <param name="f"></param>
+        /// <param name="gkey"></param>
+        /// <returns></returns>
+        private string GetForeignKeyField(string f, DataGateKey gkey)
+        {
+            if (gkey.TableJoins.IsEmpty()) return null;
+            var table = gkey.TableJoins[0].Table;
+            var field = table.Fields.FirstOrDefault(f1 => f1.Name == f);
+            if (field?.ForeignField != null)
+            {
+                field = table.Fields.FirstOrDefault(f1 => f1 != field && (f1.Title == field.Title
+                || (Math.Abs(f1.Order ?? 0) == Math.Abs(field.Order ?? 0))));
+                return field?.ForeignKey;
             }
             return null;
         }
@@ -745,19 +765,20 @@ namespace DataGate.App.DataService
         //单表的分页
         private IPager BuildPager(DataGateKey gkey, Dictionary<string, object> parameters)
         {
-            var tableMeta = GetMainTable(gkey);
-            string filter = FormatFilter(gkey.Filter, tableMeta);
+            var mainModel = GetMainTable(gkey);
+            string filter = FormatFilter(gkey.Filter, mainModel);
             if (!filter.IsEmpty())
             {
                 filter = " where " + filter;
             }
-            string sql = $"select {gkey.QueryFieldsTerm} from {tableMeta.FixDbName}{filter}";
+            string sql = $"select {gkey.QueryFieldsTerm} from {mainModel.FixDbName}{filter}";
 
             int pageSize = CommOp.ToInt(GetValueRemoveKey(parameters, "pageSize"));
             if (pageSize <= 0) pageSize = Consts.DefaultPageSize;
             DBPagerInfo pager = new DBPagerInfo
             {
                 Query = sql,
+                KeyId = $"{gkey.TableJoins[0].Alias ?? mainModel.FixDbName}.{mainModel.PrimaryKey.FixDbName}",
                 PageIndex = Math.Max(1, CommOp.ToInt(GetValueRemoveKey(parameters, "pageIndex"))) - 1,
                 PageSize = pageSize,
                 OrderBy = gkey.OrderBy,

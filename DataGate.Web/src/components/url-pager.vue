@@ -34,7 +34,7 @@ export default {
     handleSizeChange(val) {
       this.urlQuery["pagesize"] = val;
       //如果不想url分页，则调用此事件,并args.passed=false
-      if (this.$emitPass("page-change").passed) {
+      if (this.$emitPass("page-change", val).passed) {
         //直接url跳转
         this.$router.replace({ path: this.$route.path, query: this.urlQuery });
       }
@@ -42,7 +42,7 @@ export default {
     handleCurrentChange(val) {
       this.urlQuery["pageindex"] = val;
       //如果不想url分页，则调用此事件,并args.passed=false
-      if (this.$emitPass("page-change").passed) {
+      if (this.$emitPass("page-change",val).passed) {
         //直接url跳转
         this.$router.replace({ path: this.$route.path, query: this.urlQuery });
       }

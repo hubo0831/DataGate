@@ -3,13 +3,13 @@
   <div @keyup.enter="submitRow()" @keyup.escape="cancelEdit()">
     <el-form :inline="true" :model="rowBuffer" ref="gridForm" :rules="task.rules" status-icon :show-message="false">
       <el-table v-bind:data="dataList" ref="dataGrid" border fit highlight-current-row 
-      @current-change="doCurrentChange" @sort-change="doSortChange"
-        @selection-change="doSelectionChange" @row-dblclick="doRowDblClick" @row-click="doRowClick" :height="height"
+      @current-change="doCurrentChange" @sort-change="doSortChange" :stripe="stripe" :height="height"
+        @selection-change="doSelectionChange" @row-dblclick="doRowDblClick" @row-click="doRowClick"
         tooltip-effect="light" style="width: 100%;">
         <el-table-column type="selection" v-if="multiSelect"></el-table-column>
         <el-table-column type="index" v-if="showIndex"></el-table-column>
-        <el-table-column :prop="meta.name" :label="meta.title" :min-width="meta.width" :show-overflow-tooltip="meta.width>120"
-          v-for="meta in metaFilter" :key="meta.name" :sortable="meta.sortable">
+        <el-table-column  :show-overflow-tooltip="meta.column.minWidth>120" :prop="meta.name" :label="meta.title"
+          v-for="meta in metaFilter" :key="meta.name" header-align="center" v-bind="meta.column" >
           <template slot-scope="scope">
             <!-- 非当前编辑行或只读字段只显示 -->
             <template v-if="(scope.row != editingRow) || scope.row.readonly || editMode !='inline'">
@@ -19,7 +19,7 @@
               <slot name="display-op-col" v-else-if="meta.uitype=='Operator'" :meta="meta" :obj="scope.row">
                 <!-- <span>自定义显示状态的操作列内容</span> -->
               </slot>
-              <display-item v-else :meta="meta" v-model="scope.row[meta.name]">
+              <display-item v-else :meta="meta" v-model="scope.row[meta.name]" :obj="scope.row">
                 {{showArray(scope.row, meta)}}
               </display-item>
             </template>
@@ -36,7 +36,7 @@
             <slot name="edit-op-col" :obj="scope.row" :meta="meta" v-else-if="meta.uitype=='Operator'">
               <span>没有自定义编辑状态的操作列内容</span>
             </slot>
-            <!-- 常规编辑 -->
+           <!-- 常规编辑 -->
             <el-form-item v-else :prop="meta.name">
               <edit-item :obj="rowBuffer" :meta="meta"></edit-item>
             </el-form-item>
@@ -90,6 +90,10 @@ export default {
     multiEdit: Boolean, //是否支持同时编辑多项,默认false
     showIndex: {
       type: Boolean, //显示行号
+      default: true
+    },
+    stripe:{
+      type: Boolean, //显示斑马线
       default: true
     },
     editMode: {
@@ -172,7 +176,7 @@ export default {
     //勾选事件
     doSelectionChange(items) {
       this.submitRow(true);
-      if (this.multiEdit) this.task.setSelection(items);
+      if (this.multiSelect) this.task.setSelection(items);
       if (items.length == 1) {
         //刚开始时，鼠标如果正好点到复选框，将不会有当前行， 在此处强行指定
         this.$refs.dataGrid.setCurrentRow(items[0]);
@@ -182,7 +186,7 @@ export default {
       this.$emit("current-change", item);
       this.submitRow(true);
       this.current = item;
-      if (!this.multiEdit)
+      if (!this.multiSelect)
         this.task.setSelection(this.current ? [this.current] : []);
     },
     //统一处理table的行点击事件，当行点击时自动选择

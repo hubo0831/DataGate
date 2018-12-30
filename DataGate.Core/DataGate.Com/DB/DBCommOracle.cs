@@ -64,7 +64,7 @@ namespace DataGate.Com.DB
             if (p is DBPagerInfo)
             {
                 DBPagerInfo pager = p as DBPagerInfo;
-                var tp = GetSortFieldFromOrderBy(pager.OrderBy);
+                var tp = GetSortFieldFromOrderBy(pager.OrderBy,pager.KeyId);
                 string orderby = tp[0];
                 string sql = "SELECT COUNT(1) FROM (" + pager.Query + ")c";
                 pager.RecordCount = CommOp.ToInt(await Helper.ExecGetObjectAsync(sql, sp));
@@ -96,7 +96,7 @@ namespace DataGate.Com.DB
 
         async Task<IDataReader> ExecMasterDetailPageReaderAsync(MasterDetailPagerInfo pager, params IDataParameter[] sp)
         {
-            var tp = GetSortFieldFromOrderBy(pager.OrderBy);
+            var tp = GetSortFieldFromOrderBy(pager.OrderBy, pager.KeyId);
             string sortFields = tp[1];
             string innerSorts = tp[2];
             string orderby = tp[0];
@@ -104,20 +104,29 @@ namespace DataGate.Com.DB
             string filter = pager.Filter.IsEmpty() ? "" : " where " + pager.Filter;
             string sql = $"select COUNT(distinct({pager.KeyId})) from "
                + $"{pager.TablesAndJoins}{filter}";
+            if (!innerSorts.IsEmpty())
+            {
+                innerSorts = "," + innerSorts;
+            }
+            if (!sortFields.IsEmpty())
+            {
+                sortFields = "," + sortFields;
+            }
             pager.RecordCount = CommOp.ToInt(await Helper.ExecGetObjectAsync(sql, sp));
             sql = $"select {pager.Fields} from {pager.TablesAndJoins} where{Environment.NewLine}" +
                 $" {pager.KeyId} in{Environment.NewLine}"
-                +$"(select {innerId} from"
-                + $"(select {innerId},{innerSorts},rownum r from({Environment.NewLine}"
-               + $"select distinct({pager.KeyId}), {sortFields} from {pager.TablesAndJoins}{filter}{Environment.NewLine}"
+                + $"(select {innerId} from"
+                + $"(select {innerId}{innerSorts},rownum r from({Environment.NewLine}"
+               + $"select distinct({pager.KeyId}){sortFields} from {pager.TablesAndJoins}{filter}{Environment.NewLine}"
                 + $"order by {orderby})g__{Environment.NewLine}"
                 + $")h__ where r between {pager.StartIndex + 1} and {pager.StartIndex + pager.PageSize}){Environment.NewLine}"
                 + $"order by {orderby}";
             return await Helper.ExecReaderAsync(sql, sp);
         }
 
-        private string[] GetSortFieldFromOrderBy(string orderBy)
+        private string[] GetSortFieldFromOrderBy(string orderBy, string keyId)
         {
+            keyId = Helper.AddFix(keyId);
             orderBy = orderBy.ToStr();
             if (orderBy.IsEmpty())
             {
@@ -126,14 +135,22 @@ namespace DataGate.Com.DB
             string[] orders = orderBy.Split(',');
             var fieldArr = orders.Select(o =>
             {
-                string prop = o.Split(' ')[0];
+                string prop = o.Trim().Split(' ')[0];
                 string field = String.Join(".", prop.Split('.').Select(a => Helper.AddFix(a)));
                 string innerField = Helper.AddFix(prop.Split('.').Last());
+                if (innerField == keyId)
+                {
+                    innerField = null;
+                }
+                if (field == keyId)
+                {
+                    innerField = null;
+                }
                 return new { prop, field, innerField };
             });
             fieldArr.OrderBy(pf => -pf.field.Length).Each(pf => orderBy = orderBy.Replace(pf.prop, pf.field));
-            string fields = String.Join(",", fieldArr.Select(pf => pf.field));
-            string innerFields = String.Join(",", fieldArr.Select(pf => pf.innerField));
+            string fields = String.Join(",", fieldArr.Where(pf => pf.innerField != null).Select(pf => pf.field));
+            string innerFields = String.Join(",", fieldArr.Where(pf => pf.innerField != null).Select(pf => pf.innerField));
             return new string[] { orderBy, fields, innerFields };
         }
 

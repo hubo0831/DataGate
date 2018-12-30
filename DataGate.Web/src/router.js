@@ -11,16 +11,19 @@ import userState from "./userState"
 let sysComps = {};
 let preDefinedRoutes = []; //预定义的完整路由信息
 let router = new Router({
-  // mode: 'history', //history模式需要服务端支持
+ // mode: 'history', //history模式需要服务端支持
 
-  //浏览器前进后退时，保留上次滚动到的位置
-  scrollBehavior(to, from, savedPosition) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve(savedPosition||{x:0,y:0})
-      }, 500)
-    })
-  }
+  // 浏览器前进后退时，保留上次滚动到的位置
+  // 貌似因为router封装在一个局部滚动的盒子里面，而没有全局滚动，所以没效果。
+  // scrollBehavior(to, from, savedPosition) {
+  //   return new Promise((resolve, reject) => {
+  //     setTimeout(() => {
+  //       resolve(savedPosition||{x:0,y:0})
+  //     }, 500)
+  //   })
+  // }
+
+
 });
 
 
@@ -123,6 +126,7 @@ function createRoutes(menus) {
       props: true, //能通过URL传参给组件的props
       meta: {
         id: menu.id,
+        cpath //组件的唯一标识，用于判断路由切换时是否是同一组件同一页面，因为路由规则不同
       }
     }
     userRoutes.push(rtr);
@@ -146,6 +150,7 @@ function createRoutes(menus) {
 
 router.beforeEach((to, from, next) => {
   if (!to.meta.id || !userState.token || authedIds.includes(to.meta.id)) {
+    from.meta.scrollTop = $('.content-container').scrollTop(); //记录滚动位置
     next();
   } else {
     next('/unauth');

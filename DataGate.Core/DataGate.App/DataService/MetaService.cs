@@ -136,7 +136,9 @@ namespace DataGate.App.DataService
             Name = key,
             //DbName = _db.GetDbObjName(key),
             //FixDbName = _db.AddFix(key),
-            Fields = ParseMetadata(jt).ToList()
+            Fields = ParseMetadata(jt)
+            .OrderBy(m => m.Order)
+            .ToList()
             //.ToArray().Each(fm =>
             //{
             //    fm.DbName = _db.GetDbObjName(fm.Name);

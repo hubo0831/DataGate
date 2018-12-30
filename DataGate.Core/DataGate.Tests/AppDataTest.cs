@@ -22,6 +22,9 @@ using Xunit;
 
 namespace DataGate.Tests
 {
+    /// <summary>
+    /// 框架基础数据访问测试
+    /// </summary>
     public class AppDataTest : BaseTest
     {
         protected TestServer _testServer;
@@ -54,11 +57,12 @@ namespace DataGate.Tests
         /// 生成带登录后Token的Web客户端
         /// </summary>
         /// <returns></returns>
-
-        protected async Task<HttpClient> CreateLoginedClientAsync()
+        [Theory]
+        [InlineData("system", "123456")]
+        protected async Task<HttpClient> CreateLoginedClientAsync(string account, string passWord)
         {
             var client = _testServer.CreateClient();
-            var result = await PostLoginTest("system", "123456");
+            var result = await PostLoginTest(account, passWord);
             client.DefaultRequestHeaders.Add("token", result.Token);
             return client;
         }
@@ -98,17 +102,17 @@ namespace DataGate.Tests
         /// <summary>
         /// 测试登录 
         /// </summary>
-        /// <param name="userName">用户名</param>
+        /// <param name="account">用户名</param>
         /// <param name="password">密码</param>
         /// <returns></returns>
         [Theory]
         [InlineData("System", "123456")]
-        public async Task<LoginResult> PostLoginTest(string userName, string password)
+        public async Task<LoginResult> PostLoginTest(string account, string password)
         {
             var client = _testServer.CreateClient();
             HttpResponseMessage response = await client.PostAsync("/api/check/login",
               new FormUrlEncodedContent(new Dictionary<string, string>(){
-                  { "Account", userName },
+                  { "Account", account },
                   {"Password",password }}));
             var result = await response.Content.ReadAsAsync<LoginResult>();
             Assert.Equal(0, result.Code);
@@ -212,10 +216,10 @@ namespace DataGate.Tests
         /// <param name="key"></param>
         /// <param name="parm"></param>
         /// <returns></returns>
-        [InlineData("GetSysDict")]
-        [InlineData("GetAllRoles")]
+        //[InlineData("GetSysDict")]
+        //[InlineData("GetAllRoles")]
         [InlineData("GetAllRoleMenus")]
-        [InlineData("GetAuthMenus")]
+        //[InlineData("GetAuthMenus")]
         [Theory]
         public async Task<JToken> Query(string key, object parm = null)
         {
@@ -223,6 +227,7 @@ namespace DataGate.Tests
             string sql = $"/api/dg/{key}{SerialzeToUrl(parm)}";
             HttpResponseMessage response = await client.GetAsync(sql);
             var result = await response.Content.ReadAsAsync<JToken>();
+            string resStr = await response.Content.ReadAsStringAsync();
             string resultStr = result.ToString();
             Debug.WriteLine("QUERY-RESULT-STRING=" + resultStr);
             Debug.WriteLine("QUERY-RESULT-COUNT=" + result.Count());

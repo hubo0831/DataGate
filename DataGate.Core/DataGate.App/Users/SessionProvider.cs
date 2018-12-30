@@ -179,12 +179,26 @@ namespace DataGate.App
         public async Task<LoginResult> Login(LoginRequest request)
         {
             LoginResult result = new LoginResult();
-            var user = await _user.GetAsync(request.Account);
+            string requestPass = null;
+
+            //登录时回传的记住我的信息，从记住我的信息恢复用户的登录用户名密码
+            if (request.Remember?.Length > 10)
+            {
+                RestoreFormRemember(request);
+                requestPass = request.Password;
+            }
+
+            AppUser user = await _user.GetAsync(request.Account);
             if (user == null)
             {
                 return MSG.UserNotExists;
             }
-            if (user.Password != Encryption.MD5(request.Password + user.PasswordSalt))
+
+            if (requestPass == null)
+            {
+                requestPass = Encryption.MD5(request.Password + user.PasswordSalt);
+            }
+            if (user.Password != requestPass)
             {
                 return MSG.PasswordError;
             }
@@ -202,11 +216,27 @@ namespace DataGate.App
                 id = user.Id,
                 LastLoginDate = session.LastOpTime
             });
+            //要求“记住我”时，将登录信息加密回传,根据服务端的加密
+            if (request.Remember == "1")
+            {
+                request.Remember = Encryption.Encrypt(String.Join("|", user.Account, user.Password));
+            }
             return new LoginResult
             {
                 ExpireIn = Expires,
-                Token = session.Token
+                Token = session.Token,
+                Remember = request.Remember
             };
+        }
+
+
+        private void RestoreFormRemember(LoginRequest request)
+        {
+            string decode = Encryption.Decrypt(request.Remember);
+            string[] userPasswords = decode.Split(new char[] { '|' }, 2);
+            if (userPasswords.Length != 2) return;
+            request.Account = userPasswords[0];
+            request.Password = userPasswords[1];
         }
 
         /// <summary>

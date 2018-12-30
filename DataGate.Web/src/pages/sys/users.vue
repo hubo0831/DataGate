@@ -11,7 +11,7 @@
         </el-button-group>
       </div>
       <search-form :metadata="searchMeta"></search-form>
-      <edit-grid :task="task" v-loading="loading" :height="pageHeight-240" ref="editGrid" edit-mode="popup"
+      <edit-grid :task="task" v-loading="loading" id="editGrid" :height="fitHeight('#editGrid')-3" ref="editGrid" edit-mode="popup"
       multi-select 
       @format-array="doformatArray"
       @before-del-rows="confirmDel"
@@ -37,9 +37,6 @@ import * as API from "../../api";
 import util from "../../common/util";
 export default {
   mixins: [taskmixin],
-  mounted: function() {
-    // $("#taskChildenDiv").slimScroll({});
-  },
   data: function() {
     return {
       allRoles: [],
@@ -64,8 +61,7 @@ export default {
           }));
         });
       }
-    );
-    this.loadData();
+    ).done(this.loadData);
   },
   computed: {},
   methods: {
@@ -97,7 +93,7 @@ export default {
       }
     },
     confirmDel(args) {
-      args.passed = confirm("您真的要删除所选用户码？");
+      args.passed = confirm("确认删除所选用户？");
     },
     submitDel() {
       this.apiSubmit("saveuser", "删除成功");

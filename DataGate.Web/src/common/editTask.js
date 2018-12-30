@@ -24,7 +24,7 @@ export default function editTask() {
 
     //如果是分页查询，则设置排序为custom
     if (paged) {
-      this.metadata.forEach(meta => meta.sortable && (meta.sortable = "custom"));
+      this.metadata.forEach(meta => meta.column.sortable && (meta.column.sortable = "custom"));
     }
   }
   this.clearData();
@@ -63,6 +63,7 @@ export default function editTask() {
     mtemp.forEach(m => {
       //在进vue响应式之前先加点料
       m.multiValue = false;
+      if (!m.column) m.column = {};
       //没有声明显示顺序的主键都不显示
       if (m.primarykey && !m.order && m.order != 0) m.order = -1;
       else if (!m.order) m.order = 0;
@@ -83,7 +84,20 @@ export default function editTask() {
       if (!m.title) m.title = m.name;
 
       //没有声明显示宽度则默认100
-      if (!m.width) m.width = (appConfig.elSize > 1 ? 120 : 100);
+      if (!m.column.minWidth && !m.column.width) m.column.minWidth = (appConfig.elSize > 1 ? 120 : 100);
+
+      //没有明确定义可排序的都认为可以排序
+      if (typeof m.column.sortable == "undefined") {
+        m.column.sortable = true;
+      }
+
+      if (!m.align) {
+        //数字默认右对齐
+        if (m.datatype == "Number") m.column.align = "right";
+        //日期默认居中对齐
+        else if (m.datatype == "Date") m.column.align = "center";
+        else if (m.datatype == "Boolean") m.column.align = "center";
+      }
     });
 
     this.metadata = mtemp;

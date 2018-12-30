@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>$id$</id>
-    <version>0.1.5</version>
+    <version>0.1.6</version>
     <title>$title$</title>
     <authors>$authors$</authors>
     <owners>$author$</owners>
@@ -12,7 +12,11 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <copyright>$copyright$</copyright>
-    <releaseNotes>v0.1.5 数据字典文件自动生成工具</releaseNotes>
+    <releaseNotes>v0.1.6 数据字典文件自动生成工具</releaseNotes>
     <tags>DataGate Main</tags>
+    <dependencies>
+      <dependency id="DataGate.Com" version="0.1.6" />
+      <dependency id="DataGate.App" version="0.1.6" />
+    </dependencies>
   </metadata>
 </package>

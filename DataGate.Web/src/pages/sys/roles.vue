@@ -12,12 +12,12 @@
       </div>
       <el-row :gutter="5">
         <el-col :span="12" v-loading="loading">
-          <edit-grid :task="task" :height="pageHeight-150" ref="dataGrid" edit-mode="inline" show-index @current-change="doCurrentChange"></edit-grid>
+          <edit-grid :task="task" id="#dataGrid" :height="fitHeight('#dataGrid')" ref="dataGrid" edit-mode="inline" show-index @current-change="doCurrentChange"></edit-grid>
         </el-col>
         <el-col :span="12">
           <div class="card">
             <div class="card-header"><i class="fa fa-check-square-o" aria-hidden="true"></i> 功能列表</div>
-            <div class="card-content" id="menuDiv" :style="{height:(pageHeight-205) +'px'}">
+            <div class="card-content dg-fit dg-scr" id="menuDiv">
               <el-tree :data="menus" show-checkbox default-expand-all node-key="id" ref="tree" highlight-current :props="defaultProps">
               </el-tree>
             </div>
@@ -34,9 +34,6 @@
   import util from "../../common/util";
   export default {
     mixins: [taskmixin],
-    mounted: function () {
-      $("#menuDiv").slimScroll({});
-    },
     data: function () {
       return {
         menus: [],

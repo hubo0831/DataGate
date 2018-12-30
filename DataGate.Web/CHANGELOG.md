@@ -1,3 +1,20 @@
+V0.1.13 2018-12-22 - 12-30
+1. 服务端自动判断外键的排序位
+2. EditGrid和SearchForm增加和模型对接的自定义组件定义
+3. 配合服务端增加meta的column属性以批量定义列显示规则
+4. 进入带search-Form的页面时从地址栏恢复searchForm中的值
+5. 增加：taskpagemixin.apiDataFilter(key, data)ajax请求后数据预处理
+6. 增加前时后退时保留上一次滚动位置，使用window.popstate事件。
+7. 删除测试用的system账号，增加记住我功能
+8. 增加pubmixin中的fitHeight(selector)方法，自动调整editGrid的高度到页面底部
+9. 增加dg-fit和dg-scr伪样式名用于自动调整高度和自动生成滚动条
+
+V0.1.12 2018-12-17 - 
+1. Fileupload=>FileUpload
+2. tree-select=>hidden样式
+3. webuploader样式集成
+4. 增加align对齐属性
+
 V0.1.9 2018-12-10
 1. 菜单menu加上route属性以定义路由信息，和url区别，url是实际的菜单导航路径。route是路由模板定义。
    该方法不是最佳，但找不到更好的办法。
