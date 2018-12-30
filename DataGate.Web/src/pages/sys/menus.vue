@@ -15,7 +15,7 @@
     <el-col :span="12">
       <div class="card">
         <div class="card-header"><i class="fa fa-check-square-o" aria-hidden="true"></i> 功能列表</div>
-        <div class="card-content" id="menusDiv" :style="{height: pageHeight-205+ 'px'}">
+        <div class="card-content dg-fit dt-scr" id="menusDiv">
           <!-- <el-input placeholder="输入名称过滤" v-model="filterText">
           </el-input> -->
           <plain-tree :task="task" ref="plainTree">

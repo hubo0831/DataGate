@@ -13,7 +13,7 @@
           <el-button type="primary" icon="fa fa-long-arrow-down" v-on:click='doGroupCmd("doDown")'>下移</el-button>
         </el-button-group>
       </div>
-      <edit-grid :task="task" show-index :height="pageHeight-150" ref="groupEdit" :metadata="groupMeta" :data="groupFilter"
+      <edit-grid :task="task" show-index id="groupEdit" :height="fitHeight('#groupEdit')" ref="groupEdit" :metadata="groupMeta" :data="groupFilter"
        @current-change="doGroupCurrentChange"></edit-grid>
     </el-col>
     <el-col :span="14">
@@ -34,7 +34,7 @@
           <el-button :disabled="!this.task.changed" type="primary" icon="fa fa-save" v-on:click='doSave()'>保存</el-button>
         </el-button-group>
      </div>
-      <edit-grid :task="task" show-index :height="pageHeight-150" multi-select ref="itemEdit"
+      <edit-grid :task="task" show-index id="itemEdit" :height="fitHeight('#itemEdit')" multi-select ref="itemEdit"
        :metadata="itemMeta" :data="itemFilter"
        @new-row="doNewItemRow"></edit-grid>
   </el-col>

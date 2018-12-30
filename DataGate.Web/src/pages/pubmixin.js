@@ -22,7 +22,7 @@ export default {
   },
   data: function () {
     return {
-      heightFactor: 30,
+      heightFactor: 20, //高度调整的减数，靠试
       heightSelectors: {},
       pageHeight: 0, //页面高度
       pageWidth: 0,
@@ -37,11 +37,15 @@ export default {
 
       //自动调整class=dg-fit的元素的高度自适应到页面底部
       //避免每个页面都要手动调整为pageHeight减一个固定值
-      $('.dg-fit').each((idx, div) => {
-        var d = $(div);
-        var y = d.offset().top;
-        d.height(this.pageHeight - y - this.heightFactor);
-      });
+      setTimeout(() => {
+        $('.dg-fit').each((idx, div) => {
+          var d = $(div);
+          var y = d.offset().top;
+          var height = this.pageHeight - y - this.heightFactor;
+          // console.log('height=' +height);
+          d.height(height);
+        });
+      }, 0);
 
       for (var selector in this.heightSelectors) {
         this.fitHeight(selector);
@@ -54,7 +58,7 @@ export default {
         this.$set(this.heightSelectors, selector, null);
       } else {
         var y = d.offset().top;
-        this.heightSelectors[selector] = this.pageHeight - y - this.heightFactor;
+        this.heightSelectors[selector] = this.pageHeight - y - 3; //-3完全是靠试
       }
       return this.heightSelectors[selector];
     }

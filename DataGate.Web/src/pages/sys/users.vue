@@ -11,7 +11,7 @@
         </el-button-group>
       </div>
       <search-form :metadata="searchMeta"></search-form>
-      <edit-grid :task="task" v-loading="loading" id="editGrid" :height="fitHeight('#editGrid')-3" ref="editGrid" edit-mode="popup"
+      <edit-grid :task="task" v-loading="loading" id="editGrid" :height="fitHeight('#editGrid')-33" ref="editGrid" edit-mode="popup"
       multi-select 
       @format-array="doformatArray"
       @before-del-rows="confirmDel"
