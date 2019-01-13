@@ -10,7 +10,7 @@ namespace DataGate.Com
     /// </summary>
     public sealed class Frame
     {
-        public const string Version = "0.1.6";
+        public const string Version = "0.2.0";
 
         public const string CompanyName = "bwangel@163.com";
 
@@ -19,9 +19,9 @@ namespace DataGate.Com
 #else
         public const string Build = "Release";
 #endif
-        public const string Year = "2018";
+        public const string Year = "2018 - 2019";
 
-        public const string Copyright = "Copyright Jurassic Software";
+        public const string Copyright = "Copyright";
 
         public const string Trademark = "DataGate";
     }

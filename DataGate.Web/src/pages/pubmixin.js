@@ -30,6 +30,27 @@ export default {
       saving: false //显示 保存中...
     };
   },
+  // directives: {
+  //   fitHeight: {
+  //     bind(el, binding, vnode) {
+  //       if (binding.value === false) return;
+  //       var d = $(el);
+  //       var y = d.offset().top;
+  //       var height = this.pageHeight - y - this.heightFactor;
+  //       // console.log('height=' +height);
+  //       if (vnode.componentInstance)
+  //         vnode.componentInstance.height = height;
+  //       else
+  //         d.height(height);
+  //     }
+  //   },
+  //   autoScroll: {
+  //     inserted(el, binding) {
+  //       if (binding.value === false) return;
+  //       $(el).slimScroll({});
+  //     }
+  //   }
+  // },
   methods: {
     autoSize() {
       this.pageHeight = $(window).height();

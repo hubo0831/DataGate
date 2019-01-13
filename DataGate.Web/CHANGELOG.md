@@ -1,3 +1,9 @@
+V0.2.0 2019-1-2 -
+1. 增加日志
+2. 增加API.NONQUERY接口以执行非查询命令
+3. 增加API.EXPORT接口以导出Excel
+4. Util.download(file{url, name})下载文件API
+
 V0.1.13 2018-12-22 - 12-30
 1. 服务端自动判断外键的排序位
 2. EditGrid和SearchForm增加和模型对接的自定义组件定义

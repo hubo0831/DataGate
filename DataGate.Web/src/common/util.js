@@ -274,5 +274,30 @@ export default {
 
     //是空数组
     return Array.isArray(obj) && !obj.length;
+  },
+  //从指定url下载文件 name-期望的文件名
+   download({url, name}) {
+    var a = document.createElement("a");
+    a.href = url;
+    a.target = "_blank";
+    name && ( a.download = name);
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  },
+  //https://segmentfault.com/q/1010000014406245
+  encodeParams: function(obj) {
+    var params = [];
+    Object.keys(obj).forEach(function(key) {
+      var value = obj[key];
+      // 如果值为undefined我们将其置空
+      if (typeof value === "undefined") {
+        value = "";
+      }
+      // 对于需要编码的文本（比如说中文）我们要进行编码
+      params.push([key, encodeURIComponent(value)].join("="));
+    });
+    return params.join("&");
   }
 }

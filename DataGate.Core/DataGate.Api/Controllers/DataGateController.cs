@@ -15,6 +15,7 @@ using DataGate.App.DataService;
 using Microsoft.AspNetCore.Mvc;
 using DataGate.Com;
 using Newtonsoft.Json.Linq;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace DataGate.Api.Controllers
 {
@@ -31,6 +32,14 @@ namespace DataGate.Api.Controllers
         public DataGateController(DataGateService dg)
         {
             _dg = dg;
+            _dg.LogAction = (gkey, sql, ps) =>
+             {
+                 Log.Abstract = gkey.Name;
+                 Log.Message = "--" + gkey.Name + Environment.NewLine + sql;
+                 Log.Message += Environment.NewLine + String.Join(",", ps.Select(p => p.ParameterName + "=" + p.Value));
+                 if (Log.Message.Length > 4000) Log.Message = Log.Message.Remove(4000);
+                 Log.ObjectId = gkey.Key;
+             };
         }
 
         /// <summary>
@@ -41,6 +50,7 @@ namespace DataGate.Api.Controllers
         public async Task<ActionResult<object>> Query()
         {
             var key = (string)this.ControllerContext.RouteData.Values["key"];
+            Log.ObjectId = key;
             var dict = Request.Query.ToDictionary(kv => kv.Key, kv => (object)kv.Value.FirstOrDefault());
             var result = await _dg.QueryAsync(key, dict);
             //throw new ArgumentException("手动引发的异常");
@@ -48,17 +58,45 @@ namespace DataGate.Api.Controllers
         }
 
         /// <summary>
-        /// 通过指定的key配置执行数据增删改操作
+        /// 将指定查询变为Excel导出，将不考虑分页，所以查出的数据量太大可能出问题 v0.2.0+
+        /// </summary>
+        /// <returns></returns>
+        public async Task<FileResult> Export()
+        {
+            var key = (string)this.ControllerContext.RouteData.Values["key"];
+            Log.ObjectId = key;
+            var dict = Request.Query.ToDictionary(kv => kv.Key, kv => (object)kv.Value.FirstOrDefault());
+            
+            string fileName = (string)dict["filename"] ?? "导出.xlsx";
+            var result = await _dg.GetExcelStreamAsync(key, dict);
+            return File(result, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+
+        /// <summary>
+        /// 执行非查询的语句
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<ActionResult<int>> NonQuery()
+        {
+            var key = (string)this.ControllerContext.RouteData.Values["key"];
+            Log.ObjectId = key;
+            var dict = Request.Query.ToDictionary(kv => kv.Key, kv => (object)kv.Value.FirstOrDefault());
+            var result = await _dg.NonQueryAsync(key, dict);
+            return result;
+        }
+        /// <summary>
+        /// 通过指定的key配置执行数据增删改操作 v0.2.0+
         /// </summary>
         /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult<object>> Submit([FromBody]DataSubmitRequest request)
         {
             var key = (string)this.ControllerContext.RouteData.Values["key"];
+            Log.ObjectId = key;
             //string requestString = IOHelper.StreamToStr(Request.Body);
             //var request = JsonConvert.DeserializeObject<DataSaveRequest>(requestString);
             var result = await _dg.SubmitAsync(key, request);
-            //throw new ArgumentException("手动引发的异常");
             return result as object;
         }
 
@@ -67,11 +105,11 @@ namespace DataGate.Api.Controllers
         /// </summary>
         /// <returns>元数据描述对象数组</returns>
         [HttpGet]
-        public  IEnumerable<FieldMeta> Metadata()
+        public IEnumerable<FieldMeta> Metadata()
         {
             var key = (string)this.ControllerContext.RouteData.Values["key"];
-            var result =  _dg.Metadata(key);
-            //throw new ArgumentException("手动引发的异常");
+            Log.ObjectId = key;
+            var result = _dg.Metadata(key);
             return result;
         }
     }

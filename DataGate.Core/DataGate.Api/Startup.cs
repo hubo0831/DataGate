@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -11,6 +12,7 @@ using DataGate.Api.Filters;
 using DataGate.App;
 using DataGate.App.DataService;
 using DataGate.Com.DB;
+using DataGate.Com.Logs;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
@@ -24,6 +26,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using NLog;
+using NLog.Extensions.Logging;
 
 namespace DataGate.Api
 {
@@ -44,13 +48,17 @@ namespace DataGate.Api
         //}
         public IContainer ApplicationContainer { get; private set; }
 
-        //先于Config执行
+        //先于Configure执行
         public virtual IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddCors();//跨域
             services.AddMvc(options =>
             {
                 options.Filters.Add(new TokenValidateFilter());
+                options.Filters.Add(typeof(DefaultFilter));
+                //options.Filters.Add(new DefaultActionFilter());
+                //options.Filters.Add(new DefaultResultFilter());
+                //options.Filters.Add(new DefaultExceptionFilter());
             })
              .AddJsonOptions(options =>
             {
@@ -86,7 +94,7 @@ namespace DataGate.Api
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
@@ -98,35 +106,14 @@ namespace DataGate.Api
             }
 
             app.UseHttpsRedirection().UseCors(builder =>
-       builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());//.WithOrigins("http://example.com"));
+              builder.AllowAnyOrigin()
+              .AllowAnyMethod().AllowAnyHeader());//.WithOrigins("http://example.com"));
 
-            if (!Consts.IsTesting)
-                app.UseExceptionHandler(options =>
-                {
-                    options.Run(
-                    async context =>
-                    {
-                        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                        context.Response.ContentType = "application/json;charset=utf-8"; //此处要加上utf-8编码
+            GlobalDiagnosticsContext.Set("configDir", Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs"));
+            GlobalDiagnosticsContext.Set("connectionString", Configuration.GetConnectionString("Default"));
 
-                        //如果不加此句，服务器返回的数据到浏览器会拒绝
-                        context.Response.Headers["Access-Control-Allow-Origin"] = "*";
-
-                        var ex = context.Features.Get<IExceptionHandlerFeature>();
-                        if (ex != null)
-                        {
-                            var errObj = new
-                            {
-                                message = ex.Error.Message,
-                                stackTrace = ex.Error.StackTrace,
-                                exceptionType = ex.Error.GetType().Name
-                            };// $"<h1>Error: {ex.Error.Message}</h1>{ex.Error.StackTrace }";
-
-                            await context.Response.WriteAsync(JsonConvert.SerializeObject(errObj)).ConfigureAwait(false);
-                        }
-                    });
-                });
-
+            loggerFactory.AddNLog();
+            LogHelper.Init(Consts.Get<ILogManager>(), "*");
             app.UseMvc(routes =>
             {
                 routes.MapRoute(name: "datagate-save",
@@ -137,13 +124,21 @@ namespace DataGate.Api
                    template: "api/dg/m/{key}",
                    defaults: new { controller = "DataGate", action = "Metadata" });
 
+                routes.MapRoute(name: "datagate-nonquery",
+                   template: "api/dg/n/{key}",
+                   defaults: new { controller = "DataGate", action = "NonQuery" });
+
+                routes.MapRoute(name: "datagate-export",
+                    template: "api/dg/x/{key}",
+                    defaults: new { controller = "DataGate", action = "Export" });
+
                 routes.MapRoute(name: "datagate-query",
                     template: "api/dg/{key}",
                     defaults: new { controller = "DataGate", action = "Query" });
 
                 AddRoutes(routes);
-              //  routes.MapRoute(name: "api-default",
-              //template: "api/[controller]/[action]");
+                //  routes.MapRoute(name: "api-default",
+                //template: "api/[controller]/[action]");
 
                 routes.MapRoute(name: "default", template: "{controller=Home}/{action=Index}/{id?}");
             }).UseStaticFiles(); //访问wwwroot下的静态文件

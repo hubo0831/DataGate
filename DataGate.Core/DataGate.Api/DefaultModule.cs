@@ -1,8 +1,10 @@
 ﻿using Autofac;
 using DataGate.App;
 using DataGate.App.DataService;
+using DataGate.App.Logs;
 using DataGate.App.Models;
 using DataGate.Com.DB;
+using DataGate.Com.Logs;
 using Microsoft.Extensions.Configuration;
 using System;
 
@@ -17,6 +19,9 @@ namespace DataGate.Api
             builder.RegisterAssemblyTypes(typeof(AppUser).Assembly)
                    .Where(t => typeof(ISingleton).IsAssignableFrom(t))
                    .SingleInstance();
+
+            builder.RegisterType<LogInfo>().AsSelf();
+            builder.RegisterType<NLogManager>().As<ILogManager>().SingleInstance();
 
             builder.Register(c =>
             {

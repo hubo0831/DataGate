@@ -110,6 +110,7 @@ namespace DataGate
             {
                 Key = "Get" + FirstUpper(_nameConverter.ToPropName(tb.Key)),
                 tb.First().Remark,
+                Name = tb.First().Remark,
                 Model = tb.Key,
                 OpType = DataOpType.GetArray.ToString(),
                 ConnName = "Default",

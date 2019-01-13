@@ -134,7 +134,7 @@
         "uitype": "CheckBox",
         "title": "启用",
         "value": 1,
-        "Column":{"width": 60},
+        "Column": { "minWidth": 60 },
         "order": 6
       }
     ]
@@ -151,31 +151,34 @@
         "name": "account",
         "title": "账号",
         "required": true,
-  	  "Column":{"width":180},
+        "Column": { "minWidth": 180 }
       },
       {
         "name": "name",
         "title": "姓名",
-     	  "Column":{"width":180},
-     "required": true
+        "Column": { "minWidth": 180 },
+        "required": true
       },
       {
         "name": "email",
-        "width": 120,
-   	  "Column":{"width":240},
-       "title": "邮箱"
+        "Column": { "minWidth": 240 },
+        "title": "邮箱",
+        "required": true
       },
       {
         "name": "tel",
-  	  "Column":{"width":180,"align":"center"},
+        "Column": {
+          "minWidth": 180,
+          "align": "center"
+        },
         "title": "电话"
       },
       {
         "name": "roles",
         "title": "角色",
         "uitype": "List",
-		"Column":{"width":200},
-       "datatype": "[AppUserRole]",
+        "Column": { "minWidth": 200 },
+        "datatype": "[AppUserRole]",
         "foreignkey": "userId",
         "valuekey": "roleId",
         "sortable": false
@@ -183,8 +186,8 @@
       {
         "name": "lastLoginDate",
         "title": "最后登录",
-   		"Column":{"width":160},
-       "datatype": "DateTime",
+        "Column": { "minWidth": 160 },
+        "datatype": "DateTime",
         "readonly": true
       },
       {
@@ -251,6 +254,137 @@
         "title": "排序",
         "datatype": "SortOrder",
         "order": -1
+      }
+    ]
+  },
+  {
+    "Name": "SYS_LOG",
+    "Remark": "系统日志",
+    "Fields": [
+      {
+        "Name": "id",
+        "Title": "ID",
+        "DataType": "Number",
+        "PrimaryKey": true,
+         "Column":{"minWidth":70},
+		"Order": 1,
+        "MaxLength": 22,
+        "Required": true
+      },
+      {
+        "Name": "module",
+        "Title": "模块名",
+        "DataType": "String",
+        "Order": 2,
+        "MaxLength": 50
+      },
+      {
+        "Name": "action",
+        "Title": "操作名",
+        "DataType": "String",
+        "Order": 3,
+        "MaxLength": 50
+      },
+      {
+        "Name": "account",
+        "Title": "用户账号",
+        "DataType": "String",
+        "Order": 4,
+        "MaxLength": 20
+      },
+      {
+        "Name": "costs",
+        "Title": "开销(ms)",
+  		"DataType": "Number",
+        "Order": 5,
+        "MaxLength": 22
+      },
+      {
+        "Name": "loglevel",
+        "Title": "分级",
+        "DataType": "Number",
+		"UIType":"DropdownList",
+		"Options":[
+			{text:'Trace', value:0},
+				{text:'Debug', value:1},
+			{text:'Info', value:2},
+			{text:'Warning', value:3},
+			{text:'Error', value:4},
+			{text:'Fatal', value:5}
+	],
+        "Order": 6,
+        "MaxLength": 22
+      },
+      {
+        "Name": "abstract",
+        "Title": "简要信息",
+        "DataType": "String",
+        "Order": -7,
+        "FormOrder": -7
+      },
+      {
+        "Name": "message",
+        "Title": "信息",
+        "DataType": "Text",
+        "Order": 7,
+        "Column":{"minWidth":300},
+		"FormOrder": 7,
+        "MaxLength": 4000
+      },
+      {
+        "Name": "request",
+        "Title": "前端请求",
+        "DataType": "Text",
+    	"Column":{"minWidth":200},
+		"Order": 8,
+        "MaxLength": 2000
+      },
+      {
+        "Name": "objectid",
+        "Title": "业务ID",
+        "DataType": "String",
+        	"Column":{"minWidth":180},
+		"Order": 9,
+        "MaxLength": 32
+      },
+      {
+        "Name": "catalogid",
+        "Title": "业务分类ID",
+        "DataType": "String",
+        "Order": 10,
+        "MaxLength": 32
+      },
+      {
+        "Name": "optime",
+        "Title": "发生时间",
+        "DataType": "DateTime",
+    	"Column":{"minWidth":160},
+      "Order": 11,
+        "MaxLength": 7
+      },
+      {
+        "Name": "clientip",
+        "Title": "IP地址",
+        "DataType": "String",
+   	"Column":{"minWidth":160},
+         "Order": 12,
+        "MaxLength": 20
+      },
+      {
+        "Name": "useragent",
+        "Title": "浏览器标识",
+        "DataType": "String",
+		"Column":{"minWidth":200},
+        "Order": 13,
+        "MaxLength": 200
+      },
+      {
+        "Name": "exception",
+        "Title": "异常",
+        "DataType": "Text",
+       	"Column":{"minWidth":200},
+		"Order": 14,
+        "MaxLength": 2000
       }
     ]
   }

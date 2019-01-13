@@ -5,7 +5,7 @@ using System.Text;
 
 namespace DataGate.App.DataService
 {
-    public class UsersGate : IDataGate
+    public class UsersGate : ISubmitDataGate
     {
         public void OnAdd(List<string> fields, IDictionary<string, object> ps)
         {

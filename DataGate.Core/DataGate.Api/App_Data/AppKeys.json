@@ -103,6 +103,24 @@
     "Name": "保存用户最后登录时间",
     "Model": "AppUser",
     "OpType": "Save"
+  },
+  {
+    "Key": "GetSysLogs",
+    "Name": "获取日志信息",
+    "Model": "SYS_LOG",
+    "OpType": "GetPage",
+    "OrderBy": "id DESC"
+  },
+  {
+    "Key": "DelLog",
+    "Name": "删除日志",
+    "Model": "SYS_LOG",
+    "OpType": "Save"
+  },
+  {
+    "Key": "ClearLog",
+    "Name": "清空日志",
+    "Sql": "truncate table SYS_LOG",
+    "OpType": "NonQuery"
   }
-
 ]

@@ -1,19 +1,20 @@
 @import "main.scss";
 
-body {
-  background: $top-bgcolor;
-}
-
 .container {
   margin: 0 auto;
+  background:  rgb(1,10,43) url(../images/loginbg.jpg);
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: 1920px 500px;
 
-  .login-center {
-    width: 1024px;
-    margin: 0 auto;
-  }
-
-  .topbar-wrap {
-     border-bottom: 1px solid white;
+  .login-top {
+    height: 60px;
+    overflow: hidden;
+    zoom: 1;
+    border-bottom: 1px solid #d6dfea;
+    background: $top-bgcolor;
+    text-align: center;
+    padding-top:10px;
     .topbar-btn {
       color: #fff;
     }
@@ -24,31 +25,30 @@ body {
     /*}*/
     .topbar-logo {
       line-height: 26px;
-     }
+    }
 
     .topbar-logo img {
-      height: 30px;
-      margin-top: 10px;
       margin-left: 2px;
+      height: 36px;
     }
 
     .topbar-title {
       padding-left: 10px;
+      font-size: 19px;
     }
   }
 
   .login-middle {
-    background: url(../images/loginbg.jpg) no-repeat center;
-    height: 426px;
+  //  background: rgb(1,10,43);
 
     .login-container {
-      margin:auto;
-       border-radius: 10px;
-      width: 350px;
-      padding: 35px 35px 15px 30px;
-      border: 1px solid #eaeaea;
-      // background: rgba($color: #000, $alpha: 0.2);
+      margin: 64px auto;
+      width: 330px;
+      padding: 35px 35px 18px 30px;
+      //  background: rgba($color: #000, $alpha: 0.2);
       background: #fff;
+      border-radius: 10px;
+      border: 1px solid #a0b1c4;
 
       .title {
         margin: 0px auto 40px auto;
@@ -56,17 +56,23 @@ body {
       }
 
       .remember {
-          margin: 0px 0px 35px 0px;
+        margin: 0px 0px 37px 0px;
       }
     }
   }
 
   .login-bottom {
+    position: fixed;
+    _position: static;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
     clear: both;
-    background: $top-bgcolor;
-    border-top: 1px solid white;
+    line-height: 36px;
     text-align: center;
-    padding: 10px;
-    color: white;
+    color: #fff;
+    background-color: $top-bgcolor;
+    border-top: 1px solid #d6dfea;
   }
 }

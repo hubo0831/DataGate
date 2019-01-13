@@ -3,7 +3,6 @@
   <div>
     <el-form size="mini" class="meta-form" :model="task.editBuffer" v-if="task.editBuffer" label-width="90px" ref="editForm"
       :disabled="disabled || task.selection.length==0" :rules="rules" status-icon inline-message>
-
       <el-form-item v-for="item in metadataFilter" :key="item.name" :label="item.title" v-if="item.uitype!='File' || task.selection.length<=1"
         :prop="item.name" :class="{multiValue:item.multiValue}">
         <!-- 不能编辑 -->

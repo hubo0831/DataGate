@@ -51,9 +51,18 @@ namespace DataGate.App.DataService
             if (_db == null)
             {
                 _db = MetaService.CreateDBHelper(gkey.ConnName);
+                _db.Log = (sql, ps) =>
+                {
+                    LogAction?.Invoke(gkey, sql, ps);
+                };
             }
             return gkey;
         }
+
+        /// <summary>
+        /// 提供记录日志的委托
+        /// </summary>
+        public Action<DataGateKey, string, IDataParameter[]> LogAction { get; set; }
 
         /// <summary>
         /// 获取指定表指定条件的数据列表
@@ -80,12 +89,79 @@ namespace DataGate.App.DataService
                 case DataOpType.GetPage:
                     result = await GetPageAsync(gkey, param);
                     break;
+                default:
+                    throw new ArgumentException("key=GetArray, GetObject or GetPage");
+            }
+            gkey.DataGate.OnResult(gkey, result);
+            return result;
+        }
+
+        async Task<object> QueryForExportAsync(DataGateKey gkey, Dictionary<string, object> param)
+        {
+            object result = gkey.Data;
+            if (result != null)
+            {
+                return result;
+            }
+            switch (gkey.OpType)
+            {
+                case DataOpType.GetPage:
+                case DataOpType.GetArray:
+                    result = await GetArrayAsync(gkey, param);
+                    break;
+                case DataOpType.GetObject:
+                    throw new NotSupportedException("不支持单个对象导出");
+                default:
+                    throw new ArgumentException("key=GetArray or GetPage");
             }
             return result;
         }
 
         /// <summary>
-        /// 根据查询参数对象调用Query
+        /// 通用导出成Excel v0.2.0+
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<Stream> GetExcelStreamAsync(string key, Dictionary<string, object> param)
+        {
+            DataGateKey gkey = GetDataGate(key);
+            var result = await QueryForExportAsync(gkey, param);
+            var defaultGate = Consts.Get<DefaultExportGate>();
+            DataTable dt = defaultGate.OnExport(gkey, result);
+            gkey.DataGate.OnExport(gkey, dt);
+            return ExcelHelper.ExportByEPPlus(dt);
+        }
+
+        /// <summary>
+        /// 执行非查询语句 v0.2.0+
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="param">参数</param>
+        /// <returns></returns>
+        public async Task<int> NonQueryAsync(string key, Dictionary<string, object> param)
+        {
+            DataGateKey gkey = GetDataGate(key);
+            object result = gkey.Data;
+            if (result != null)
+            {
+                return CommOp.ToInt(result);
+            }
+            switch (gkey.OpType)
+            {
+                case DataOpType.NonQuery:
+                    if (gkey.Sql.IsEmpty())
+                    {
+                        throw new NoNullAllowedException("在执行NonQuery命令时，Sql是必须的");
+                    }
+                    var ps = _db.GetParameter(param);
+                    return await _db.ExecNonQueryAsync(gkey.Sql, ps.ToArray());
+            }
+            return 0;
+        }
+
+        /// <summary>
+        /// 根据查询参数对象调用Query, 主要用于服务端自身调用
         /// </summary>
         /// <param name="key"></param>
         /// <param name="obj">对象参数</param>
@@ -119,6 +195,13 @@ namespace DataGate.App.DataService
         public async Task<IEnumerable<string>> SubmitAsync(string key, DataSubmitRequest request)
         {
             DataGateKey gkey = GetDataGate(key);
+
+            //有测试数据时直接返回测试数据
+            if (gkey.Data != null)
+            {
+                return gkey.Data.Select(jk => jk.ToString());
+            }
+
             IEnumerable<string> ids = new string[0];
 
             _db.BeginTrans();
@@ -222,7 +305,7 @@ namespace DataGate.App.DataService
             var fields = tableMeta.PrimaryKeys.Select(pk => pk.Name)
                 .Intersect(psin.Select(kv => kv.Key),
                  StringComparer.OrdinalIgnoreCase).ToList();
-            gkey.DataGate?.OnRemove(psin);
+            gkey.DataGate.OnRemove(psin);
             var ps = fields.Select(f =>
              {
                  var psKey = psin.Keys.First(key => key.Equals(f, StringComparison.OrdinalIgnoreCase));
@@ -256,7 +339,7 @@ namespace DataGate.App.DataService
                 .Select(f => f.Name).Intersect(psin.Select(kv => kv.Key),
                  StringComparer.OrdinalIgnoreCase).ToList();
 
-            gkey.DataGate?.OnAdd(fields, psin);
+            gkey.DataGate.OnAdd(fields, psin);
 
             string id = null;
 
@@ -312,7 +395,7 @@ namespace DataGate.App.DataService
                 .Select(f => f.Name).Intersect(psin.Select(kv => kv.Key),
                  StringComparer.OrdinalIgnoreCase).ToList();
 
-            gkey.DataGate?.OnChange(fields, psin);
+            gkey.DataGate.OnChange(fields, psin);
             var ps = fields.Select(f =>
             {
                 var psKey = psin.Keys.First(key => key.Equals(f, StringComparison.OrdinalIgnoreCase));
@@ -338,7 +421,7 @@ namespace DataGate.App.DataService
             if (r > 1)
             {
                 _db.RollbackTrans();
-                throw new InvalidOperationException("错误操作，根据ID更新的记录数过多");
+                throw new InvalidOperationException("错误操作，根据主键更新的记录数过多");
             }
             return r;
         }
@@ -575,6 +658,13 @@ namespace DataGate.App.DataService
                 var field = tableMeta.Fields.FirstOrDefault(f => f.Name.Equals(r.Name, StringComparison.OrdinalIgnoreCase));
                 if (field == null) return null;
                 string left = field.ForeignField.IsEmpty() ? (gkey.TableJoins[0].Alias ?? tableMeta.Name) + "." + field.Name : field.ForeignField;
+                
+                //当有sql语句并且有模型定义时
+                if (!gkey.Sql.IsEmpty() && gkey.TableJoins.Length>0)
+                {
+                    left = field.Name;
+                }
+
                 string pName = r.Name + "_f"; //加后缀以免和未知的key冲突
                 ps[pName] = r.Value;
                 switch (r.Operator)
@@ -765,12 +855,17 @@ namespace DataGate.App.DataService
         //单表的分页
         private IPager BuildPager(DataGateKey gkey, Dictionary<string, object> parameters)
         {
+            if (!gkey.Sql.IsEmpty())
+            {
+                return BuildSqlPager(gkey, parameters);
+            }
             var mainModel = GetMainTable(gkey);
             string filter = FormatFilter(gkey.Filter, mainModel);
             if (!filter.IsEmpty())
             {
                 filter = " where " + filter;
             }
+
             string sql = $"select {gkey.QueryFieldsTerm} from {mainModel.FixDbName}{filter}";
 
             int pageSize = CommOp.ToInt(GetValueRemoveKey(parameters, "pageSize"));
@@ -779,6 +874,36 @@ namespace DataGate.App.DataService
             {
                 Query = sql,
                 KeyId = $"{gkey.TableJoins[0].Alias ?? mainModel.FixDbName}.{mainModel.PrimaryKey.FixDbName}",
+                PageIndex = Math.Max(1, CommOp.ToInt(GetValueRemoveKey(parameters, "pageIndex"))) - 1,
+                PageSize = pageSize,
+                OrderBy = gkey.OrderBy,
+            };
+            return pager;
+        }
+
+        /// <summary>
+        /// 如果有Sql语句，直接根据Sql生成分页
+        /// </summary>
+        /// <param name="gkey"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        private IPager BuildSqlPager(DataGateKey gkey, Dictionary<string, object> parameters)
+        {
+            var mainModel = GetMainTable(gkey);
+            string filter = FormatFilter(gkey.Filter, mainModel);
+            if (!filter.IsEmpty())
+            {
+                filter = " where " + filter;
+            }
+
+            string sql = $"{gkey.Sql}{filter}";
+
+            int pageSize = CommOp.ToInt(GetValueRemoveKey(parameters, "pageSize"));
+            if (pageSize <= 0) pageSize = Consts.DefaultPageSize;
+            DBPagerInfo pager = new DBPagerInfo
+            {
+                Query = sql,
+                KeyId = mainModel.PrimaryKey.FixDbName,
                 PageIndex = Math.Max(1, CommOp.ToInt(GetValueRemoveKey(parameters, "pageIndex"))) - 1,
                 PageSize = pageSize,
                 OrderBy = gkey.OrderBy,

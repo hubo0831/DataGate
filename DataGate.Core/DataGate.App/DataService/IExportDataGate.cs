@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Text;
 
 namespace DataGate.App.DataService
 {
     /// <summary>
-    /// 用于标记数据网关前后处理程序的接口
+    /// 导出的过滤器
     /// </summary>
-    public interface IDataGate
+    public interface IExportDataGate : IDataGate
     {
+        void OnExport(DataGateKey gkey, DataTable dt);
     }
 }

@@ -255,6 +255,7 @@ namespace DataGate.Tests
             HttpResponseMessage response = await client.GetAsync(sql);
             var result = await response.Content.ReadAsAsync<JObject>();
             Debug.WriteLine("QUERY-RESULT-COUNT=" + result.Count);
+            Assert.True(response.IsSuccessStatusCode);
             return result;
         }
 
@@ -394,7 +395,7 @@ namespace DataGate.Tests
         }
 
         [Theory]
-        [InlineData("GetAllUsers", 0, 10)]
+        [InlineData("GetAllUsers", 1, 10)]
         async Task SearchUserTest(string key, int pageIndex, int pageSize)
         {
             var _filter = new FilterRequest[]{

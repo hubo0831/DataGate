@@ -37,6 +37,14 @@ namespace DataGate.App
         };
         #endregion
 
+        #region 杂项
+        public static ApiResult NotImplemented = new ApiResult
+        {
+            Code = 1099,
+            Message = "该功能尚未实现"
+        };
+
+        #endregion
 
     }
 }

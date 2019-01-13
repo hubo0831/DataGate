@@ -48,7 +48,7 @@ namespace DataGate.Api.Controllers
         {
             var userSession = _session.Get(Token);
 
-            var user = await _user.GetByIdAsync(userSession.Id);
+            var user = await _user.GetAsync(userSession.Account);
             //  ps["Password"] = Encryption.MD5("123456" + ps["PasswordSalt"]);
             return Encryption.MD5(p + user.PasswordSalt) == user.Password;
         }
@@ -58,12 +58,12 @@ namespace DataGate.Api.Controllers
         /// </summary>
         /// <param name="p"></param>
         /// <returns></returns>
-       [HttpPost]
+        [HttpPost]
         public async Task<bool> ChangePassword(string p)
         {
             var userSession = _session.Get(Token);
 
-            var user = await _user.GetByIdAsync(userSession.Id);
+            var user = await _user.GetAsync(userSession.Account);
             //  ps["Password"] = Encryption.MD5("123456" + ps["PasswordSalt"]);
             user.PasswordSalt = CommOp.NewId();
             user.Password = Encryption.MD5(p + user.PasswordSalt);
@@ -82,7 +82,7 @@ namespace DataGate.Api.Controllers
         {
             var userSession = _session.Get(Token);
 
-            var user = await _user.GetByIdAsync(userSession.Id);
+            var user = await _user.GetAsync(userSession.Account);
             //  ps["Password"] = Encryption.MD5("123456" + ps["PasswordSalt"]);
             user.Name = name;
             user.Email = email;
@@ -98,7 +98,10 @@ namespace DataGate.Api.Controllers
         [HttpPost]
         public async Task<LoginResult> Login(LoginRequest request)
         {
-            return await _session.Login(request);
+            var result = await _session.Login(request);
+            Log.Account = request.Account;
+            Log.Abstract = result.Code == 0 ? "登录成功" : "登录失败";
+            return result;
         }
 
         /// <summary>

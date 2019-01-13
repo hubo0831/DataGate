@@ -13,7 +13,7 @@ namespace DataGate.App
     public class UserSession
     {
         public string Token { get; set; }
-        public string Id { get; set; }
+        public string Account { get; set; }
 
         public DateTime LastOpTime { get; set; }
     }

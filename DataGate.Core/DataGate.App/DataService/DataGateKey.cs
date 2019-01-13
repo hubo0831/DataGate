@@ -1,4 +1,5 @@
-﻿using DataGate.Com.DB;
+﻿using DataGate.Com;
+using DataGate.Com.DB;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -10,14 +11,19 @@ using System.Threading.Tasks;
 namespace DataGate.App.DataService
 {
     /// <summary>
-    /// 访问数据库的配置
+    /// 访问数据库的网关配置信息，由Key键唯一标记每个不同的访问接口
     /// </summary>
     public class DataGateKey
     {
         /// <summary>
-        /// 配置名称
+        /// 配置的KEY
         /// </summary>
         public string Key { get; set; }
+
+        /// <summary>
+        /// 配置的名称
+        /// </summary>
+        public string Name { get; set; }
 
         /// <summary>
         /// where后面的查询子句
@@ -49,10 +55,23 @@ namespace DataGate.App.DataService
         /// 注入服务，在操作前和操作后提供切入点
         /// </summary>
         [JsonIgnore]
-        public IDataGate DataGate { get; set; }
+        internal ListDataGate DataGate { get; set; }
 
         [JsonIgnore]
         internal JoinInfo[] TableJoins { get; set; }
+
+        /// <summary>
+        /// 主表信息
+        /// </summary>
+        [JsonIgnore]
+        public TableMeta MainTable
+        {
+            get
+            {
+                if (TableJoins.IsEmpty()) return null;
+                return TableJoins[0].Table;
+            }
+        }
 
         /// <summary>
         /// 明确指定的查询字段
@@ -100,6 +119,7 @@ namespace DataGate.App.DataService
         GetArray,
         GetObject,
         GetPage,
-        Save
+        Save,
+        NonQuery
     }
 }

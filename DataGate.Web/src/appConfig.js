@@ -13,7 +13,7 @@ var appConfig = {
   logo:require("./assets/images/logo.png"),
   copyright:"&copy;Copyright Jurassic Software 2018 <small>datagate.web v0.1.9</small>",
   systemName:"DataGate Management System",
-  titleHtml:"DataGate Management System",
+  titleHtml:"",
   defaultValueFunc:{}, //默认值的定义
   appSecret: 'somesecrettodefinebyserver' //这个后面应该放服务端
 };

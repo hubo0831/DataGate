@@ -110,6 +110,11 @@ export const QUERY = (key, params) => {
   return GET('/api/dg/' + key, params).done(filterResult);
 }
 
+//通用非查询
+export const NONQUERY = (key, params) => {
+  return POST('/api/dg/n/' + key, params).done(filterResult);
+}
+
 //通用批量更新
 export const SUBMIT = (key, params) => {
   context.saving = true;
@@ -119,4 +124,11 @@ export const SUBMIT = (key, params) => {
 //获取元数据
 export const META = key => {
   return GET('/api/dg/m/' + key).done(filterResult);
+}
+
+//通用导出Excel, 生成一个文件下载链接并自动点击
+export const EXPORT = (key, params) =>{
+  params.token = userState.token;
+  var url = formatUrl('/api/dg/x/' + key +"?" + util.encodeParams(params));
+  util.download({url});
 }

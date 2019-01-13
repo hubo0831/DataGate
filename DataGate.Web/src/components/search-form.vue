@@ -61,6 +61,9 @@
         <div v-else-if="meta.uitype=='TextBox'" class="search-input">
           <el-input v-model="meta.value" clearable :placeholder="meta.title"></el-input>
         </div>
+        <div v-else-if="meta.uitype=='TextArea'" class="search-input">
+          <el-input v-model="meta.value" clearable :placeholder="meta.title"></el-input>
+        </div>
         <!-- Custom自定义组件暂时用文本框 -->
         <div v-else-if="meta.uitype=='Custom'" class="search-input">
           <el-input v-model="meta.value" clearable :placeholder="meta.title"></el-input>
@@ -83,6 +86,7 @@
       <el-form-item>
         <el-button type="primary" v-on:click="search">查询</el-button>
         <el-button type="primary" v-on:click="reset">重置</el-button>
+        <slot></slot>
       </el-form-item>
     </el-form>
   </div>

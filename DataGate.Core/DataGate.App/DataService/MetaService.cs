@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
+using System.Data;
 
 namespace DataGate.App.DataService
 {
@@ -21,7 +22,7 @@ namespace DataGate.App.DataService
         readonly object synObj = new object();
         Dictionary<string, DataGateKey> _dataKeysDict = new Dictionary<string, DataGateKey>();
         Dictionary<string, TableMeta> _tableMetas = new Dictionary<string, TableMeta>();
-        static Dictionary<string, IDataGate> _dataGateDict = new Dictionary<string, IDataGate>();
+        static List<KeyValuePair<string, IDataGate>> _dataGateEntrys = new List<KeyValuePair<string, IDataGate>>();
         FileSystemWatcher fw;
         string _appDataDir;
 
@@ -61,8 +62,28 @@ namespace DataGate.App.DataService
                 {
                     GetTableMetas();
                     GetDataKeys();
+                    CreateDataGateList();
                     _modelInited = true;
                 }
+            }
+        }
+
+        /// <summary>
+        /// 根据已注册的IDataGate的字典构造实际执行的IDataGate列表
+        /// </summary>
+        private void CreateDataGateList()
+        {
+            foreach (var kv in _dataKeysDict)
+            {
+                List<IDataGate> dataGates = new List<IDataGate>();
+                foreach (var kvEntry in _dataGateEntrys)
+                {
+                    if (Regex.IsMatch(kv.Key, kvEntry.Key, RegexOptions.IgnoreCase))
+                    {
+                        dataGates.Add(kvEntry.Value);
+                    }
+                }
+                kv.Value.DataGate = new ListDataGate(dataGates);
             }
         }
 
@@ -153,14 +174,8 @@ namespace DataGate.App.DataService
         /// <param name="dataGate"></param>
         public static void RegisterDataGate(string key, IDataGate dataGate)
         {
-            if (!_dataGateDict.ContainsKey(key.ToLower()))
-            {
-                _dataGateDict.Add(key.ToLower(), dataGate);
-            }
-            else
-            {
-                _dataGateDict[key.ToLower()] = dataGate;
-            }
+            key = key.ToLower();
+            _dataGateEntrys.Add(new KeyValuePair<string, IDataGate>(key, dataGate));
         }
 
         //支持逗号分隔的字符串/字符串数组/对象数组/混合数组
@@ -204,13 +219,10 @@ namespace DataGate.App.DataService
             if (!_modelInited) InitTableMetas();
             key = key.ToLower();
             var gkey = _dataKeysDict[key];
-            if (gkey.DataGate == null && _dataGateDict.ContainsKey(key))
-            {
-                gkey.DataGate = _dataGateDict[key];
-            }
             return new DataGateKey
             {
                 DataGate = gkey.DataGate,
+                Name = gkey.Name,
                 Filter = gkey.Filter,
                 Key = gkey.Key,
                 Model = gkey.Model,
@@ -358,6 +370,12 @@ namespace DataGate.App.DataService
             {
                 return FormatQueryFields(gkey);
             }
+            //当定义了Sql和Model时，从Model中生成查询列表，不加表别名或表名，主要用于前台
+            //单击列标题排序时判断由哪个字段排序
+            else if (!(gkey.Sql.IsEmpty() || gkey.Model.IsEmpty()))
+            {
+                return FormatFieldsFromSql(gkey);
+            }
             var db = GetTempDB(gkey);
             //否则从TableMeata元数据定义中生成查询字段列表
 
@@ -441,6 +459,11 @@ namespace DataGate.App.DataService
             {
                 return String.Join(".", f.Split('.').Select(s => GetTempDB(gkey).AddFix(s.Trim())));
             }));
+        }
+
+        private string FormatFieldsFromSql(DataGateKey gkey)
+        {
+            return String.Join(",", gkey.TableJoins[0].Table.Fields.Select(f => f.FixDbName));
         }
 
         static Dictionary<string, Func<DBHelper>> _dbDict = new Dictionary<string, Func<DBHelper>>();

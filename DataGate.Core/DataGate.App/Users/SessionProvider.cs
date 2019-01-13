@@ -132,7 +132,7 @@ namespace DataGate.App
             {
                 return MSG.SessionExpired;
             }
-            var user = await _user.GetByIdAsync(userSession.Id);
+            var user = await _user.GetAsync(userSession.Account);
             return new UserInfoResult
             {
                 Id = user.Id,
@@ -205,7 +205,7 @@ namespace DataGate.App
             UserSession session = new UserSession
             {
                 Token = CommOp.NewId(),
-                Id = user.Id,
+                Account = user.Account,
                 LastOpTime = DateTime.Now
             };
             _sessionDict.TryAdd(session.Token, session);
