@@ -366,7 +366,7 @@ namespace DataGate.App.DataService
             }).Where(p => p != null).ToArray();
             string strFields = String.Join(",", fields.Select(p => _db.AddFix(p.Trim())));
             string strValues = String.Join(",", ps.Select(p => '@' + p.ParameterName));
-            string sql = $"insert into {tableMeta.FixDbName} fields({strFields}) values({strValues})";
+            string sql = $"insert into {tableMeta.FixDbName} ({strFields}) values({strValues})";
             await _db.TransNonQueryAsync(sql, ps);
             return id;
         }
