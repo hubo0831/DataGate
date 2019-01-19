@@ -145,10 +145,10 @@ namespace DataGate.App.DataService
             _tableMetas = allTableMetas.ToDictionary(m => m.Name);
         }
 
-        private TableMeta CreateTableMeta(JObject metaJObj)
+        private TableMeta CreateTableMeta(JObject metaObj)
         {
-            string key = (string)metaJObj[nameof(TableMeta.Name)];
-            JToken jt = metaJObj[nameof(TableMeta.Fields)];
+            string key = (string)metaObj[nameof(TableMeta.Name)];
+            JToken jt = metaObj[nameof(TableMeta.Fields)];
             return CreateTableMeta(key, jt);
         }
 

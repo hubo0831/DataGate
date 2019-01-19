@@ -50,6 +50,10 @@ a, a:visited {
   background-color: #4A5064;
 }
 
+.el-menu--popup{
+  background-color: $side-bgcolor;
+}
+
 .el-submenu .el-menu-item.is-active,
 .el-menu-item.is-active,
 .el-submenu .el-menu-item.is-active:hover,

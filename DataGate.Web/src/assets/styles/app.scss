@@ -95,7 +95,7 @@ a {
       overflow-y: auto;
     }
 
-    .el-menu {
+    .el-menu{
       height: 100%;
       /*写给不支持calc()的浏览器*/
       height: -moz-calc(100% - 80px);
@@ -107,7 +107,7 @@ a {
     }
 
     .el-submenu .el-menu-item {
-      min-width: 60px;
+      min-width: 50px;
     }
 
     .el-menu {
@@ -115,19 +115,7 @@ a {
     }
 
     .el-menu--collapse {
-      width: 60px;
-    }
-
-    .el-menu .el-menu-item,
-    .el-submenu .el-submenu__title {
-      height: 46px;
-      line-height: 46px;
-    }
-
-    .el-menu-item:hover,
-    .el-submenu .el-menu-item:hover,
-    .el-submenu__title:hover {
-      background-color: $side-hover;
+      width: 50px;
     }
   }
 
@@ -137,6 +125,7 @@ a {
     color: white;
     height: 26px;
     line-height: 30px;
+    cursor:pointer;
   }
 
   .content-container {

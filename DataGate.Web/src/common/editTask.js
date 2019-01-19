@@ -57,7 +57,7 @@ export default function editTask() {
       if (pkey) pkey.primarykey = true;
     }
     if (!pkey) {
-      throw "表没有定义主键";
+    //  throw "表没有定义主键";
     }
 
     mtemp.forEach(m => {

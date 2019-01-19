@@ -23,14 +23,13 @@ namespace DataGate.Com.Logs
         /// <param name="ex"></param>
         public static void Write(LogInfo logInfo, Exception ex = null)
         {
-            if (log == null) return;
             //修改人：卢英杰
             //修改于: 2015.8.26。
             //原因：发现写入日志文件的时候有许多空日志，所以加入一些判断来限制空日志信息的产生。
             //if (log != null)   原方法
             //if (log != null && logInfo != null && !string.IsNullOrWhiteSpace(logInfo.ActionName) 
             //    && !string.IsNullOrWhiteSpace(logInfo.ModuleName))
-            log.Write(logInfo, ex);
+            log?.Write(logInfo, ex);
         }
     }
 }

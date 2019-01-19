@@ -1,5 +1,6 @@
 ﻿using DataGate.Api.Controllers;
 using DataGate.App;
+using DataGate.Com;
 using DataGate.Com.Logs;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
@@ -20,8 +21,6 @@ namespace DataGate.Api.Filters
     /// </summary>
     public class DefaultFilter : IActionFilter, IResultFilter, IExceptionFilter
     {
-        const string LogSaveKey = "ActionLog";
-
         public void OnActionExecuted(ActionExecutedContext context)
         {
             if (context.Controller is BaseController controller)
@@ -50,10 +49,9 @@ namespace DataGate.Api.Filters
 
         public void OnResultExecuted(ResultExecutedContext context)
         {
-            if (context.Controller is BaseController controller)
+            if (context.Controller is BaseController controller && controller.Log != null)
             {
                 controller.OnResultExecuted(context);
-                controller.Log.Costs = (DateTime.Now - controller.Log.OpTime).TotalMilliseconds;
                 LogHelper.Write(controller.Log);
             }
         }
@@ -70,7 +68,7 @@ namespace DataGate.Api.Filters
             //如果不加此句，服务器返回的数据到浏览器会拒绝
             context.HttpContext.Response.Headers["Access-Control-Allow-Origin"] = "*";
             var logInfo = GetLogInfo(context);
-            logInfo.Costs = (DateTime.Now - logInfo.OpTime).TotalMilliseconds;
+            //   logInfo.Costs = (DateTime.Now - logInfo.OpTime).TotalMilliseconds;
             LogHelper.Write(logInfo, ex);
             var errObj = new
             {
@@ -94,7 +92,7 @@ namespace DataGate.Api.Filters
             logInfo.OpTime = DateTime.Now;
             logInfo.LogLevel = LogType.Info;
             logInfo.Request = httpContext.Request.Method + " " + httpContext.Request.QueryString.ToString();
-            context.ActionDescriptor.Properties[LogSaveKey] = logInfo;
+         //   context.ActionDescriptor.Properties[LogSaveKey] = logInfo;
             return logInfo;
         }
 

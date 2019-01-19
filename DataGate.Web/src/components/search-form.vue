@@ -142,6 +142,7 @@ export default {
     getOperators: function(meta) {
       switch (meta.uitype) {
         case "Date":
+        case "DateTime":
           return [
             {
               text: "介于",

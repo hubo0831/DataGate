@@ -31,10 +31,8 @@
 export default {
   //meta-元数据 value-列的值 obj-整行的数据对象
   props: ["meta", "value", "obj"],
-  filters: {
-
-  },
-  methods:{
+  filters: {},
+  methods: {
     //显示单选下拉列表的值
     dropDownValue(val) {
       for (var i in this.meta.options) {
@@ -43,10 +41,16 @@ export default {
     },
     //显示多选下拉列表的值，这里的val可能是，分隔的值或一个数组
     dropDownMultiValue(val) {
+      var vk = this.meta.valuekey;
       if (typeof val == "string") {
         val = val.split(",");
       }
-      var options = this.meta.options.filter(op => vals.indexOf(op.value) >= 0);
+      else{
+        val = val.map(v => v[vk]);
+      }
+      var options = this.meta.options.filter(
+        op => val.indexOf(vk ? op.value[vk] : op.value) >= 0
+      );
       return options.map(m => m.text).join(",");
     }
   }

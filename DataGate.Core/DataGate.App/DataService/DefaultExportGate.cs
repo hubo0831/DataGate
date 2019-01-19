@@ -10,7 +10,7 @@ using Newtonsoft.Json.Linq;
 namespace DataGate.App.DataService
 {
     /// <summary>
-    /// 将字典项翻译成文字
+    /// 默认的过滤器，导出Excel前，将某些属于字典的列, 将字典名翻译成文字，并自动格式化日期的列
     /// </summary>
     public class DefaultExportGate : ISingleton
     {

@@ -4,7 +4,7 @@
       <site-title></site-title>
     </div>
     <div class="login-middle">
-        <div class="login-container">
+        <div class="login-container" v-loading="loading">
           <el-form
             ref="AccountForm"
             :model="loginModel"
@@ -43,7 +43,6 @@
                 style="width:100%;"
                 @click.native.prevent="doLogin"
                 native-type="submit"
-                :loading="loading"
               >登录</el-button>
             </el-form-item>
           </el-form>
@@ -150,7 +149,7 @@ export default {
           // for (var i in result) {
           //   console.log("result[" + i + "]=" + result[i]);
           // }
-          that.$message.error(result.$message || "登录失败");
+          this.$message.error(result.$message || "登录失败");
         });
       });
     },

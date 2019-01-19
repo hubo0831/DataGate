@@ -6,12 +6,12 @@ namespace DataGate.Com.Logs
     /// <summary>
     /// 系统日志数据实体类
     /// </summary>
-    public class LogInfo : IId<int>
+    public class LogInfo : IId<string>
     {
         /// <summary>
         /// 主键ID
         /// </summary>
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         /// <summary>
         /// 模块名或控制器名

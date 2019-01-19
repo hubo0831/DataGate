@@ -47,8 +47,8 @@
         <aside :class="{showSidebar:!collapsed}">
           <!--展开折叠开关-->
           <div class="menu-toggle" @click.prevent="collapse">
-            <i class="fa fa-arrow-left" v-show="!collapsed"></i>
-            <i class="fa fa-arrow-right" v-show="collapsed"></i>
+            <i class="fa fa-outdent" v-show="!collapsed"></i>
+            <i class="fa fa-indent" v-show="collapsed"></i>
           </div>
           <!--导航菜单-->
           <el-menu :default-active="defaultChildIndex" :collapse="collapsed" @select="handleSelect">
@@ -144,10 +144,10 @@ export default {
     API.setContext(this);
     var reLogin = result => {
       if (!result.$code) return;
-      this.$message.error(result.$message + " 正在重新登录...");
+     // this.$message.error(result.$message + " 正在重新登录...");
       setTimeout(() => {
         UserAPI.logout();
-      }, 2000);
+      }, 1000);
     };
 
     //Promise.all返回的是一个用户数组，其实每个用户都是一样的
@@ -217,7 +217,7 @@ export default {
     bus.$on("login", getUser);
     bus.$on("logout", () => {
       this.user = null;
-      //   this.$router.replace("/");
+       this.$router.replace("/");
       //  location.reload(); //没办法
     });
 

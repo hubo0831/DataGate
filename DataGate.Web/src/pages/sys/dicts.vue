@@ -135,9 +135,9 @@ export default {
     doGroupCurrentChange(group) {
       this.currentGroup = group;
     },
-    //以下是item操作
+    //以下是item操作,新增item时必须赋值parentCode,要不然item会跑到左边的group里去
     doNewItemRow(rowData) {
-      rowData.parentId = this.currentGroup.id;
+      rowData.parentCode = this.currentGroup.code;
     },
     //批量导入
     batchAdd() {

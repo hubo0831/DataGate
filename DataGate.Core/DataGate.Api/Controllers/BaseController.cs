@@ -20,7 +20,7 @@ namespace DataGate.Api.Controllers
     public abstract class BaseController : ControllerBase
     {
         const string LogSaveKey = "ActionLog";
-
+        Stopwatch sw = new Stopwatch();
         public BaseController()
         {
         }
@@ -51,6 +51,7 @@ namespace DataGate.Api.Controllers
 
         public virtual void OnActionExecuting(ActionExecutingContext context)
         {
+            sw.Start();
         }
 
         public virtual void OnActionExecuted(ActionExecutedContext context)
@@ -63,6 +64,8 @@ namespace DataGate.Api.Controllers
 
         public virtual void OnResultExecuted(ResultExecutedContext context)
         {
+            sw.Stop();
+            Log.Costs = sw.ElapsedMilliseconds;
         }
 
     }

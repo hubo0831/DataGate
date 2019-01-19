@@ -266,8 +266,8 @@
         "Title": "ID",
         "DataType": "Number",
         "PrimaryKey": true,
-         "Column":{"minWidth":70},
-		"Order": 1,
+        "Column": { "minWidth": 70 },
+        "Order": 1,
         "MaxLength": 22,
         "Required": true
       },
@@ -295,7 +295,7 @@
       {
         "Name": "costs",
         "Title": "开销(ms)",
-  		"DataType": "Number",
+        "DataType": "Number",
         "Order": 5,
         "MaxLength": 22
       },
@@ -303,15 +303,33 @@
         "Name": "loglevel",
         "Title": "分级",
         "DataType": "Number",
-		"UIType":"DropdownList",
-		"Options":[
-			{text:'Trace', value:0},
-				{text:'Debug', value:1},
-			{text:'Info', value:2},
-			{text:'Warning', value:3},
-			{text:'Error', value:4},
-			{text:'Fatal', value:5}
-	],
+        "UIType": "DropdownList",
+        "Options": [
+          {
+            "text": "Trace",
+            "value": 0
+          },
+          {
+            "text": "Debug",
+            "value": 1
+          },
+          {
+            "text": "Info",
+            "value": 2
+          },
+          {
+            "text": "Warning",
+            "value": 3
+          },
+          {
+            "text": "Error",
+            "value": 4
+          },
+          {
+            "text": "Fatal",
+            "value": 5
+          }
+        ],
         "Order": 6,
         "MaxLength": 22
       },
@@ -327,24 +345,24 @@
         "Title": "信息",
         "DataType": "Text",
         "Order": 7,
-        "Column":{"minWidth":300},
-		"FormOrder": 7,
+        "Column": { "minWidth": 300 },
+        "FormOrder": 7,
         "MaxLength": 4000
       },
       {
         "Name": "request",
         "Title": "前端请求",
         "DataType": "Text",
-    	"Column":{"minWidth":200},
-		"Order": 8,
+        "Column": { "minWidth": 200 },
+        "Order": 8,
         "MaxLength": 2000
       },
       {
         "Name": "objectid",
         "Title": "业务ID",
         "DataType": "String",
-        	"Column":{"minWidth":180},
-		"Order": 9,
+        "Column": { "minWidth": 180 },
+        "Order": 9,
         "MaxLength": 32
       },
       {
@@ -358,23 +376,23 @@
         "Name": "optime",
         "Title": "发生时间",
         "DataType": "DateTime",
-    	"Column":{"minWidth":160},
-      "Order": 11,
+        "Column": { "minWidth": 160 },
+        "Order": 11,
         "MaxLength": 7
       },
       {
         "Name": "clientip",
         "Title": "IP地址",
         "DataType": "String",
-   	"Column":{"minWidth":160},
-         "Order": 12,
+        "Column": { "minWidth": 160 },
+        "Order": 12,
         "MaxLength": 20
       },
       {
         "Name": "useragent",
         "Title": "浏览器标识",
         "DataType": "String",
-		"Column":{"minWidth":200},
+        "Column": { "minWidth": 200 },
         "Order": 13,
         "MaxLength": 200
       },
@@ -382,8 +400,8 @@
         "Name": "exception",
         "Title": "异常",
         "DataType": "Text",
-       	"Column":{"minWidth":200},
-		"Order": 14,
+        "Column": { "minWidth": 200 },
+        "Order": 14,
         "MaxLength": 2000
       }
     ]

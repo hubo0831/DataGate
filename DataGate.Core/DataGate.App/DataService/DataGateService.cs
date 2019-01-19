@@ -717,6 +717,7 @@ namespace DataGate.App.DataService
                 }
             }).Where(r => r != null));
 
+            //与原有的gkey.Filter合并得到一个and条件
             if (!filterStr.IsEmpty())
             {
                 gkey.Filter = gkey.Filter.IsEmpty() ? filterStr : $"({gkey.Filter}) and {filterStr}";

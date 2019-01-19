@@ -456,6 +456,8 @@ namespace DataGate.Tests
 
             var client = _testServer.CreateClient();
             var response = await client.PostAsJsonAsync("/api/dg/s/SaveUser", task);
+            string resultStr = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("RESULT=" + resultStr);
             var result = await response.Content.ReadAsAsync<string[]>();
             Assert.True(1 == result.Length);
 
@@ -507,6 +509,99 @@ namespace DataGate.Tests
             };
 
             response = await client.PostAsJsonAsync("/api/dg/s/SaveUser", task2);
+            result = await response.Content.ReadAsAsync<string[]>();
+            Assert.True(0 == result.Length);
+        }
+
+        [Fact]
+        async Task TestCUDRole()
+        {
+            var rand = new Random();
+            string pk = CommOp.NewId();
+            var menus = await Get<DBCrud<AppMenu>>().GetListAsync();
+            if (menus.Count < 2)
+            {
+                throw new Exception("要完成本次测试，菜单表中至少要有2个菜单。");
+            }
+            var roleMenu = new
+            {
+                menuId = menus[0].Id,
+                roleId = pk
+            };
+
+            var role = new
+            {
+                id = pk,
+                name = "测试角色" + rand.Next(),
+                //这个子表数据应该被忽略掉，在前端json传值时也应该不传
+                menus = new object[] { }
+            };
+
+            var task = new
+            {
+                added = new object[] { role },
+                details = new object[]
+                {
+                    new
+                    {
+                        key="SaveRoleMenu",
+                        added = new object[]{ roleMenu }
+                    }
+                }
+            };
+
+            var client = _testServer.CreateClient();
+            var response = await client.PostAsJsonAsync("/api/dg/s/SaveRole", task);
+            string resultStr = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("RESULT=" + resultStr);
+            var result = await response.Content.ReadAsAsync<string[]>();
+            Assert.True(1 == result.Length);
+
+            var role1 = new
+            {
+                id = pk,
+                name = "测试角色" + rand.Next(),
+                menus = new object[] { roleMenu  }
+            };
+
+            var roleMenu1 = new
+            {
+                menuId = menus[1].Id,
+                roleId = pk
+            };
+
+            var task1 = new
+            {
+                changed = new object[] { role1 },
+                details = new object[]
+                {
+                    new
+                    {
+                        key="SaveRoleMenu",
+                        removed = new object[]{ roleMenu },
+                        added = new object[]{roleMenu1}
+                    }
+                }
+            };
+
+            response = await client.PostAsJsonAsync("/api/dg/s/SaveRole", task1);
+            result = await response.Content.ReadAsAsync<string[]>();
+            Assert.True(0 == result.Length);
+
+            var task2 = new
+            {
+                removed = new object[] { role1 },
+                details = new object[]
+                {
+                    new
+                    {
+                        key = "SaveRoleMenu",
+                        removed = new object[] { roleMenu1 }
+                    }
+                }
+            };
+
+            response = await client.PostAsJsonAsync("/api/dg/s/SaveRole", task2);
             result = await response.Content.ReadAsAsync<string[]>();
             Assert.True(0 == result.Length);
         }

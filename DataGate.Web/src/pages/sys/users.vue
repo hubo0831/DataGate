@@ -13,7 +13,6 @@
       <search-form :metadata="searchMeta"></search-form>
       <edit-grid :task="task" v-loading="loading" id="editGrid" :height="fitHeight('#editGrid')-33" ref="editGrid" edit-mode="popup"
       multi-select 
-      @format-array="doformatArray"
       @before-del-rows="confirmDel"
       @after-del-rows="submitDel"
        @save-task="doSave">
@@ -52,14 +51,13 @@ export default {
         this.allRoles = roles[0];
         this.task.setMetadata(meta[0]);
         this.searchMeta = this.task.reDefineMetadata("account,name,email,roleName");
-        this.task.setOptionsCallback("roles", meta => {
-          return this.allRoles.map(r => ({
+        var rolemeta = this.task.metadata.find(m=>m.name == 'roles');
+        rolemeta.options = this.allRoles.map(r => ({
             value: {
               roleId: r.id
             },
             text: r.name
           }));
-        });
       }
     ).done(this.loadData);
   },
@@ -77,21 +75,7 @@ export default {
     doSave() {
       this.apiSubmit("saveuser", "保存成功！");
     },
-    //此处处理edit-grid组件的format-array事件，将用户拥有的角色列表输出字符串
-    doformatArray(args) {
-      if (args.meta.name == "roles") {
-        var userRoles = args.value;
 
-        args.value = userRoles
-          .map(ur => {
-            var role = this.allRoles.find(r => r.id == ur.roleId);
-            return role;
-          })
-          .sort((a, b) => a.ord - b.ord)
-          .map(r => r.name)
-          .join(", ");
-      }
-    },
     confirmDel(args) {
       args.passed = confirm("确认删除所选用户？");
     },

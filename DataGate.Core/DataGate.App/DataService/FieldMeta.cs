@@ -148,6 +148,12 @@ namespace DataGate.App.DataService
         public Dictionary<string, object> Column { get; set; }
 
         /// <summary>
+        /// 联动的字段
+        /// </summary>
+        [JsonProperty("linkto")]
+        public string Linkto { get; set; }
+
+        /// <summary>
         /// 注释或备注
         /// </summary>
         [JsonProperty("remark")]

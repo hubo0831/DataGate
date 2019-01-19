@@ -6,7 +6,7 @@ using System.Text;
 namespace DataGate.App.DataService
 {
     /// <summary>
-    /// 数据更改前的过滤器
+    /// 数据更改前的过滤器,主要用于参数检查，或添加某些额外的参数
     /// </summary>
     public interface ISubmitDataGate:IDataGate
     {

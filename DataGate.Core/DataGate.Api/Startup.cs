@@ -82,11 +82,12 @@ namespace DataGate.Api
             //AutoFac声明以下方法已过时，因此不可能在程序运行中动态改变已注册的注入
             //builder.Update(ApplicationContainer);
 
-            MetaService.RegisterDataGate("SaveUser", new UsersGate());
+            MetaService.RegisterDataGate("^SaveUser$", new UsersGate());
             MetaService.RegisterDBHelper("Default", () => new DBHelper
             {
                 //var cfg = Program.Config.GetSection("ConnectionStrings");
-                DBComm = new DBCommOracle(),
+             DBComm = new DBCommOracle(),
+              //   DBComm = new DBCommSql(),
                 DbNameConverter = new UpperNameConverter()
             });
             Consts.ServiceProvider = new AutofacServiceProvider(ApplicationContainer);//第三方IOC接管 core内置DI容器
@@ -109,8 +110,8 @@ namespace DataGate.Api
               builder.AllowAnyOrigin()
               .AllowAnyMethod().AllowAnyHeader());//.WithOrigins("http://example.com"));
 
-            GlobalDiagnosticsContext.Set("configDir", Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs"));
-            GlobalDiagnosticsContext.Set("connectionString", Configuration.GetConnectionString("Default"));
+            //GlobalDiagnosticsContext.Set("configDir", Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs"));
+            //GlobalDiagnosticsContext.Set("connectionString", Configuration.GetConnectionString("Default"));
 
             loggerFactory.AddNLog();
             LogHelper.Init(Consts.Get<ILogManager>(), "*");
