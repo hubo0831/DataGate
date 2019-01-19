@@ -10,6 +10,10 @@ using System;
 
 namespace DataGate.Api
 {
+    /// <summary>
+    /// DataGate.App的Autofac注入程序, DataGate.App设定为不依赖Autofac
+    /// 所以需要在主程序中注入其中类型
+    /// </summary>
     public class DefaultModule : Module
     {
         protected override void Load(ContainerBuilder builder)
