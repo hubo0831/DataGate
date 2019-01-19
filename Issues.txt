@@ -1,0 +1,8 @@
+Issues:
+解决Github警告的aspnetcoreapp版本过低有安全风险的问题。
+
+数组如果不直接在url中序列化，会带上[]符号导至后台出错，后台需要判断。
+jquery的_符号要排除掉。
+
+别外的命名规则。
+在导出Excel列，部分数据列会当成文本，尝试在导出前修改DataColumn的DataType解决这个问题。
