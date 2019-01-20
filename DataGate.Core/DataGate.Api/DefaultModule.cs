@@ -29,7 +29,7 @@ namespace DataGate.Api
 
             builder.Register(c =>
             {
-                return MetaService.CreateDBHelper("Default");
+                return DBFactory.CreateDBHelper("Default");
             })
             .As<DBHelper>();
             //// .SingleInstance(); 由于事务的存在，DBHelper不能单例

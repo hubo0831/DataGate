@@ -32,44 +32,54 @@ namespace DataGate.Api.Filters
     /// <summary>
     /// 暂时用此Filter来拦截判断权限
     /// </summary>
-    public class TokenValidateFilter :IActionFilter
+    public class TokenValidateFilter : IActionFilter
     {
-        public void OnActionExecuted(ActionExecutedContext context)
+        public virtual void OnActionExecuted(ActionExecutedContext context)
         {
         }
 
-        public void OnActionExecuting(ActionExecutingContext context)
+        public virtual void OnActionExecuting(ActionExecutingContext context)
         {
-            var action = context.ActionDescriptor as ControllerActionDescriptor;
-            if (action == null)
+            if (!(context.ActionDescriptor is ControllerActionDescriptor action))
             {
                 return;
             }
-            
+
+            if (!(context.Controller is BaseController controller))
+            {
+                return;
+            }
+
             if (ExcludedActions.Contains($"{context.Controller.GetType()}.{action.ActionName}"))
             {
                 return;
             }
+
+            controller.Log = controller.Log ?? DefaultFilter.GetLogInfo(context);
+
             if (Consts.IsTesting)
             {
                 return;
             }
+
             var token = context.HttpContext.Request.Headers["token"].FirstOrDefault();
             if (token == null)
             {
                 token = context.HttpContext.Request.Query["token"];
             }
-            if (token == null)
+            if (String.IsNullOrEmpty(token))
             {
                 context.Result = new JsonResult(MSG.NotLogined);
+                controller.Log.Message = MSG.NotLogined.Message;
             }
             else
             {
-               var sessionProvider = Consts.ServiceProvider.GetService<SessionProvider>();
+                var sessionProvider = Consts.ServiceProvider.GetService<SessionProvider>();
                 var session = sessionProvider.Get(token);
                 if (session == null)
                 {
                     context.Result = new JsonResult(MSG.SessionExpired);
+                    controller.Log.Message = MSG.SessionExpired.Message;
                 }
             }
         }

@@ -11,7 +11,7 @@ namespace DataGate.App
 {
     public class UserMan : DBCrud<AppUser>
     {
-        public UserMan() : base(MetaService.CreateDBHelper("Default")) { }
+        public UserMan() : base(DBFactory.CreateDBHelper("Default")) { }
 
         public async Task<AppUser> GetAsync(string account)
         {

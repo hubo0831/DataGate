@@ -33,7 +33,7 @@ namespace DataGate.Tests
         {
             Consts.IsTesting = true;
             _testServer = new TestServer(WebHost.CreateDefaultBuilder().UseStartup(StartupType));
-            _db = MetaService.CreateDBHelper("Default");
+            _db = DBFactory.CreateDBHelper("Default");
         }
 
         protected virtual Type StartupType
@@ -231,6 +231,7 @@ namespace DataGate.Tests
             string resultStr = result.ToString();
             Debug.WriteLine("QUERY-RESULT-STRING=" + resultStr);
             Debug.WriteLine("QUERY-RESULT-COUNT=" + result.Count());
+            Assert.True(response.IsSuccessStatusCode);
             return result;
         }
 

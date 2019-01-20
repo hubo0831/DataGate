@@ -50,7 +50,7 @@ namespace DataGate.App.DataService
             //注意这里在单个生命周期内_db只能有一个
             if (_db == null)
             {
-                _db = MetaService.CreateDBHelper(gkey.ConnName);
+                _db = DBFactory.CreateDBHelper(gkey.ConnName);
                 _db.Log = (sql, ps) =>
                 {
                     LogAction?.Invoke(gkey, sql, ps);

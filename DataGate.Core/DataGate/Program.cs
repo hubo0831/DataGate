@@ -23,14 +23,8 @@ namespace DataGate
             .AddEnvironmentVariables();
 
             Consts.Config = builder.Build();
-
-            MetaService.RegisterDBHelper("Default", () => new DBHelper
-            {
-                //var cfg = Program.Config.GetSection("ConnectionStrings");
-                DBComm = new DBCommOracle(),
-                //  DbNameConverter = new UpperNameConverter()
-            });
         }
+
         static DictSettings dictSettings;
 
         static bool Error(string err)
@@ -77,7 +71,7 @@ dotnet datagate.dll -m appmodels.json
                 switch (arg.Substring(1))
                 {
                     case "t":
-                        arg = args[i+1];
+                        arg = args[i + 1];
                         if (arg[0] == '-')
                         {
                             dictSettings.Tables = null;
@@ -87,7 +81,7 @@ dotnet datagate.dll -m appmodels.json
                         dictSettings.Tables = arg.Split(",");
                         break;
                     case "tr":
-                        arg = args[i+1];
+                        arg = args[i + 1];
                         if (arg[0] == '-')
                         {
                             dictSettings.TableReg = null;
@@ -168,8 +162,9 @@ dotnet datagate.dll -m appmodels.json
                 Error("没有在配置文件appsettings.json中发现指定的生成信息，也没有在命令行参数中发现。");
                 Usage();
             }
-
-            DictService dictService = new DictService(new DictForOracle(), new UpperNameConverter(), dictSettings);
+            IDictFor dict = Consts.Config.GetConnectionString("Default").Contains("DESCRIPTION",StringComparison.OrdinalIgnoreCase) ?
+               (IDictFor)new DictForOracle() : new DictForSqlServer();
+            DictService dictService = new DictService(dict, new UpperNameConverter(), dictSettings);
             dictService.Run();
             Console.Write("执行完毕，按任意键退出");
 #if DEBUG

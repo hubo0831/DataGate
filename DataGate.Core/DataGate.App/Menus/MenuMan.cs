@@ -9,7 +9,7 @@ namespace DataGate.App
 {
     public class MenuMan : DBCrud<AppMenu>, ISingleton
     {
-        public MenuMan() : base(MetaService.CreateDBHelper("Default"))
+        public MenuMan() : base(DBFactory.CreateDBHelper("Default"))
         {
 
         }

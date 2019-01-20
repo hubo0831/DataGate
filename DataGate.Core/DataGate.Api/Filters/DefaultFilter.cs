@@ -33,7 +33,7 @@ namespace DataGate.Api.Filters
         {
             if (context.Controller is BaseController controller)
             {
-                controller.Log = GetLogInfo(context);
+                controller.Log = controller.Log ?? DefaultFilter.GetLogInfo(context);
                 controller.Log.Account = controller.GetSession()?.Account;
                 controller.OnActionExecuting(context);
             }

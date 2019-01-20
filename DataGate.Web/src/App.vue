@@ -144,7 +144,7 @@ export default {
     API.setContext(this);
     var reLogin = result => {
       if (!result.$code) return;
-     // this.$message.error(result.$message + " 正在重新登录...");
+      // this.$message.error(result.$message + " 正在重新登录...");
       setTimeout(() => {
         UserAPI.logout();
       }, 1000);
@@ -208,17 +208,28 @@ export default {
       }
     });
 
-    bus.$on("server-exception", ex => {
-      this.ex = ex;
-      this.errorBoxVisible = true;
-    });
     bus.$on("update-title", this.updateTitle);
     bus.$on("session-timeout", reLogin);
     bus.$on("login", getUser);
     bus.$on("logout", () => {
       this.user = null;
-       this.$router.replace("/");
+      this.$router.replace("/");
       //  location.reload(); //没办法
+    });
+
+    //服务端异常处理
+    bus.$on("server-exception", ex => {
+      this.ex = ex;
+      this.$notify.error({
+        title: ex.exceptionType,
+        message: ex.message + "\n点击查看详情",
+        onClick: () => (this.errorBoxVisible = true)
+      });
+    });
+   
+   //返回结果不是预期的数据
+   bus.$on("invalid-result", msg => {
+      this.$message.error(msg);
     });
 
     var token = userState.token;

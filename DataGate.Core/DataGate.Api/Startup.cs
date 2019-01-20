@@ -83,13 +83,6 @@ namespace DataGate.Api
             //builder.Update(ApplicationContainer);
 
             MetaService.RegisterDataGate("^SaveUser$", new UsersGate());
-            MetaService.RegisterDBHelper("Default", () => new DBHelper
-            {
-                //var cfg = Program.Config.GetSection("ConnectionStrings");
-             DBComm = new DBCommOracle(),
-              //   DBComm = new DBCommSql(),
-                DbNameConverter = new UpperNameConverter()
-            });
             Consts.ServiceProvider = new AutofacServiceProvider(ApplicationContainer);//第三方IOC接管 core内置DI容器
             return Consts.ServiceProvider;
         }

@@ -26,7 +26,7 @@ namespace DataGate
         public DictService(IDictFor dictFor, INameConverter nameConverter, DictSettings settings)
         {
             _dictFor = dictFor;
-            _db = MetaService.CreateDBHelper("Default");
+            _db = DBFactory.CreateDBHelper("Default");
             _nameConverter = nameConverter;
             _settings = settings;
         }

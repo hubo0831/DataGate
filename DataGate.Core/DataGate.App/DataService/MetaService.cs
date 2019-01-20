@@ -466,19 +466,6 @@ namespace DataGate.App.DataService
             return String.Join(",", gkey.TableJoins[0].Table.Fields.Select(f => f.FixDbName));
         }
 
-        static Dictionary<string, Func<DBHelper>> _dbDict = new Dictionary<string, Func<DBHelper>>();
-
-        /// <summary>
-        /// 注册DBHelper的生成器
-        /// </summary>
-        /// <param name="connName">连接字符串或名称</param>
-        /// <param name="dbFunc">生成DBHelper的方法</param>
-        public static void RegisterDBHelper(string connName, Func<DBHelper> dbFunc)
-        {
-            connName = connName.ToLower();
-            _dbDict[connName] = dbFunc;
-        }
-
         Dictionary<string, DBHelper> _tempDict = new Dictionary<string, DBHelper>();
 
         private DBHelper GetTempDB(DataGateKey key)
@@ -486,32 +473,9 @@ namespace DataGate.App.DataService
             string connName = key.ConnName ?? "Default";
             if (!_tempDict.ContainsKey(connName))
             {
-                _tempDict[connName] = CreateDBHelper(connName);
+                _tempDict[connName] = DBFactory.CreateDBHelper(connName);
             }
             return _tempDict[connName];
-        }
-
-        /// <summary>
-        /// 根据指定字符串连接名称或连拉字符串本身获取新的DBHelper
-        /// </summary>
-        /// <param name="connName"></param>
-        /// <returns>DBHelper</returns>
-        public static DBHelper CreateDBHelper(string connStrOrName)
-        {
-            if (connStrOrName.IsEmpty()) connStrOrName = "Default";
-            DBHelper helper = _dbDict[connStrOrName.ToLower()]();
-            if (helper.ConnStr == null)
-            {
-                if (connStrOrName.Length <= 30 && !connStrOrName.Contains('='))
-                {
-                    helper.ConnStr = Consts.Config.GetConnectionString(connStrOrName);
-                }
-                else
-                {
-                    helper.ConnStr = connStrOrName;
-                }
-            }
-            return helper;
         }
     }
 }

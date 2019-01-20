@@ -18,13 +18,11 @@ let context = null; //调用此模块的vue对象，主要是获取它的弹出�
 function showError(xhr, err, e) {
   var ex = xhr.responseJSON;
   if (ex && appConfig.debug) {
-    this.$notify.error({
-      title: ex.exceptionType,
-      message: ex.message + "\n点击查看详情",
-      onClick: () => bus.$emit("server-exception", ex)
-    })
+    bus.$emit('server-exception', ex);
+    throw ex;
   } else {
-    this.$message.error('请求出错:' + (e || err));
+    bus.$emit('invalid-result', '请求出错:' + (e || err));
+    throw e;
   }
 }
 
@@ -100,8 +98,10 @@ function filterResult(result) {
   if (!result.$code ) return;
   if (result.$code == 1010) {
     bus.$emit("session-timeout", result);
+    throw result;
   } else if (result.$message) {
-    this.$message.error(result.$message);
+    bus.$emit("invalid-result", result.$message);
+    throw result;
   }
 }
 

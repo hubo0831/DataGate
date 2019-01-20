@@ -9,7 +9,7 @@ import 'element-ui/lib/theme-chalk/index.css'
 import './assets/styles/main.scss'
 import appConfig from './appConfig.js'
 
-Vue.config.productionTip = false;
+Vue.config.productionTip = !appConfig.debug;
 Vue.use(ElementUI);
 
 import "./formatmixin"
