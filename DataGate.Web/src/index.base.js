@@ -13,10 +13,7 @@ import util from "./common/util"
 import editTask from "./common/editTask"
 import bus from "./bus"
 import * as api from "./api"
-
-import Login from "./Login.vue"
 //组件注册
-
 import pubmixin from "./pages/pubmixin.js";
 import taskmixin from "./pages/taskmixin"
 

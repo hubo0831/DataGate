@@ -3,6 +3,7 @@ V0.2.0 2019-1-2 -
 2. 增加API.NONQUERY接口以执行非查询命令
 3. 增加API.EXPORT接口以导出Excel
 4. Util.download(file{url, name})下载文件API
+5. Vue升到2.5.22 vue-router升到3.0.2
 
 V0.1.13 2018-12-22 - 12-30
 1. 服务端自动判断外键的排序位
