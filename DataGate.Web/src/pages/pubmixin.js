@@ -15,7 +15,8 @@ export default {
   },
   mounted() {
     this.autoSize();
-    $(".dg-scr").slimScroll({});
+    if ($(".dg-scr").length > 0)
+      $(".dg-scr").slimScroll({});
   },
   destoryed() {
     $(window).unbind("resize", this.autoSize);
