@@ -5,8 +5,8 @@ import userState from "./userState"
 Vue.mixin({
   data() {
     return {
-      appConfig,
-      userProfile:userState,
+      appConfig, //系统全局配置项
+      userProfile:userState, //用户信息
     }
   },
   //Vue.mixin全局混入，用于常用格式化

@@ -1,4 +1,8 @@
-V0.2.0 2019-1-2 -
+v0.2.1 2019-1-23
+1. 升级vue-template-compiler 2.5.22
+2. 去掉throw jquery.ajax不是promise
+
+V0.2.0 2019-1-2 - 2019-1-22
 1. 增加日志
 2. 增加API.NONQUERY接口以执行非查询命令
 3. 增加API.EXPORT接口以导出Excel

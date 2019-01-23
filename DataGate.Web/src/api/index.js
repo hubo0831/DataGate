@@ -19,10 +19,8 @@ function showError(xhr, err, e) {
   var ex = xhr.responseJSON;
   if (ex && appConfig.debug) {
     bus.$emit('server-exception', ex);
-    throw ex;
   } else {
     bus.$emit('invalid-result', '请求出错:' + (e || err));
-    throw e;
   }
 }
 
