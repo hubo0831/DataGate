@@ -1,6 +1,6 @@
 {
   "name": "datagate.web",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "A Vue.js + elementUI project for datagate management system clientside",
   "author": "bwangel@163.com",
   "private": false,

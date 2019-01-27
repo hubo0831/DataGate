@@ -1,7 +1,7 @@
 /**
  * Created by jerry on 2017/4/14.
  */
-var SIGN_REGEXP = /([yMdhsm])(\1*)/g
+var SIGN_REGEXP = /([yMdhsmf])(\1*)/g
 var DEFAULT_PATTERN = 'yyyy-MM-dd'
 
 function padding(s, len) {
@@ -99,6 +99,8 @@ export default {
           return padding(date.getMinutes(), $0.length)
         case 's':
           return padding(date.getSeconds(), $0.length)
+        case 'f':
+          return padding(date.getMilliseconds(), $0.length)
       }
     })
   },
@@ -223,7 +225,7 @@ export default {
   },
   //设置cookie
   setCookie(cname, cvalue, exminutes) {
-    cname  += window.location.port; //防止同一端口不同网站cookie相同
+    cname += window.location.port; //防止同一端口不同网站cookie相同
     if (typeof exminutes == 'number') {
       var d = new Date();
       d.setTime(d.getTime() + (exminutes * 60 * 1000));
@@ -276,20 +278,23 @@ export default {
     return Array.isArray(obj) && !obj.length;
   },
   //从指定url下载文件 name-期望的文件名
-   download({url, name}) {
+  download({
+    url,
+    name
+  }) {
     var a = document.createElement("a");
     a.href = url;
     a.target = "_blank";
-    name && ( a.download = name);
+    name && (a.download = name);
     a.style.display = "none";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
   },
   //https://segmentfault.com/q/1010000014406245
-  encodeParams: function(obj) {
+  encodeParams: function (obj) {
     var params = [];
-    Object.keys(obj).forEach(function(key) {
+    Object.keys(obj).forEach(function (key) {
       var value = obj[key];
       // 如果值为undefined我们将其置空
       if (typeof value === "undefined") {

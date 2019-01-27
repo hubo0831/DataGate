@@ -1,3 +1,6 @@
+v0.2.3
+1. formatDate增加毫秒
+
 v0.2.1 - v 0.2.2 2019-1-23
 1. 升级vue-template-compiler 2.5.22
 2. 去掉throw jquery.ajax不是promise
