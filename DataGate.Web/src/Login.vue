@@ -81,7 +81,6 @@
 
 <script>
 import API from "./api/api_user";
-import UserAPI from "./api/api_user.js";
 import pubmixin from "./pages/pubmixin.js";
 import appConfig from "./appConfig";
 import bus from "./bus";
@@ -145,7 +144,7 @@ export default {
     doLogin() {
       this.$refs.AccountForm.validate(valid => {
         if (!valid) return;
-        UserAPI.login(this.loginModel).catch(result => {
+        API.login(this.loginModel).catch(result => {
           // for (var i in result) {
           //   console.log("result[" + i + "]=" + result[i]);
           // }
@@ -154,7 +153,7 @@ export default {
       });
     },
     doForgot() {
-      UserAPI.forgot(this.forgotModel)
+      API.forgot(this.forgotModel)
         .then(result => {
           this.$message.success("密码重置邮件发送成功！请查收。");
         })

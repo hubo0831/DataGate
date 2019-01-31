@@ -20,6 +20,7 @@ import util from "./common/util"
 import editTask from "./common/editTask"
 import bus from "./bus"
 import * as api from "./api"
+import userApi from "./api/api_user";
 
 import Login from "./Login.vue"
 //组件注册
@@ -72,6 +73,7 @@ export const AppConfig = appConfig;
 export const Util = util;
 export const EditTask = editTask;
 export const API = api;
+export const UserAPI = userApi;
 export const Bus = bus;
 export const PubMixin = pubmixin;
 export const TaskMixin = taskmixin;

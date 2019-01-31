@@ -1,5 +1,6 @@
 v0.2.3
 1. formatDate增加毫秒
+2. export + UserAPI in index and index.base
 
 v0.2.1 - v 0.2.2 2019-1-23
 1. 升级vue-template-compiler 2.5.22

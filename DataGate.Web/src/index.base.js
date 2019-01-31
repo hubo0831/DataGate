@@ -8,6 +8,7 @@ import appConfig from './appConfig.js'
 Vue.config.productionTip = !appConfig.debug;
 
 import "./formatmixin"
+import userApi from "./api/api_user";
 import userState from './userState'
 import util from "./common/util"
 import editTask from "./common/editTask"
@@ -32,6 +33,7 @@ export const AppConfig = appConfig;
 export const Util = util;
 export const EditTask = editTask;
 export const API = api;
+export const UserAPI = userApi;
 export const Bus = bus;
 export const PubMixin = pubmixin;
 export const TaskMixin = taskmixin;
