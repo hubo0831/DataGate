@@ -27,7 +27,7 @@
   <ItemGroup>
     <None Remove="AppKeys.json" />
     <None Remove="appsettings.json" />
-    <None Remove="nlog.config" />
+    <None Remove="nlog_oracle.config" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,9 +35,9 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="nlog.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Content Include="nlog_oracle.config">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
@@ -58,6 +58,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="nlog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="TestData\Endless Space 2.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

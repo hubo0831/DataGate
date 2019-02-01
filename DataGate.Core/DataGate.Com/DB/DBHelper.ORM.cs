@@ -267,25 +267,14 @@ namespace DataGate.Com.DB
         /// <returns>int</returns>
         string PrepareInsertSqlString<T>(T entity)
         {
-            Type type = entity.GetType();
+            Type type = typeof(T);
             PropertyInfo[] props = type.GetProperties();
+            string fields = String.Join(",", props.Select(p => AddFix(p.Name)));
+            string values = String.Join(",", props.Select(p => "@" + p.Name));
             StringBuilder sb = new StringBuilder();
-            sb.Append(" Insert Into ");
-            sb.Append(AddFix(type.Name));
-            sb.Append("(");
-            StringBuilder sp = new StringBuilder();
-            StringBuilder sb_prame = new StringBuilder();
-            foreach (PropertyInfo prop in props)
-            {
-                if (prop.GetValue(entity, null) != null)
-                {
-                    sb_prame.Append("," + AddFix(prop.Name));
-                    sp.Append(",@" + GetDbObjName(prop.Name));
-                }
-            }
-            sb.Append(sb_prame.ToString().Substring(1, sb_prame.ToString().Length - 1) + ") Values (");
-            sb.Append(sp.ToString().Substring(1, sp.ToString().Length - 1) + ")");
-            return sb.ToString();
+            return $"insert into {AddFix(type.Name)}\r\n" +
+                $"({fields})\r\n" +
+                $"values({values})";
         }
 
         #endregion

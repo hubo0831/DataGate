@@ -38,7 +38,8 @@ namespace DataGate.Tests
 
         HttpClient _client;
         //测试分块，单元测试的分块设置得小一点看效果
-        static readonly int BLOCK_SIZE = 32768;
+        static readonly int BLOCK_SIZE = 655360;
+        //static readonly int BLOCK_SIZE = 32768;
         async Task<string> UploadFile(FileInfo fi, Action<int> uploadPorgress = null)
         {
             var fileStream = fi.OpenRead();

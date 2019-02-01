@@ -8,9 +8,6 @@ namespace DataGate.App.Files
     public class ServerUploadRequest : UploadRequest
     {
         /// <summary>文件上传请求</summary>
-        public ServerUploadRequest() { }
-
-        /// <summary>文件上传请求</summary>
         public ServerUploadRequest(UploadRequest request)
         {
             if (request == null) return;
@@ -23,9 +20,6 @@ namespace DataGate.App.Files
 
         /// <summary>服务端接收文件</summary>
         public string ServerFile { get; set; }
-
-        /// <summary>离线上传文件路径</summary>
-        public string RelativePath { get; set; }
 
         /// <summary>
         /// 上传文件的用户ID

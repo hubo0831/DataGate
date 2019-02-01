@@ -31,5 +31,10 @@ namespace DataGate.App.Files
         /// 上传人的用户ID
         /// </summary>
         public string UserId { get; set; }
+
+        /// <summary>
+        /// 文件长度
+        /// </summary>
+        public long Size { get; internal set; }
     }
 }

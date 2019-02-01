@@ -53,14 +53,29 @@ namespace DataGate.App.Files
             return result;
         }
 
-        /// <summary>处理秒传或无文件上传</summary>
+        private string CreateId()
+        {
+            return Guid.NewGuid().ToString("N");
+        }
+
+        /// <summary>秒传,需要客户端提供文件的MD5</summary>
         private async Task<UploadResult> HandleClientMD5Async(ServerUploadRequest request)
         {
             UploadResult result = new UploadResult();
             if (request.Md5.IsEmpty()) return result;
-            var exists = await _fileMan.GetByMd5Async(request.Md5);
-            if (exists != null)
+            var existsDoc = await _fileMan.GetByMd5Async(request.Md5);
+            if (existsDoc != null)
             {
+                var docFile = _uploadPath + existsDoc.RelativePath;
+                if (File.Exists(docFile))
+                {
+                    //如果相同的文件已存在，则新增一条指向原有文件的记录
+                    existsDoc.Id = CreateId();
+                    existsDoc.Name = request.FileName;
+                    existsDoc.Path = request.FilePath;
+                    await _fileMan.InsertAsync(existsDoc);
+                    result.Id = existsDoc.Id;
+                }
                 result.Dup = true;
             }
             return result;
@@ -70,8 +85,8 @@ namespace DataGate.App.Files
         private async Task<UploadResult> HandleSingleAsync(ServerUploadRequest request)
         {
             UploadResult result = new UploadResult();
-
             var doc = await BuildNewCheckExists(request, result);
+            result.Id = doc.Id;
             return result;
         }
 
@@ -84,7 +99,7 @@ namespace DataGate.App.Files
             {
                 throw new Exception("分片参数无效！");
             }
-            var uploadMD5 = request.Md5?.FirstOrDefault();
+            var uploadMD5 = request.Md5;
             result.Chunk = request.Chunk;
             if (request.Chunk < request.Chunks)
             {
@@ -131,17 +146,14 @@ namespace DataGate.App.Files
             var doc = BuildNew(request);
             var uploadMD5 = request.Md5;
             doc.Md5 = BuildMD5(request.ServerFile, uploadMD5);
+            doc.Size = new FileInfo(request.ServerFile).Length;
             var existsDoc = await _fileMan.GetByMd5Async(doc.Md5);
-            if (existsDoc == null) //服务端去重， wang加
+            if (existsDoc == null)
             {
-                if (request.RelativePath.IsEmpty())
-                {
-                    var docFile = _uploadPath + doc.RelativePath;
-                    File.Move(request.ServerFile, docFile);
-                }
-                await this._fileMan.InsertAsync(doc);
+                var docFile = _uploadPath + doc.RelativePath;
+                File.Move(request.ServerFile, docFile);
             }
-            else
+            else //服务端去重， wang加
             {
                 var docFile = _uploadPath + existsDoc.RelativePath;
                 if (!File.Exists(docFile)) //万一找到的旧文件不存在，就复制新传的文件
@@ -150,9 +162,13 @@ namespace DataGate.App.Files
                     File.Move(request.ServerFile, docFile);
                     await this._fileMan.UpdateManyAsync("Md5=@Md5", new { doc.RelativePath }, new { existsDoc.Md5 });
                 }
+                else //如果相同的文件已存在，则新增一条指向原有文件的记录
+                {
+                    doc.RelativePath = existsDoc.RelativePath;
+                }
                 result.Dup = true;
-                doc = existsDoc;
             }
+            await _fileMan.InsertAsync(doc);
             return doc;
         }
 
@@ -160,24 +176,19 @@ namespace DataGate.App.Files
         {
             var doc = new SysFile
             {
-                Id = Guid.NewGuid().ToString("N"),
+                Id = CreateId(),
                 Name = request.FileName,
                 CreateTime = DateTime.Now,
                 UserId = request.UserId
             };
+
             var ext = Path.GetExtension(request.FileName);
-            if (request.RelativePath.IsEmpty())
-            {
-                var level1Dir = doc.CreateTime.ToString("yyyyMM");
-                var level2Dir = doc.CreateTime.ToString("ddHH");
-                var docPath = $@"{this._uploadPath}\{level1Dir}\{level2Dir}";
-                if (!Directory.Exists(docPath)) Directory.CreateDirectory(docPath);
-                doc.RelativePath = $@"\{level1Dir}\{level2Dir}\{doc.Id}{ext}";
-            }
-            else
-            {
-                doc.RelativePath = request.RelativePath;
-            }
+
+            var level1Dir = doc.CreateTime.ToString("yyyyMM");
+            var level2Dir = doc.CreateTime.ToString("ddHH");
+            var docPath = $@"{this._uploadPath}\{level1Dir}\{level2Dir}";
+            if (!Directory.Exists(docPath)) Directory.CreateDirectory(docPath);
+            doc.RelativePath = $@"\{level1Dir}\{level2Dir}\{doc.Id}{ext}";
             doc.ContentType = IOHelper.GetContentType(request.FileName);
             return doc;
         }
@@ -185,8 +196,6 @@ namespace DataGate.App.Files
         /// <summary>生成MD5</summary>
         private string BuildMD5(string serverFile, string uploadMD5)
         {
-            //var buffer = File.ReadAllBytes(serverFile); //太占内存
-            // var md5 = buffer.ToMD5().ToUpperInvariant();
             var md5 = IOHelper.GetMD5HashFromFile(serverFile).ToUpperInvariant();
             if (!uploadMD5.IsEmpty() && !md5.Equals(uploadMD5, StringComparison.OrdinalIgnoreCase))
             {
@@ -262,7 +271,7 @@ namespace DataGate.App.Files
             }
             return Task.FromResult(folders);
         }
-        
+
         /// <summary>获得某个上传文件夹下全部文件列表</summary>
         public Task<List<string>> GetUploadFolderFilesAsync(string folderFullName)
         {

@@ -14,7 +14,6 @@ namespace DataGate.Api.Controllers
     /// <summary>
     /// 文件的上传和下载
     /// </summary>
-    [ApiController]
     public class FilesController : BaseController
     {
         private UploadFileService _fileService;
@@ -29,26 +28,18 @@ namespace DataGate.Api.Controllers
         public async Task<UploadResult> Upload(UploadRequest request)
         {
             var userSession = GetSession();
-            IFormFile file = Request.Form.Files.FirstOrDefault();
-            ServerUploadRequest request2 = new ServerUploadRequest()
+            ServerUploadRequest request2 = new ServerUploadRequest(request); ;
+            request2.UserId = userSession?.Id;
+
+            if (request2.Chunk < request2.Chunks || request2.Guid.IsEmpty())
             {
-                Chunk = request.Chunk,
-                Chunks = request.Chunks,
-                Guid = request.Guid,
-                Md5 = request.Md5,
-                UserId = userSession?.Id
-            };
-            if (file != null)
-            {
+                IFormFile file = Request.Form.Files[0];
                 string serverFile = Path.Combine(_fileService.TempPath, Guid.NewGuid().ToString());
 
-                using (FileStream fs = System.IO.File.Create(serverFile))
-                {
-                    file.CopyTo(fs);
-                    fs.Flush();
-                }
+                FileStream fs = System.IO.File.Create(serverFile);
+                file.CopyTo(fs);
+                fs.Close();
                 request2.ServerFile = serverFile;
-                request2.FileName = file.FileName;
             }
 
             return await _fileService.UploadAsync(request2);
