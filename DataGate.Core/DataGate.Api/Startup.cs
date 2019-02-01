@@ -130,6 +130,14 @@ namespace DataGate.Api
                     template: "api/dg/{key}",
                     defaults: new { controller = "DataGate", action = "Query" });
 
+                routes.MapRoute(name: "datagate-upload",
+                 template: "api/dg/u",
+                 defaults: new { controller = "Files", action = "Upload" });
+
+                routes.MapRoute(name: "datagate-download",
+                 template: "api/dg/d/{id}/{filename?}",
+                 defaults: new { controller = "Files", action = "DownById" });
+
                 AddRoutes(routes);
                 //  routes.MapRoute(name: "api-default",
                 //template: "api/[controller]/[action]");

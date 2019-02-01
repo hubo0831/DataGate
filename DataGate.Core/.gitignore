@@ -7,3 +7,4 @@ bin/
 obj/
 Nuget/
 *.csproj.user
+Upload_*/

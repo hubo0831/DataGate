@@ -206,6 +206,7 @@ namespace DataGate.App
             {
                 Token = CommOp.NewId(),
                 Account = user.Account,
+                Id = user.Id,
                 LastOpTime = DateTime.Now
             };
             _sessionDict.TryAdd(session.Token, session);

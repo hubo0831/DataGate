@@ -11,13 +11,13 @@ namespace DataGate.App.Files
     public class UploadFileService
     {
         SysFileMan _fileMan;
-        /// <summary>构造函数</summary>
+        /// <summary>构造上传文件处理器</summary>
         public UploadFileService(SysFileMan fileMan, UploadConfig config)
         {
             _fileMan = fileMan;
-            this._uploadDir = config.UploadFilesDir;
+            this._uploadDir = config.FilesDir;
             this._uploadPath = config.UploadFilesPath;
-            this._tempPath = config.UploadTempPath;
+            this.TempPath = config.TempPath;
             ClearTempFiles();
         }
 
@@ -28,7 +28,7 @@ namespace DataGate.App.Files
         string _uploadPath;
 
         /// <summary>上传临时路径</summary>
-        private string _tempPath;
+        public string TempPath { get; private set; }
 
         /// <summary>处理文件上传</summary>
         public async Task<UploadResult> UploadAsync(ServerUploadRequest request)
@@ -62,7 +62,6 @@ namespace DataGate.App.Files
             if (exists != null)
             {
                 result.Dup = true;
-
             }
             return result;
         }
@@ -129,7 +128,7 @@ namespace DataGate.App.Files
         /// <summary>生成新文档，如已存在则直接返回已存在文档 wang加</summary>
         private async Task<SysFile> BuildNewCheckExists(ServerUploadRequest request, UploadResult result)
         {
-            var doc = BuildNew(request.RelativePath, request.FileName, request.CharSet);
+            var doc = BuildNew(request);
             var uploadMD5 = request.Md5;
             doc.Md5 = BuildMD5(request.ServerFile, uploadMD5);
             var existsDoc = await _fileMan.GetByMd5Async(doc.Md5);
@@ -157,34 +156,30 @@ namespace DataGate.App.Files
             return doc;
         }
 
-        private SysFile BuildNew(string relativePath, string fileName, string charSet)
+        private SysFile BuildNew(ServerUploadRequest request)
         {
-            var doc = new SysFile();
-            doc.Id = Guid.NewGuid().ToString("N");
-            doc.Name = fileName;
-            doc.CreateTime = DateTime.Now;
-            var ext = Path.GetExtension(fileName);
-            if (relativePath.IsEmpty())
+            var doc = new SysFile
             {
-                var levelOneDir = doc.CreateTime.ToString("yyyyMM");
-                var levelTwoDir = doc.CreateTime.ToString("ddHH");
-                var docPath = $@"{this._uploadPath}\{levelOneDir}\{levelTwoDir}";
+                Id = Guid.NewGuid().ToString("N"),
+                Name = request.FileName,
+                CreateTime = DateTime.Now,
+                UserId = request.UserId
+            };
+            var ext = Path.GetExtension(request.FileName);
+            if (request.RelativePath.IsEmpty())
+            {
+                var level1Dir = doc.CreateTime.ToString("yyyyMM");
+                var level2Dir = doc.CreateTime.ToString("ddHH");
+                var docPath = $@"{this._uploadPath}\{level1Dir}\{level2Dir}";
                 if (!Directory.Exists(docPath)) Directory.CreateDirectory(docPath);
-                doc.RelativePath = $@"\{levelOneDir}\{levelTwoDir}\{doc.Id}{ext}";
+                doc.RelativePath = $@"\{level1Dir}\{level2Dir}\{doc.Id}{ext}";
             }
             else
             {
-                doc.RelativePath = relativePath;
+                doc.RelativePath = request.RelativePath;
             }
-            doc.ContentType = IOHelper.GetContentType(fileName);
+            doc.ContentType = IOHelper.GetContentType(request.FileName);
             return doc;
-        }
-
-        /// <summary>校验MD5</summary>
-        private void VerifyMD5(string serverFile, string uploadMD5)
-        {
-            if (uploadMD5.IsEmpty()) return;
-            BuildMD5(serverFile, uploadMD5);
         }
 
         /// <summary>生成MD5</summary>
@@ -204,20 +199,14 @@ namespace DataGate.App.Files
         private string GetNewChunkFile(ServerUploadRequest request, int chunk)
         {
             var ext = Path.GetExtension(request.FileName);
-            return $@"{this._tempPath}\{request.Guid}_PART_{chunk.ToString()}{ext}";
+            return $@"{this.TempPath}\{request.Guid}_PART_{chunk.ToString()}{ext}";
         }
 
         /// <summary>获得分片合并文件路径</summary>
         private string GetNewMergeFile(ServerUploadRequest request)
         {
             var ext = Path.GetExtension(request.FileName);
-            return $@"{this._tempPath}\{request.Guid}{ext}";
-        }
-
-        /// <summary>开始生成文档</summary>
-        public SysFile BeginBuild(string fileName, string charSet = null)
-        {
-            return BuildNew(null, fileName, charSet);
+            return $@"{this.TempPath}\{request.Guid}{ext}";
         }
 
         /// <summary>根据FileID获得相关文件流, wang加</summary>
@@ -250,8 +239,6 @@ namespace DataGate.App.Files
             return result;
         }
 
-
-
         /// <summary>获得上传文件夹下全部子文件夹</summary>
         public Task<List<UploadFolder>> GetUploadFoldersAsync()
         {
@@ -275,6 +262,7 @@ namespace DataGate.App.Files
             }
             return Task.FromResult(folders);
         }
+        
         /// <summary>获得某个上传文件夹下全部文件列表</summary>
         public Task<List<string>> GetUploadFolderFilesAsync(string folderFullName)
         {
@@ -283,10 +271,11 @@ namespace DataGate.App.Files
             var files = Directory.GetFiles(path).Select(e => e.Substring(path.Length + 1)).ToList();
             return Task.FromResult(files);
         }
+
         /// <summary>清除临时文件夹中的过期文件</summary>
         public void ClearTempFiles()
         {
-            var files = Directory.GetFiles(this._tempPath);
+            var files = Directory.GetFiles(this.TempPath);
             var now = DateTime.Now;
             var delay = TimeSpan.FromHours(1);
             foreach (var file in files)
