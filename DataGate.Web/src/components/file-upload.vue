@@ -1,75 +1,119 @@
 <template>
-<!-- 文件上传组件 -->
-<div>
+  <!-- 文件上传组件 -->
+  <div>
     <div :id="id" class="uploader" :style="height?{ height:height+'px' }:{}">
-        <div class="queueList">
-            <div class="allFiles">
-                <el-table ref="dataGrid"
-                          v-bind:data="fileList"
-                          highlight-current-row
-                          v-on:row-click="handleRowClick"
-                          v-on:selection-change="handleSelection"
-                          v-on:cell-mouse-enter="handleCellHover"
-                          v-on:cell-mouse-leave="handleCellLeave"
-                          :row-class-name="getRowClass"
-                          border
-                          :height="height? height-49:null"
-                          :show-header="true"
-                          tooltip-effect="light"
-                          style="width: 100%;">
-                    <el-table-column type="selection" width="30px"></el-table-column>
-                    <el-table-column prop="name" label="文件名称" show-overflow-tooltip>
-                        <template slot-scope="scope">
-                            <div v-bind:draggable="draggable" v-on:dragstart="$emit('drag-start', scope.row,$event)"
-                                 v-on:dragend="$emit('drag-end', scope.row, $event)">
-                                <a href="#" v-if="scope.row.oldexists" title="有重复的成果"><i class="el-icon-info"></i></a>
-                                <i v-bind:class="getThumbnail(scope.row)"></i>
-                                {{scope.row.name}}
-                            </div>
-                            <div style="position:relative;margin-top:2px">
-                                <div v-if="scope.row.percentage>0 && scope.row.percentage< 1" :style='{"background":"#409eff","width":scope.row.percentage * 100 + "%","height":"2px","position":"absolute","left":0,"bottom":0}'></div>
-                            </div>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="size" label="大小" width="74px" align="right" :formatter="formatSize">
-                    </el-table-column>
-                    <el-table-column prop="status" width="74px" align="center" label="操作">
-                        <template slot-scope="scope" style="text-align:center;">
-                            <el-tooltip v-bind:content="getStateIco(scope.row).content" placement="top" effect="light">
-                                <i v-bind:class="getStateIco(scope.row).ico"></i>
-                            </el-tooltip>
-                            <a :href="scope.row.downUrl" target="_blank"><i class="el-icon-download" title="下载文件" /></a>
-                            <a href="javascript:;" v-on:click="removeFile(scope.row)"><i class="el-icon-delete" title="删除" /></a>
-                        </template>
-                    </el-table-column>
-                </el-table>
-            </div>
-            <div style="width:100%;height:3px;background:#ebeef5">
-                <div v-if="totalPercentage>0 && totalPercentage< 1" :style='{"background":"#409eff","width":totalPercentage * 100 + "%","height":"100%"}'></div>
-            </div>
-            <el-row :id="id + 'dndArea'" class="placeholder">
-                <el-col :span="11">
-                    <span :id='id +"_filePicker"'></span>&nbsp;
-                    <span v-if="fileList.length==0">或拖放到虚框内</span>
-                    <span v-else>共{{fileList.length}}个文件 </span>&nbsp;
-                </el-col>
-                <el-col :span="13">
-                    <el-button type="primary" size="small" v-show="selection.length > 0" v-on:click="removeFiles">删除</el-button>
-                    <el-button type="primary"  size="small" v-show="getCount('waiting') > 0 && !isInProgress" v-on:click="startUpload">
-                        开始上传
-                    </el-button>
-                    <el-button type="primary" size="small" v-show="isInProgress" v-on:click="stopUpload">暂停上传</el-button>
-                    <el-button type="primary"  size="small" v-show="getCount('error') > 0 && !isInProgress" v-on:click="retry">重试</el-button>
-                </el-col>
-            </el-row>
+      <div class="queueList">
+        <div class="allFiles">
+          <el-table
+            ref="dataGrid"
+            v-bind:data="fileList"
+            highlight-current-row
+            v-on:row-click="handleRowClick"
+            v-on:selection-change="handleSelection"
+            v-on:cell-mouse-enter="handleCellHover"
+            v-on:cell-mouse-leave="handleCellLeave"
+            :row-class-name="getRowClass"
+            border
+            :height="height? height-49:null"
+            :show-header="true"
+            tooltip-effect="light"
+            style="width: 100%;"
+          >
+            <el-table-column type="selection" width="30px"></el-table-column>
+            <el-table-column prop="name" label="文件名称" show-overflow-tooltip>
+              <template slot-scope="scope">
+                <div
+                  v-bind:draggable="draggable"
+                  v-on:dragstart="$emit('drag-start', scope.row,$event)"
+                  v-on:dragend="$emit('drag-end', scope.row, $event)"
+                >
+                  <a href="#" v-if="scope.row.oldexists" title="有重复的成果">
+                    <i class="el-icon-info"></i>
+                  </a>
+                  <i v-bind:class="getThumbnail(scope.row)"></i>
+                  {{scope.row.name}}
+                </div>
+                <div style="position:relative;margin-top:2px">
+                  <div
+                    v-if="scope.row.percentage>0 && scope.row.percentage< 1"
+                    :style="{"background":"#409eff","width":scope.row.percentage * 100 + "%","height":"2px","position":"absolute","left":0,"bottom":0}"
+                  ></div>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="size"
+              label="大小"
+              width="74px"
+              align="right"
+              :formatter="formatSize"
+            ></el-table-column>
+            <el-table-column prop="status" width="74px" align="center" label="操作">
+              <template slot-scope="scope" style="text-align:center;">
+                <el-tooltip
+                  v-bind:content="getStateIco(scope.row).content"
+                  placement="top"
+                  effect="light"
+                >
+                  <i v-bind:class="getStateIco(scope.row).ico"></i>
+                </el-tooltip>
+                <a :href="scope.row.downUrl" target="_blank">
+                  <i class="el-icon-download" title="下载文件"/>
+                </a>
+                <a href="javascript:;" v-on:click="removeFile(scope.row)">
+                  <i class="el-icon-delete" title="删除"/>
+                </a>
+              </template>
+            </el-table-column>
+          </el-table>
         </div>
+        <div style="width:100%;height:3px;background:#ebeef5">
+          <div
+            v-if="totalPercentage>0 && totalPercentage< 1"
+            :style="{"background":"#409eff","width":totalPercentage * 100 + "%","height":"100%"}"
+          ></div>
+        </div>
+        <el-row :id="id + 'dndArea'" class="placeholder">
+          <el-col :span="11">
+            <span :id="id +"_filePicker""></span>&nbsp;
+            <span v-if="fileList.length==0">或拖放到虚框内</span>
+            <span v-else>共{{fileList.length}}个文件</span>&nbsp;
+          </el-col>
+          <el-col :span="13">
+            <el-button
+              type="primary"
+              size="small"
+              v-show="selection.length > 0"
+              v-on:click="removeFiles"
+            >删除</el-button>
+            <el-button
+              type="primary"
+              size="small"
+              v-show="getCount('waiting') > 0 && !isInProgress"
+              v-on:click="startUpload"
+            >开始上传</el-button>
+            <el-button
+              type="primary"
+              size="small"
+              v-show="isInProgress"
+              v-on:click="stopUpload"
+            >暂停上传</el-button>
+            <el-button
+              type="primary"
+              size="small"
+              v-show="getCount('error') > 0 && !isInProgress"
+              v-on:click="retry"
+            >重试</el-button>
+          </el-col>
+        </el-row>
+      </div>
     </div>
-</div>
+  </div>
 </template>
 <script>
-import WebUploader from "webuploader"
-import "webuploader/css/webuploader.css"
-import "../assets/styles/uploader.css"
+import WebUploader from "webuploader";
+import "webuploader/css/webuploader.css";
+import "../assets/styles/uploader.css";
 export default {
   props: {
     //原始的文件列表和上传后的文件列表
@@ -158,7 +202,7 @@ export default {
 
       chunked: true,
       chunkSize: chunkSize, //分片大小（3M）,
-      server: "/api/up"
+      server: "/api/dg/u"
       // 以下已经在geobank.js里配置
       //fileNumLimit: 300,
       //fileSizeLimit: 200 * 1024 * 1024,    // 200 M
@@ -271,7 +315,7 @@ export default {
     //单个文件上传成功 BankService/Upload
     uploader.on("uploadSuccess", function(file, response) {
       function afterSuccess(data) {
-        file.id = data.tempFileIds[0];
+        file.id = data.id;
         file.percentage = 1;
         file.status = "finished";
         that.getDownloadUrl(file);
@@ -290,6 +334,7 @@ export default {
           url: that.uploader.option("server"),
           data: {
             fileName: file.name,
+            filePath: file.path, //v0.2.4
             guid: file.guid,
             chunk: chunksTotal,
             chunks: chunksTotal

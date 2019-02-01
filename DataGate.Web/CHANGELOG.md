@@ -1,3 +1,6 @@
+v0.2.4
+1. 配合服务端调整FileUpload
+
 v0.2.3
 1. formatDate增加毫秒
 2. export + UserAPI in index and index.base
