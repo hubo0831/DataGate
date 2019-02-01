@@ -1,7 +1,7 @@
-DataGate.Core --asp.net core api Ó¦ÓÃ³ÌĞò
+ï»¿DataGate.Core --asp.net core api åº”ç”¨ç¨‹åº
 ========================================
-1.°²×°Êı¾İ¿â£ºÌá¹©ÁËoracle½Å±¾£¬ÔÚDataGate.Core/DataGate.Api/db/oracleÏÂ¡£
+1.å®‰è£…æ•°æ®åº“ï¼šæä¾›äº†oracleè„šæœ¬ï¼Œåœ¨DataGate.Core/DataGate.Api/db/oracleä¸‹ã€‚
 --------------------
-2.ĞŞ¸ÄDataGate.Core/DatagGate.Api/appsettings.jsonÖĞµÄDefaultÁ¬½Ó´®¸ÄÎª×Ô¼ºµÄÊı¾İ¿âÁ¬½Ó´®,DefaultÃû³Æ²»Òª¸Ä¡£
+2.ä¿®æ”¹DataGate.Core/DatagGate.Api/appsettings.jsonä¸­çš„Defaultè¿æ¥ä¸²æ”¹ä¸ºè‡ªå·±çš„æ•°æ®åº“è¿æ¥ä¸²,Defaultåç§°ä¸è¦æ”¹ã€‚
 --------------------
-3.ÔÚvisual studioÖĞÆô¶¯DataGate.Api.
+3.åœ¨visual studioä¸­å¯åŠ¨DataGate.Api.
