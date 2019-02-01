@@ -11,7 +11,9 @@ namespace DataGate.Com.DB
     /// <summary>
     /// 封装对象的增删改查操作
     /// </summary>
-    public class DBCrud<T> where T : IId<string>, new()
+    /// <typeparam name="T">对象类型</typeparam>
+    /// <typeparam name="TId">主键类型</typeparam>
+    public class DBCrud<T, TId> where T : IId<TId>, new()
     {
         protected DBHelper Helper { get; }
 
@@ -30,9 +32,9 @@ namespace DataGate.Com.DB
             return await Helper.GetModelByWhereAsync<T>(where, ps);
         }
 
-        public async Task<T> GetModelByIdAsync(string id)
+        public async Task<T> GetModelByIdAsync(TId id)
         {
-            return await Helper.GetModelByIdAsync<T>(id);
+            return await Helper.GetModelByIdAsync<T, TId>(id);
         }
 
         /// <summary>
@@ -40,14 +42,14 @@ namespace DataGate.Com.DB
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-        public async Task<int> InsertAsync(IDictionary<string, object> t)
+        public async Task<int> InsertAsync(T t)
         {
             return await Helper.InsertModelAsync(t);
         }
 
         public async Task<int> DeleteAsync(T t)
         {
-            return await Helper.DeleteModelAsync<T>(t.Id);
+            return await Helper.DeleteModelAsync<T, TId>(t.Id);
         }
 
         public async Task<int> DeleteManyAsync(string where, IDictionary<string, object> t)
@@ -57,15 +59,22 @@ namespace DataGate.Com.DB
 
         public async Task<int> UpdateAsync(T t)
         {
-            return await Helper.UpdateModelAsync(t);
+            return await Helper.UpdateModelAsync<T, TId>(t);
         }
 
-        public async Task<int> UpdateManyAsync(string where, T t, IDictionary<string, object> p)
+        public async Task<int> UpdateManyAsync(string where, object update, object p)
         {
-            return await Helper.UpdateModelAsync(where, t, p);
+            return await Helper.UpdateManyAsync<T>(where, update, p);
         }
-
-
-
     }
+
+    /// <summary>
+    /// 专对字符串主键的对象的增删改查操作
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class DBCrud<T> : DBCrud<T, string> where T : IId<string>, new()
+    {
+        public DBCrud(DBHelper helper) : base(helper) { }
+    }
+
 }

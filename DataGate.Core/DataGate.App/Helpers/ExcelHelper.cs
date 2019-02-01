@@ -1,4 +1,5 @@
-﻿using OfficeOpenXml;
+﻿using DataGate.Com;
+using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ namespace DataGate.App
             using (ExcelPackage pck = new ExcelPackage())
             {
                 //Create the worksheet
-                string sheetName = string.IsNullOrEmpty(sourceTable.TableName) ? "Sheet1" : sourceTable.TableName;
+                string sheetName = sourceTable.TableName.IsEmpty() ? "Sheet1" : sourceTable.TableName;
                 ExcelWorksheet ws = pck.Workbook.Worksheets.Add(sheetName);
 
                 //Load the datatable into the sheet, starting from cell A1. Print the column names on row 1

@@ -91,9 +91,9 @@ namespace DataGate.Com.DB
         /// </summary>
         /// <param name="id">ID</param>
         /// <returns>返回实体类</returns>
-        public async Task<T> GetModelByIdAsync<T>(string id) where T : IId<string>, new()
+        public async Task<T> GetModelByIdAsync<T, TId>(TId id) where T : IId<TId>, new()
         {
-            if (string.IsNullOrEmpty(id))
+            if (CommOp.IsDefault(id))
             {
                 return default(T);
             }
@@ -112,7 +112,17 @@ namespace DataGate.Com.DB
         }
 
         /// <summary>
-        /// 根据查询条件获取对象,返回实体，实体为数据表
+        /// 根据唯一的字符串ID获取对象,返回实体，实体为数据表
+        /// </summary>
+        /// <param name="id">ID</param>
+        /// <returns>返回实体类</returns>
+        public async Task<T> GetModelByIdAsync<T>(string id) where T : IId<string>, new()
+        {
+            return await GetModelByIdAsync<T, string>(id);
+        }
+
+        /// <summary>
+        /// 根据查询条件获取对象,返回实体，如果有多个实体，则返回第一个
         /// </summary>
         /// <param name="where">条件</param>
         /// <param name="param">参数化</param>
@@ -165,20 +175,7 @@ where T : new()
         }
 
         /// <summary>
-        /// 插入新对象到表异步版本
-        /// </summary>
-        /// <typeparam name="T">对象类型</typeparam>
-        /// <param name="t">对象</param>
-        /// <returns>插入的条数</returns>
-        public async Task<int> InsertModelAsync<T>(IDictionary<string, object> t)
-        {
-            string sql = PrepareInsertSqlString(t);
-            var sp = GetParameter(t);
-            return await ExecNonQueryAsync(sql, sp.ToArray());
-        }
-
-        /// <summary>
-        /// 更新对象异步版本
+        /// 更新字符串ID对象的异步版本
         /// </summary>
         /// <typeparam name="T">要更新的对象类型</typeparam>
         /// <param name="t">对象</param>
@@ -191,17 +188,42 @@ where T : new()
         }
 
         /// <summary>
-        /// 根据ID删除指定对象异步版本
+        /// 更新对象异步版本
+        /// </summary>
+        /// <typeparam name="T">要更新的对象类型</typeparam>
+        /// <param name="t">对象</param>
+        /// <returns>更新条数</returns>
+        public async Task<int> UpdateModelAsync<T, TId>(T t) where T : IId<TId>
+        {
+            string sql = PrepareUpdateSqlString<T, TId>(t);
+            var sp = GetParameter(t);
+            return await ExecNonQueryAsync(sql, sp.ToArray());
+        }
+
+        /// <summary>
+        /// 根据字符串类型ID删除指定对象异步版本
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="id"></param>
         /// <returns></returns>
         public async Task<int> DeleteModelAsync<T>(string id) where T : IId<string>
         {
-            string sql = PrepareDeleteSqlString<T>(id);
+            return await DeleteModelAsync<T, string>(id);
+        }
+
+        /// <summary>
+        /// 根据ID删除指定对象异步版本
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<int> DeleteModelAsync<T, TId>(TId id) where T : IId<TId>
+        {
+            string sql = PrepareDeleteSqlString<T, TId>(id);
             var sp = CreateParameter("@ID", id);
             return await ExecNonQueryAsync(sql, sp);
         }
+
 
         /// <summary>
         /// 根据条件批量删除指定对象的异步版本
@@ -217,22 +239,46 @@ where T : new()
             return await ExecNonQueryAsync(sql, sp);
         }
 
-
         /// <summary>
         /// 根据查询条件批量更新实体异步版本
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="strAfterWhere">查询条件</param>
-        /// <param name="t">要更橷的对象</param>
-        /// <param name="ht">查询参数</param>
+        /// <param name="dataToUpdate">要更新的对象</param>
+        /// <param name="parameters">查询对象参数</param>
         /// <returns></returns>
-        public async Task<int> UpdateModelAsync<T>(string strAfterWhere, T t, IDictionary<string, object> ht) where T : IId<string>
+        public async Task<int> UpdateManyAsync<T>(string strAfterWhere, object dataToUpdate, object parameters)
         {
-            string sql = PrepareUpdateSqlString<T>(strAfterWhere, t);
-            var sp = GetParameter(t).Union(GetParameter(ht));
+            string sql = PrepareUpdateManyString<T>(strAfterWhere, dataToUpdate);
+            var sp = GetParameter(dataToUpdate, "_u").Union(GetParameter(parameters));
             return await ExecNonQueryAsync(sql, sp.ToArray());
         }
 
+        /// <summary>
+        /// 哈希表生成UpdateSql语句
+        /// </summary>
+        /// <param name="strAfterWhere">查询条件</param>
+        /// <param name="dataToUpdate">更新的对象</param>
+        /// <returns></returns>
+        string PrepareUpdateManyString<T>(string strAfterWhere, object dataToUpdate)
+        {
+            if (dataToUpdate is IDictionary<string, object> dict)
+            {
+                return PrepareUpdateManyString<T>(strAfterWhere, dict);
+            }
+            List<string> sbs = new List<string>();
+            string sets = String.Join(",", dataToUpdate.GetType().GetProperties()
+                .Select(key => $"{AddFix(key.Name)}=@{key.Name}_u"));
+            return $"update {GetDbObjName(typeof(T).Name)} set {sets} where {strAfterWhere}";
+        }
+
+        string PrepareUpdateManyString<T>(string strAfterWhere, IDictionary<string, object> ht)
+        {
+            List<string> sbs = new List<string>();
+            string sets = String.Join(",", ht
+                .Select(key => $"{AddFix(key.Key)}=@{key.Key}_u"));
+            return $"update {GetDbObjName(typeof(T).Name)} set {sets} where {strAfterWhere}";
+        }
         #endregion
 
     }

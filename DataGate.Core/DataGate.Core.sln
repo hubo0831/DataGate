@@ -20,10 +20,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{FBC25D88-2
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataGate", "DataGate\DataGate.csproj", "{A6BB0E9D-112D-41DF-B043-9969E6A4B0D1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataGate.WeChat", "DataGate.WeChat\DataGate.WeChat.csproj", "{4A1C72A3-9281-42EA-AEE9-072E21D9F360}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataGate.Messages", "DataGate.Messages\DataGate.Messages.csproj", "{59D248A4-2DC8-48DF-8A0E-793550D47785}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,14 +46,6 @@ Global
 		{A6BB0E9D-112D-41DF-B043-9969E6A4B0D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A6BB0E9D-112D-41DF-B043-9969E6A4B0D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A6BB0E9D-112D-41DF-B043-9969E6A4B0D1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4A1C72A3-9281-42EA-AEE9-072E21D9F360}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4A1C72A3-9281-42EA-AEE9-072E21D9F360}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4A1C72A3-9281-42EA-AEE9-072E21D9F360}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4A1C72A3-9281-42EA-AEE9-072E21D9F360}.Release|Any CPU.Build.0 = Release|Any CPU
-		{59D248A4-2DC8-48DF-8A0E-793550D47785}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{59D248A4-2DC8-48DF-8A0E-793550D47785}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{59D248A4-2DC8-48DF-8A0E-793550D47785}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{59D248A4-2DC8-48DF-8A0E-793550D47785}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -18,6 +18,7 @@ namespace DataGate.App
             var appUser = await Helper.GetModelByWhereAsync<AppUser>("account=@account", Helper.CreateParameter("account", account.ToLower()));
             return appUser;
         }
+
         public async Task<AppUser> GetByIdAsync(string id)
         {
             var appUser = await Helper.GetModelByIdAsync<AppUser>(id);

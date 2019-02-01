@@ -145,14 +145,25 @@ namespace DataGate.Com.DB
         }
 
         /// <summary>
-        /// 更新对象
+        /// 更新字符串ID的对象
         /// </summary>
         /// <typeparam name="T">要更新的对象类型</typeparam>
         /// <param name="t">对象</param>
         /// <returns>更新条数</returns>
         public int UpdateModel<T>(T t) where T : IId<string>
         {
-            string sql = PrepareUpdateSqlString(t);
+            return UpdateModel<T, string>(t);
+        }
+
+        /// <summary>
+        /// 更新对象
+        /// </summary>
+        /// <typeparam name="T">要更新的对象类型</typeparam>
+        /// <param name="t">对象</param>
+        /// <returns>更新条数</returns>
+        public int UpdateModel<T, TId>(T t) where T : IId<TId>
+        {
+            string sql = PrepareUpdateSqlString<T, TId>(t);
             var sp = GetParameter(t);
             return ExecNonQuery(sql, sp.ToArray());
         }
@@ -170,20 +181,6 @@ namespace DataGate.Com.DB
             return ExecNonQuery(sql, sp);
         }
 
-        /// <summary>
-        /// 根据查询条件批量更新实体
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="strAfterWhere">查询条件</param>
-        /// <param name="t">要更橷的对象</param>
-        /// <param name="ht">查询参数</param>
-        /// <returns></returns>
-        public int UpdateModel<T>(string strAfterWhere, T t, Hashtable ht) where T : IId<string>
-        {
-            string sql = PrepareUpdateSqlString<T>(strAfterWhere, t);
-            var sp = GetParameter(t).Union(GetParameter(ht));
-            return ExecNonQuery(sql, sp.ToArray());
-        }
         #endregion
 
         #region 对象参数转换SqlParam
@@ -191,8 +188,9 @@ namespace DataGate.Com.DB
         /// 字典对象参数转换
         /// </summary>
         /// <param name="dict"></param>
+        /// <param name="suffix">是否要在参数名后加后缀</param>
         /// <returns></returns>
-        public IEnumerable<IDataParameter> GetParameter(IDictionary<string, object> dict)
+        public IEnumerable<IDataParameter> GetParameter(IDictionary<string, object> dict, string suffix = null)
         {
             if (dict == null)
             {
@@ -200,25 +198,35 @@ namespace DataGate.Com.DB
             }
             foreach (string key in dict.Keys)
             {
-                yield return CreateParameter(key, dict[key]);
+                yield return CreateParameter(key + suffix, dict[key]);
             }
         }
 
         /// <summary>
         /// 实体类对象参数转换
         /// </summary>
-        /// <param name="entity"></param>
+        /// <param name="entity">实体</param>
+        /// <param name="suffix">为和查询参数相区别对应的后缀</param>
         /// <returns></returns>
-        IEnumerable<IDataParameter> GetParameter<T>(T entity)
+        IEnumerable<IDataParameter> GetParameter(object entity, string suffix = null)
         {
+            if (entity is IDictionary<string, object> dict)
+            {
+                foreach (var a in GetParameter(dict, suffix))
+                {
+                    yield return a;
+                }
+                yield break;
+            }
             if (entity == null) yield break;
             Type type = entity.GetType();
             PropertyInfo[] props = type.GetProperties();
             foreach (PropertyInfo prop in props)
             {
-                yield return CreateParameter(prop.Name, prop.GetValue(entity, null));
+                yield return CreateParameter(prop.Name + suffix, prop.GetValue(entity, null));
             }
         }
+
         #endregion
 
         #region 拼接 查询
@@ -279,6 +287,7 @@ namespace DataGate.Com.DB
             sb.Append(sp.ToString().Substring(1, sp.ToString().Length - 1) + ")");
             return sb.ToString();
         }
+
         #endregion
 
         #region 拼接 修改 SQL语句
@@ -291,10 +300,17 @@ namespace DataGate.Com.DB
         string PrepareUpdateSqlString<T>(string strAfterWhere, T t)
             where T : IId<string>
         {
-            List<string> sbs = new List<string>();
-            string sets = String.Join(",", typeof(T).GetProperties()
-                .Each(key => $"GetFieldName(key)=@key"));
-            return $"update {GetDbObjName(typeof(T).Name)} set {sets} where {strAfterWhere}";
+            return PrepareUpdateSqlString<T, string>(t);
+        }
+
+        /// <summary>
+        /// 泛型方法，反射生成字符串ID的UpdateSql语句
+        /// </summary>
+        /// <param name="t">实体类</param>
+        /// <returns>int</returns>
+        string PrepareUpdateSqlString<T>(T t) where T : IId<string>
+        {
+            return PrepareUpdateSqlString<T, string>(t);
         }
 
         /// <summary>
@@ -302,7 +318,7 @@ namespace DataGate.Com.DB
         /// </summary>
         /// <param name="t">实体类</param>
         /// <returns>int</returns>
-        string PrepareUpdateSqlString<T>(T t) where T : IId<string>
+        string PrepareUpdateSqlString<T, TId>(T t) where T : IId<TId>
         {
             Type type = typeof(T);
             PropertyInfo[] props = type.GetProperties();
@@ -322,6 +338,7 @@ namespace DataGate.Com.DB
             sb.Append(" WHERE ID=@ID");
             return sb.ToString();
         }
+
         #endregion
 
         #region 拼接 删除 SQL语句
@@ -332,6 +349,17 @@ namespace DataGate.Com.DB
         /// <param name="id"></param>
         /// <returns></returns>
         string PrepareDeleteSqlString<T>(string id)
+        {
+            return PrepareDeleteSqlString<T, string>(id);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        string PrepareDeleteSqlString<T, TId>(TId id)
         {
             String sql = $"delete from {AddFix(typeof(T).Name)} where ID=@ID";
             return sql;
