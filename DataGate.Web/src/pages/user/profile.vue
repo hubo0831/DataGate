@@ -41,7 +41,7 @@ export default {
     };
   },
   created(){
-    this.form = $.extend({}, this.userProfile.currentUser);
+    this.form = $.extend({}, this.userState.currentUser);
   },
   methods: {
     doSave() {
@@ -53,7 +53,7 @@ export default {
             email: that.form.email
           };
           API.POST("/api/check/ChangeProfile", args).done(r => {
-            $.extend(this.userProfile.currentUser, args);
+            $.extend(this.userState.currentUser, args);
             this.$message.success("用户信息保存成功！");
           });
         }

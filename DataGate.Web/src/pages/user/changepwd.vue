@@ -3,7 +3,7 @@
     <el-col :span="12" class="warp-main">
       <el-form ref="form" status-icon :model="form" label-width="100px" :rules="rules" size="mini">
         <el-form-item label="账号">
-          <label>{{userProfile.currentUser.account}}</label>
+          <label>{{userState.currentUser.account}}</label>
         </el-form-item>
         <el-form-item label="原密码" prop="oldPwd">
           <el-input type="password" v-model="form.oldPwd"></el-input>
