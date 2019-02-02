@@ -1,5 +1,6 @@
 v0.2.4
 1. 配合服务端调整FileUpload
+2. 基类的userProfile重命名为userState
 
 v0.2.3
 1. formatDate增加毫秒
