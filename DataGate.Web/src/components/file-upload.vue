@@ -36,7 +36,7 @@
                 <div style="position:relative;margin-top:2px">
                   <div
                     v-if="scope.row.percentage>0 && scope.row.percentage< 1"
-                    :style="{"background":"#409eff","width":scope.row.percentage * 100 + "%","height":"2px","position":"absolute","left":0,"bottom":0}"
+                    :style="{background:'#409eff',width:scope.row.percentage * 100 + '%',height:'2px',position:'absolute',left:0,bottom:0}"
                   ></div>
                 </div>
               </template>
@@ -70,12 +70,12 @@
         <div style="width:100%;height:3px;background:#ebeef5">
           <div
             v-if="totalPercentage>0 && totalPercentage< 1"
-            :style="{"background":"#409eff","width":totalPercentage * 100 + "%","height":"100%"}"
+            :style="{background:'#409eff',width:totalPercentage * 100 + '%',height:'100%'}"
           ></div>
         </div>
         <el-row :id="id + 'dndArea'" class="placeholder">
           <el-col :span="11">
-            <span :id="id +"_filePicker""></span>&nbsp;
+            <span :id="id +'_filePicker'"></span>&nbsp;
             <span v-if="fileList.length==0">或拖放到虚框内</span>
             <span v-else>共{{fileList.length}}个文件</span>&nbsp;
           </el-col>
