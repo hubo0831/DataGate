@@ -50,7 +50,7 @@ namespace DataGate.App.DataService
             //注意这里在单个生命周期内_db只能有一个
             if (_db == null)
             {
-                _db = DBFactory.CreateDBHelper(gkey.ConnName);
+                _db = DBFactory.CreateDBHelper(gkey.ConnName ?? "Default");
                 _db.Log = (sql, ps) =>
                 {
                     LogAction?.Invoke(gkey, sql, ps);
@@ -658,9 +658,9 @@ namespace DataGate.App.DataService
                 var field = tableMeta.Fields.FirstOrDefault(f => f.Name.Equals(r.Name, StringComparison.OrdinalIgnoreCase));
                 if (field == null) return null;
                 string left = field.ForeignField.IsEmpty() ? (gkey.TableJoins[0].Alias ?? tableMeta.Name) + "." + field.Name : field.ForeignField;
-                
+
                 //当有sql语句并且有模型定义时
-                if (!gkey.Sql.IsEmpty() && gkey.TableJoins.Length>0)
+                if (!gkey.Sql.IsEmpty() && gkey.TableJoins.Length > 0)
                 {
                     left = field.Name;
                 }

@@ -843,7 +843,7 @@ namespace DataGate.Com
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
-        static public bool IsChnChar(string str)
+        static public bool IsChnChar(this string str)
         {
             return Regex.IsMatch(str, @"^[\u4e00-\u9fa5]{0,}$");
         }
@@ -853,20 +853,20 @@ namespace DataGate.Com
         /// </summary>
         /// <param name="phoneNumber"></param>
         /// <returns></returns>
-        public static bool IsPhoneNumber(string phoneNumber)
+        public static bool IsPhoneNumber(this string phoneNumber)
         {
             if (String.IsNullOrEmpty(phoneNumber)) return false;
             return Regex.IsMatch(phoneNumber, @"(\(\d{3}\)|\d{3}-)?\d{8}");
         }
 
         /// <summary>
-        /// 判断是否含有除了字母及数字外的其他字符
+        /// 判断是否只包含字母及数字和下划线字符
         /// </summary>
         /// <param name="str">要验证的字符串</param>
-        /// <returns>返回true代表不包含汉字或者特殊字符</returns>
-        public static bool StrIsNumberOrLetters(string str)
+        /// <returns></returns>
+        public static bool IsVariableName(this string str)
         {
-            System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"^[a-zA-z0-9]+$");
+            System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"^[a-zA-z0-9_]+$");
             return regex.IsMatch(str);
         }
 

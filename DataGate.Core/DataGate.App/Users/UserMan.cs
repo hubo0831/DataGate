@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DataGate.Com.DB;
 using DataGate.App.Models;
 using DataGate.App.DataService;
+using DataGate.Com;
 
 namespace DataGate.App
 {
@@ -15,8 +16,20 @@ namespace DataGate.App
 
         public async Task<AppUser> GetAsync(string account)
         {
-            var appUser = await Helper.GetModelByWhereAsync<AppUser>("account=@account", Helper.CreateParameter("account", account.ToLower()));
-            return appUser;
+            AppUser user = null;
+            if (CommOp.IsEmail(account))
+            {
+                user = await Helper.GetModelByWhereAsync<AppUser>("email=@email", Helper.CreateParameter("email", account.ToLower()));
+            }
+            else if (CommOp.IsPhoneNumber(account))
+            {
+                user = await Helper.GetModelByWhereAsync<AppUser>("tel=@tel", Helper.CreateParameter("tel", account.ToLower()));
+            }
+            else
+            {
+                user = await Helper.GetModelByWhereAsync<AppUser>("account=@account", Helper.CreateParameter("account", account.ToLower()));
+            }
+            return user;
         }
 
         public async Task<AppUser> GetByIdAsync(string id)

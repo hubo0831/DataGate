@@ -22,6 +22,8 @@ namespace DataGate.App.DataService
         readonly object synObj = new object();
         Dictionary<string, DataGateKey> _dataKeysDict = new Dictionary<string, DataGateKey>();
         Dictionary<string, TableMeta> _tableMetas = new Dictionary<string, TableMeta>();
+
+        //为保证原始添加顺序，不用Dictionary<>
         static List<KeyValuePair<string, IDataGate>> _dataGateEntrys = new List<KeyValuePair<string, IDataGate>>();
         FileSystemWatcher fw;
         string _appDataDir;
@@ -78,7 +80,12 @@ namespace DataGate.App.DataService
                 List<IDataGate> dataGates = new List<IDataGate>();
                 foreach (var kvEntry in _dataGateEntrys)
                 {
-                    if (Regex.IsMatch(kv.Key, kvEntry.Key, RegexOptions.IgnoreCase))
+                    string pattern = kvEntry.Key;
+                    if (pattern.IsVariableName())
+                    {
+                        pattern = '^' + pattern + "$";
+                    }
+                    if (Regex.IsMatch(kv.Key, pattern, RegexOptions.IgnoreCase))
                     {
                         dataGates.Add(kvEntry.Value);
                     }
@@ -170,8 +177,8 @@ namespace DataGate.App.DataService
         /// <summary>
         /// 注册一个数据处理前后的监视程序
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="dataGate"></param>
+        /// <param name="key">一个完全匹配的key(只包含字母、数字和下划线）或一个匹配的正则表达式</param>
+        /// <param name="dataGate">实现IDataGate接口的处理程序</param>
         public static void RegisterDataGate(string key, IDataGate dataGate)
         {
             key = key.ToLower();
@@ -350,16 +357,21 @@ namespace DataGate.App.DataService
                     if (joinField != null)
                     {
                         return $"{join} {rightNames} on" +
-                            $" {db.AddFix(joinField.ForeignKey)}={models[i].Alias ?? modelLeft.FixDbName}.{joinField.FixDbName}";
+                            $" {AddDotFix(db, joinField.ForeignKey)}={models[i].Alias ?? modelLeft.FixDbName}.{joinField.FixDbName}";
                     }
                 }
                 else
                 {
                     return $"{join} {rightNames} on" +
-                        $" {db.AddFix(joinField.ForeignKey)}={models[idx].Alias ?? modelRight.FixDbName}.{joinField.FixDbName}";
+                        $" {AddDotFix(db, joinField.ForeignKey)}={models[idx].Alias ?? modelRight.FixDbName}.{joinField.FixDbName}";
                 }
             }
             throw new ArgumentException($"找不到模型{modelRightName}中的{nameof(FieldMeta.ForeignKey)}定义。");
+        }
+
+        private string AddDotFix(DBHelper db, string dotName)
+        {
+            return String.Join(".", dotName.Split('.').Select(n => db.AddFix(n)));
         }
 
         //构造select后面的字段列表
@@ -441,7 +453,7 @@ namespace DataGate.App.DataService
                         return null;
                     }
 
-                    return $"{db.AddFix(f.ForeignField)} {f.Name}";
+                    return $"{AddDotFix(db, f.ForeignField)} {f.Name}";
 
                 }
                 else

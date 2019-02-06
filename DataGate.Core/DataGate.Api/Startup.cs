@@ -82,7 +82,7 @@ namespace DataGate.Api
             //AutoFac声明以下方法已过时，因此不可能在程序运行中动态改变已注册的注入
             //builder.Update(ApplicationContainer);
 
-            MetaService.RegisterDataGate("^SaveUser$", new UsersGate());
+            MetaService.RegisterDataGate("SaveUser", new UsersGate());
             Consts.ServiceProvider = new AutofacServiceProvider(ApplicationContainer);//第三方IOC接管 core内置DI容器
             return Consts.ServiceProvider;
         }

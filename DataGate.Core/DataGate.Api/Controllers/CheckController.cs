@@ -76,16 +76,18 @@ namespace DataGate.Api.Controllers
         /// </summary>
         /// <param name="name"></param>
         /// <param name="email"></param>
+        /// <param name="tel"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<bool> ChangeProfile(string name, string email)
+        public async Task<bool> ChangeProfile(AppUser u)
         {
             var userSession = _session.Get(Token);
 
             var user = await _user.GetAsync(userSession.Account);
             //  ps["Password"] = Encryption.MD5("123456" + ps["PasswordSalt"]);
-            user.Name = name;
-            user.Email = email;
+            user.Name = u.Name;
+            user.Email = u.Email;
+            user.Tel = u.Tel;
             await _user.UpdateAsync(user);
             return true;
         }
