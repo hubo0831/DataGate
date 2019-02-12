@@ -19,7 +19,7 @@ namespace DataGate.Api.Filters
     /// <summary>
     /// 暂时用此Filter来拦截记录常规访问日志
     /// </summary>
-    public class DefaultFilter : IActionFilter, IResultFilter
+    public class DefaultFilter : IActionFilter, IResultFilter,IExceptionFilter
     {
         public void OnActionExecuted(ActionExecutedContext context)
         {

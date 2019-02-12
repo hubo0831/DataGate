@@ -32,6 +32,8 @@ namespace DataGate.App
         /// </summary>
         public string Email { get; set; }
 
+        public string Tel { get; set; }
+
         /// <summary>
         /// 用户能访问的菜单或功能列表
         /// </summary>

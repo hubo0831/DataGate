@@ -93,7 +93,7 @@ export const JPOST = (url, params) => {
 }
 
 function filterResult(result) {
-  if (!result.$code ) return;
+  if (!result || !result.$code ) return;
   if (result.$code == 1010) {
     bus.$emit("session-timeout", result);
     throw result;

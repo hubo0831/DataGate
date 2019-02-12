@@ -139,6 +139,7 @@ namespace DataGate.App
                 Account = user.Account,
                 Name = user.Name,
                 Email = user.Email,
+                Tel = user.Tel,
                 Menus = await GetUserMenus(user.Id)
             };
         }
