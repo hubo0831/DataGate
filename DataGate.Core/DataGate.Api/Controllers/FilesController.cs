@@ -28,12 +28,14 @@ namespace DataGate.Api.Controllers
         public async Task<UploadResult> Upload(UploadRequest request)
         {
             var userSession = GetSession();
-            ServerUploadRequest request2 = new ServerUploadRequest(request); ;
+            ServerUploadRequest request2 = new ServerUploadRequest(request);
             request2.UserId = userSession?.Id;
 
             if (request2.Chunk < request2.Chunks || request2.Guid.IsEmpty())
             {
                 IFormFile file = Request.Form.Files[0];
+                request2.FileName = file.FileName;
+
                 string serverFile = Path.Combine(_fileService.TempPath, Guid.NewGuid().ToString());
 
                 FileStream fs = System.IO.File.Create(serverFile);
@@ -48,13 +50,12 @@ namespace DataGate.Api.Controllers
         /// <summary>
         /// 根据文件ID下载文件 wang加
         /// </summary>
-        /// <param name="id">文件ID</param>
-        /// <param name="filename">（可选)下载后的文件名称</param>
         /// <returns>下载流</returns>
         [HttpGet]
-        public async Task<IActionResult> DownById(string id, string filename = null)
+        public async Task<IActionResult> DownById()
         {
-            filename = filename ?? (string)this.ControllerContext.RouteData.Values["filename"];
+            string id = (string)this.ControllerContext.RouteData.Values["id"];
+            string filename = (string)this.ControllerContext.RouteData.Values["filename"];
             var result = await _fileService.DownloadAsync(id);
             return File(result.Content, result.ContentType, filename ?? result.FileName);
         }
