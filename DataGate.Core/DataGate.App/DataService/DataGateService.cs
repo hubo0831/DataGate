@@ -272,7 +272,7 @@ namespace DataGate.App.DataService
         }
 
         //将filter条件中的对象属性名换成数据库字段名
-        private static string FormatFilter(string filter, params TableMeta[] tableMetas)
+        private string FormatFilter(string filter, params TableMeta[] tableMetas)
         {
             if (filter.IsEmpty()) return null;
             foreach (var tableMeta in tableMetas)
@@ -286,8 +286,9 @@ namespace DataGate.App.DataService
 
                 foreach (var field in tableMeta.Fields)
                 {
-                    //@号表示排除参数，取查询子句后面的属性名称
-                    reg = new Regex($"([^\\w@]+|^){field.Name}(\\W+|$)", RegexOptions.IgnoreCase);
+                    //@号表示排除参数，取查询子句后面的属性名称, 加入_db.DBComm.FieldPrefix
+                    //以防止多表时，两表字段名相同时的重复替换
+                    reg = new Regex($"([^\\w@\\{_db.DBComm.FieldPrefix}]+|^){field.Name}(\\W+|$)", RegexOptions.IgnoreCase);
 
                     if (reg.IsMatch(filter))
                     {
