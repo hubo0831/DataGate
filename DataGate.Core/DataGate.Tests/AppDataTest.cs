@@ -514,6 +514,17 @@ namespace DataGate.Tests
             Assert.True(0 == result.Length);
         }
 
+        protected async Task<string[]> Submit(string key, object sumitData)
+        {
+            var client = _testServer.CreateClient();
+            var response = await client.PostAsJsonAsync($"/api/dg/s/{key}", sumitData);
+            string resultStr = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("SUBMIT-RESULT=" + resultStr);
+            Assert.True(response.IsSuccessStatusCode);
+            var result = await response.Content.ReadAsAsync<string[]>();
+            return result;
+        }
+
         [Fact]
         async Task TestCUDRole()
         {
