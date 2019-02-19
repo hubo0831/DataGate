@@ -11,7 +11,7 @@ namespace DataGate.App
 
         Task<UserInfoResult> GetUserAsync(string token);
 
-        Task<LoginResult> Login(LoginRequest request);
+        Task<LoginResult> Login(LoginRequest request, bool validate);
 
         bool Remove(string token);
     }

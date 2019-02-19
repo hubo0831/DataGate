@@ -65,6 +65,7 @@ function rememberLogin() {
   });
 }
 
+
 //退出登录，主动退出或超时退出都会进入此方法，则需要保留是否记住我的勾选状态同时清空记住我的内容
 function logout() {
   function releaseUser() {

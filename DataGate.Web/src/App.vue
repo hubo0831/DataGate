@@ -168,8 +168,6 @@ export default {
     var getUserData = [util.emptyPromise];
     var userDataFunc = user => {
       var us = [];
-      //记住 记住我的信息到cookie,如果该用户下次登录则传递此信息
-      util.setCookie("rememberInfo", user.rememberInfo);
       bus.$emit("logined", getUserData);
       for (var i in getUserData) {
         us.push(getUserData[i](user));

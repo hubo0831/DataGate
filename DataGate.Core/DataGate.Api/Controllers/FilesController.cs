@@ -52,6 +52,7 @@ namespace DataGate.Api.Controllers
         /// </summary>
         /// <returns>下载流</returns>
         [HttpGet]
+        [ResponseCache]
         public async Task<IActionResult> DownById()
         {
             string id = (string)this.ControllerContext.RouteData.Values["id"];

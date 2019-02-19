@@ -1,3 +1,6 @@
+v0.2.6 2019-02-19
+1. 增加服务端的匿名登录用户
+
 v0.2.4 - v0.2.5
 1. 配合服务端调整FileUpload
 2. 基类的userProfile重命名为userState

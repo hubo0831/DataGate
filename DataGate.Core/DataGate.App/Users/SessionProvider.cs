@@ -176,8 +176,9 @@ namespace DataGate.App
         /// 登录
         /// </summary>
         /// <param name="request"></param>
+        /// <param name="validate">验证密码</param>
         /// <returns></returns>
-        public async Task<LoginResult> Login(LoginRequest request)
+        public async Task<LoginResult> Login(LoginRequest request, bool validate=true)
         {
             LoginResult result = new LoginResult();
             string requestPass = null;
@@ -199,7 +200,7 @@ namespace DataGate.App
             {
                 requestPass = Encryption.MD5(request.Password + user.PasswordSalt);
             }
-            if (user.Password != requestPass)
+            if (user.Password != requestPass && validate)
             {
                 return MSG.PasswordError;
             }
