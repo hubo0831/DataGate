@@ -160,6 +160,11 @@ namespace DataGate.App.DataService
             return 0;
         }
 
+        public async Task<int> NonQueryAsync(string key, object param)
+        {
+            return await NonQueryAsync(key, CommOp.ToDictionary(param));
+        }
+
         /// <summary>
         /// 根据查询参数对象调用Query, 主要用于服务端自身调用
         /// </summary>
