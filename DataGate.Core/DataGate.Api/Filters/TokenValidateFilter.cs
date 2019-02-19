@@ -40,6 +40,11 @@ namespace DataGate.Api.Filters
 
         public virtual void OnActionExecuting(ActionExecutingContext context)
         {
+            if (Consts.IsTesting)
+            {
+                return;
+            }
+
             if (!(context.ActionDescriptor is ControllerActionDescriptor action))
             {
                 return;
@@ -56,11 +61,6 @@ namespace DataGate.Api.Filters
             }
 
             controller.Log = controller.Log ?? DefaultFilter.GetLogInfo(context);
-
-            if (Consts.IsTesting)
-            {
-                return;
-            }
 
             var token = context.HttpContext.Request.Headers["token"].FirstOrDefault();
             if (token == null)
@@ -84,7 +84,7 @@ namespace DataGate.Api.Filters
             }
         }
 
-        static string[] ExcludedActions =
+        static List<string> ExcludedActions = new List<string>
         {
            $"{typeof(CheckController)}.{nameof(CheckController.Login)}",
            $"{typeof(HomeController)}.{nameof(HomeController.Index)}"

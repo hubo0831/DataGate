@@ -17,6 +17,11 @@ namespace DataGate.App
         public async Task<AppUser> GetAsync(string account)
         {
             AppUser user = null;
+            user = await Helper.GetModelByWhereAsync<AppUser>("account=@account", Helper.CreateParameter("account", account.ToLower()));
+            if (user != null)
+            {
+                return user;
+            }
             if (CommOp.IsEmail(account))
             {
                 user = await Helper.GetModelByWhereAsync<AppUser>("email=@email", Helper.CreateParameter("email", account.ToLower()));
@@ -24,10 +29,6 @@ namespace DataGate.App
             else if (CommOp.IsPhoneNumber(account))
             {
                 user = await Helper.GetModelByWhereAsync<AppUser>("tel=@tel", Helper.CreateParameter("tel", account.ToLower()));
-            }
-            else
-            {
-                user = await Helper.GetModelByWhereAsync<AppUser>("account=@account", Helper.CreateParameter("account", account.ToLower()));
             }
             return user;
         }

@@ -122,7 +122,7 @@ namespace DataGate.Com.DB
         }
 
         /// <summary>
-        /// 根据查询条件获取对象,返回实体，如果有多个实体，则返回第一个
+        /// 根据查询条件获取对象,返回实体，如果有多个实体，则返回空
         /// </summary>
         /// <param name="where">条件</param>
         /// <param name="param">参数化</param>
@@ -135,7 +135,7 @@ where T : new()
             strSql.Append("SELECT * FROM " + AddFix(type.Name) + " WHERE ");
             strSql.Append(where);
             DataTable dt = await this.ExecDataTableAsync(strSql.ToString(), param);
-            if (dt.Rows.Count > 0)
+            if (dt.Rows.Count == 1)
             {
                 return RowToModel<T>(dt.Rows[0]);
             }
@@ -143,7 +143,7 @@ where T : new()
         }
 
         /// <summary>
-        /// 根据查询条件获取对象,返回实体，实体可为业务Model
+        /// 根据查询条件获取单个对象,返回实体，如有多个则返回空
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sql"></param>
@@ -154,7 +154,7 @@ where T : new()
         {
             Type type = typeof(T);
             DataTable dt = await this.ExecDataTableAsync(sql, param);
-            if (dt.Rows.Count > 0)
+            if (dt.Rows.Count == 1)
             {
                 return RowToModel<T>(dt.Rows[0]);
             }

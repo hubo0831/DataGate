@@ -19,6 +19,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
 using Xunit;
+using System.Reflection;
 
 namespace DataGate.Tests
 {
@@ -117,6 +118,42 @@ namespace DataGate.Tests
             var result = await response.Content.ReadAsAsync<LoginResult>();
             Assert.Equal(0, result.Code);
             return result;
+        }
+
+        protected async Task<T> HttpPostAsync<T>(string url, object p)
+        {
+            var client = _testServer.CreateClient();
+            HttpResponseMessage response = await client.PostAsync(url,
+              new FormUrlEncodedContent(ToDict(p)));
+            var resultStr = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("HTTPPOST-RESULT-STRING=" + resultStr);
+            Assert.True(response.IsSuccessStatusCode);
+            return await response.Content.ReadAsAsync<T>();
+        }
+
+        protected async Task<T> HttpGetAsync<T>(string url, object p = null)
+        {
+            var client = _testServer.CreateClient();
+            if (p != null)
+            {
+                url += "?" + new FormUrlEncodedContent(ToDict(p));
+            }
+            HttpResponseMessage response = await client.GetAsync(url);
+            var resultStr = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("HTTPGET-RESULT-STRING=" + resultStr);
+            Assert.True(response.IsSuccessStatusCode);
+            return await response.Content.ReadAsAsync<T>();
+        }
+
+        protected IEnumerable<KeyValuePair<string, string>> ToDict(object entity)
+        {
+            Type type = entity.GetType();
+            PropertyInfo[] props = type.GetProperties();
+            foreach (PropertyInfo prop in props)
+            {
+                yield return new KeyValuePair<string, string>(prop.Name, prop.GetValue(entity, null)?.ToString());
+            }
+
         }
 
         /// <summary>
@@ -573,7 +610,7 @@ namespace DataGate.Tests
             {
                 id = pk,
                 name = "测试角色" + rand.Next(),
-                menus = new object[] { roleMenu  }
+                menus = new object[] { roleMenu }
             };
 
             var roleMenu1 = new

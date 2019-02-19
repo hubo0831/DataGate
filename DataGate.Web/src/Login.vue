@@ -4,73 +4,73 @@
       <site-title></site-title>
     </div>
     <div class="login-middle">
-        <div class="login-container" v-loading="loading">
-          <el-form
-            ref="AccountForm"
-            :model="loginModel"
-            :rules="rules"
-            label-position="left"
-            label-width="0px"
-            v-if="!forgot"
-          >
-            <h3 class="title">系统登录</h3>
-            <el-form-item prop="account">
-              <el-input
-                type="text"
-                v-model="loginModel.account"
-                autofocus
-                autoselect
-                placeholder="账号"
-              ></el-input>
-            </el-form-item>
-            <el-form-item prop="password">
-              <el-input type="password" v-model="loginModel.password" placeholder="密码"></el-input>
-            </el-form-item>
-            <el-checkbox
-              v-model="loginModel.remember"
-              true-label="1"
-              false-label="0"
-              class="remember"
-              style="color:#409EFF"
-            >记住我</el-checkbox>
-            <!-- <a href="#" style="float:right" @click="forgot=true">
+      <div class="login-container" v-loading="loading">
+        <el-form
+          ref="AccountForm"
+          :model="loginModel"
+          :rules="rules"
+          label-position="left"
+          label-width="0px"
+          v-if="!forgot"
+        >
+          <h3 class="title">系统登录</h3>
+          <el-form-item prop="account">
+            <el-input
+              type="text"
+              v-model="loginModel.account"
+              autofocus
+              autoselect
+              placeholder="账号"
+            ></el-input>
+          </el-form-item>
+          <el-form-item prop="password">
+            <el-input type="password" v-model="loginModel.password" placeholder="密码"></el-input>
+          </el-form-item>
+          <el-checkbox
+            v-model="loginModel.remember"
+            true-label="1"
+            false-label="0"
+            class="remember"
+            style="color:#409EFF"
+          >记住我</el-checkbox>
+          <!-- <a href="#" style="float:right" @click="forgot=true">
               忘记密码
               <i class="fa fa-question"></i>
-            </a>-->
-            <el-form-item style="width:100%;">
-              <el-button
-                type="primary"
-                style="width:100%;"
-                @click.native.prevent="doLogin"
-                native-type="submit"
-              >登录</el-button>
-            </el-form-item>
-          </el-form>
-          <el-form ref="ForgotForm" label-width="80px" :rules="forgotRules" v-else>
-            <h3 class="title">请输入要找回的账号信息</h3>
-            <el-form-item prop="account" label="注册账号">
-              <el-input
-                type="text"
-                v-model="forgotModel.account"
-                autofocus
-                autoselect
-                placeholder="账号"
-              ></el-input>
-            </el-form-item>
-            <el-form-item prop="email" label="注册邮箱">
-              <el-input type="email" v-model="forgotModel.email" placeholder="邮箱"></el-input>
-            </el-form-item>
-            <div style="text-align:center">
-              <el-button
-                type="primary"
-                @click.native.prevent="doForgot"
-                native-type="submit"
-                :loading="loading"
-              >发送密码重置邮件</el-button>
-              <el-button @click="forgot=false">返回登录</el-button>
-            </div>
-          </el-form>
-        </div>
+          </a>-->
+          <el-form-item style="width:100%;">
+            <el-button
+              type="primary"
+              style="width:100%;"
+              @click.native.prevent="doLogin"
+              native-type="submit"
+            >登录</el-button>
+          </el-form-item>
+        </el-form>
+        <el-form ref="ForgotForm" label-width="80px" :rules="forgotRules" v-else>
+          <h3 class="title">请输入要找回的账号信息</h3>
+          <el-form-item prop="account" label="注册账号">
+            <el-input
+              type="text"
+              v-model="forgotModel.account"
+              autofocus
+              autoselect
+              placeholder="账号"
+            ></el-input>
+          </el-form-item>
+          <el-form-item prop="email" label="注册邮箱">
+            <el-input type="email" v-model="forgotModel.email" placeholder="邮箱"></el-input>
+          </el-form-item>
+          <div style="text-align:center">
+            <el-button
+              type="primary"
+              @click.native.prevent="doForgot"
+              native-type="submit"
+              :loading="loading"
+            >发送密码重置邮件</el-button>
+            <el-button @click="forgot=false">返回登录</el-button>
+          </div>
+        </el-form>
+      </div>
       <div style="clear:both"></div>
     </div>
     <div class="login-bottom">
@@ -136,8 +136,8 @@ export default {
   },
   created() {
     //如果上次勾了记住我，则尝试用记住我的信息自动登录
-    API.rememberLogin().then(remember => {
-      if (remember == 0 || remember == 1) this.loginModel.remember = remember;
+    API.rememberLogin().catch(remember => {
+      this.loginModel.remember = remember;
     });
   },
   methods: {

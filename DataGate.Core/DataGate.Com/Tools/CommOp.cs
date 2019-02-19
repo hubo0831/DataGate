@@ -856,7 +856,7 @@ namespace DataGate.Com
         public static bool IsPhoneNumber(this string phoneNumber)
         {
             if (String.IsNullOrEmpty(phoneNumber)) return false;
-            return Regex.IsMatch(phoneNumber, @"(\(\d{3}\)|\d{3}-)?\d{8}");
+            return Regex.IsMatch(phoneNumber, @"^[\d|\+\-\s]+$");
         }
 
         /// <summary>

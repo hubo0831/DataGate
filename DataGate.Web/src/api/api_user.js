@@ -43,10 +43,10 @@ function login(account) {
 
 //勾了“记住我”后下次的登录
 function rememberLogin() {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     var remember = util.getCookie("remember");
     if ((remember || '').length < 10) {
-      resolve(remember);
+      reject(0);
       return;
     }
     API.POST('/api/Check/Login', {
@@ -59,7 +59,7 @@ function rememberLogin() {
           bus.$emit("login");
           resolve(result);
         } else {
-          resolve(1);
+          reject(1);
         }
       });
   });

@@ -245,6 +245,19 @@ namespace DataGate.App.DataService
             return ids;
         }
 
+        /// <summary>
+        /// 批量执行增删改操作, 使用一个匿名对象转成DataSubmitRequest
+        /// 用于服务端内部调用
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="requestObj">匿名对象</param>
+        /// <returns></returns>
+        public async Task<IEnumerable<string>> SubmitAsync(string key, object requestObj)
+        {
+            DataSubmitRequest request = JObject.FromObject(requestObj).ToObject<DataSubmitRequest>();
+            return await SubmitAsync(key, request);
+        }
+
         private async Task<IEnumerable<string>> InsertManyAsync(DataGateKey gkey, JArray added)
         {
             List<string> ids = new List<string>();
@@ -345,13 +358,14 @@ namespace DataGate.App.DataService
             string id = null;
 
             //假定ID字段是GUID
-            if (fields.Contains(Consts.DefaultKeyName))
+            if (tableMeta.PrimaryKeys.Count()==1 && fields.Contains(tableMeta.PrimaryKey.Name, StringComparer.OrdinalIgnoreCase))
             {
-                id = CommOp.ToStr(psin[Consts.DefaultKeyName]);
-                if (psin.ContainsKey(Consts.DefaultKeyName) && id.IsEmpty())
+                var field = tableMeta.PrimaryKey;
+
+                var pkey = psin.Keys.First(k => k.Equals(field.Name, StringComparison.OrdinalIgnoreCase));
+                if (psin.ContainsKey(pkey) && (psin[pkey] as string).IsEmpty() && field.DataType != "Number")
                 {
-                    id = CommOp.NewId();
-                    psin[Consts.DefaultKeyName] = id;
+                    psin[pkey] = CommOp.NewId();
                 }
             }
 
