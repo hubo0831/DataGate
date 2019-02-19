@@ -165,9 +165,9 @@ export default {
     };
 
     //在用户登录后，UI加载之前 获取一些数据，在外面没有改变该事件时，什么也不做
-    var getUserData = [util.emptyPromise];
     var userDataFunc = user => {
       var us = [];
+      var getUserData = [util.emptyPromise];
       bus.$emit("logined", getUserData);
       for (var i in getUserData) {
         us.push(getUserData[i](user));
@@ -224,9 +224,9 @@ export default {
         onClick: () => (this.errorBoxVisible = true)
       });
     });
-   
-   //返回结果不是预期的数据
-   bus.$on("invalid-result", msg => {
+
+    //返回结果不是预期的数据
+    bus.$on("invalid-result", msg => {
       this.$message.error(msg);
     });
 
