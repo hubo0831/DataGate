@@ -10,8 +10,8 @@ namespace DataGate.App.DataService
     /// </summary>
     public interface ISubmitDataGate:IDataGate
     {
-        void OnAdd(List<string> fields, IDictionary<string, object> ps);
-        void OnChange(List<string> fields, IDictionary<string, object> ps);
-        void OnRemove(IDictionary<string, object> ps);
+        void OnAdd(DataGateKey gkey, List<string> fields, IDictionary<string, object> ps);
+        void OnChange(DataGateKey gkey, List<string> fields, IDictionary<string, object> ps);
+        void OnRemove(DataGateKey gkey, IDictionary<string, object> ps);
     }
 }

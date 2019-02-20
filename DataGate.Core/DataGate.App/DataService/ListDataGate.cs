@@ -17,27 +17,27 @@ namespace DataGate.App.DataService
             _dataGates = datagates;
         }
 
-        public void OnAdd(List<string> fields, IDictionary<string, object> ps)
+        public void OnAdd(DataGateKey gkey, List<string> fields, IDictionary<string, object> ps)
         {
             foreach (var dg in _dataGates.OfType<ISubmitDataGate>())
             {
-                dg.OnAdd(fields, ps);
+                dg.OnAdd(gkey, fields, ps);
             }
         }
 
-        public void OnChange(List<string> fields, IDictionary<string, object> ps)
+        public void OnChange(DataGateKey gkey, List<string> fields, IDictionary<string, object> ps)
         {
             foreach (var dg in _dataGates.OfType<ISubmitDataGate>())
             {
-                dg.OnChange(fields, ps);
+                dg.OnChange(gkey, fields, ps);
             }
         }
 
-        public void OnRemove(IDictionary<string, object> ps)
+        public void OnRemove(DataGateKey gkey, IDictionary<string, object> ps)
         {
             foreach (var dg in _dataGates.OfType<ISubmitDataGate>())
             {
-                dg.OnRemove(ps);
+                dg.OnRemove(gkey, ps);
             }
         }
 
@@ -54,6 +54,14 @@ namespace DataGate.App.DataService
             foreach (var dg in _dataGates.OfType<IQueryDataGate>())
             {
                 dg.OnResult(gkey, result);
+            }
+        }
+
+        public void OnQuery(DataGateKey gkey, Dictionary<string, object> param)
+        {
+            foreach (var dg in _dataGates.OfType<IQueryDataGate>())
+            {
+                dg.OnResult(gkey, param);
             }
         }
     }

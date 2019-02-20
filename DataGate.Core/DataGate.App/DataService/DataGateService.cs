@@ -324,7 +324,7 @@ namespace DataGate.App.DataService
             var fields = tableMeta.PrimaryKeys.Select(pk => pk.Name)
                 .Intersect(psin.Select(kv => kv.Key),
                  StringComparer.OrdinalIgnoreCase).ToList();
-            gkey.DataGate.OnRemove(psin);
+            gkey.DataGate.OnRemove(gkey, psin);
             var ps = fields.Select(f =>
              {
                  var psKey = psin.Keys.First(key => key.Equals(f, StringComparison.OrdinalIgnoreCase));
@@ -358,7 +358,7 @@ namespace DataGate.App.DataService
                 .Select(f => f.Name).Intersect(psin.Select(kv => kv.Key),
                  StringComparer.OrdinalIgnoreCase).ToList();
 
-            gkey.DataGate.OnAdd(fields, psin);
+            gkey.DataGate.OnAdd(gkey, fields, psin);
 
             string id = null;
 
@@ -415,7 +415,7 @@ namespace DataGate.App.DataService
                 .Select(f => f.Name).Intersect(psin.Select(kv => kv.Key),
                  StringComparer.OrdinalIgnoreCase).ToList();
 
-            gkey.DataGate.OnChange(fields, psin);
+            gkey.DataGate.OnChange(gkey, fields, psin);
             var ps = fields.Select(f =>
             {
                 var psKey = psin.Keys.First(key => key.Equals(f, StringComparison.OrdinalIgnoreCase));

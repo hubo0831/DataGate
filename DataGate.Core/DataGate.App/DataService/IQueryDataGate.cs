@@ -11,7 +11,14 @@ namespace DataGate.App.DataService
     public interface IQueryDataGate: IDataGate
     {
         /// <summary>
-        /// 过滤接口
+        /// 查询准备
+        /// </summary>
+        /// <param name="gkey"></param>
+        /// <param name="param"></param>
+        void OnQuery(DataGateKey gkey, Dictionary<string, object> param);
+
+        /// <summary>
+        /// 结果过滤
         /// </summary>
         /// <param name="gkey"></param>
         /// <param name="result"></param>

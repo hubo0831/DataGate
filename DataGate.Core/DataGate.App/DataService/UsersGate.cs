@@ -8,7 +8,7 @@ namespace DataGate.App.DataService
 {
     public class UsersGate : ISubmitDataGate
     {
-        private void TestField(List<string> fields, string f)
+        private void TestField( List<string> fields, string f)
         {
             var fo = fields.FirstOrDefault(ff => ff.Equals(f, StringComparison.OrdinalIgnoreCase));
             if (fo != null)
@@ -18,7 +18,7 @@ namespace DataGate.App.DataService
             fields.Add(f);
         }
 
-        public void OnAdd(List<string> fields, IDictionary<string, object> ps)
+        public void OnAdd(DataGateKey gkey, List<string> fields, IDictionary<string, object> ps)
         {
             if (!ps.TryGetValue("Password", out object pwd) && !ps.TryGetValue("password", out pwd))
             {
@@ -32,7 +32,7 @@ namespace DataGate.App.DataService
             ps["createDate"] = DateTime.Now;
         }
 
-        public void OnChange(List<string> fields, IDictionary<string, object> ps)
+        public void OnChange(DataGateKey gkey, List<string> fields, IDictionary<string, object> ps)
         {
             if (!ps.TryGetValue("Password", out object pwd) && !ps.TryGetValue("password", out pwd))
             {
@@ -45,7 +45,7 @@ namespace DataGate.App.DataService
             ps["Password"] = Encryption.MD5(pwd + (string)ps["PasswordSalt"]);
         }
 
-        public void OnRemove(IDictionary<string, object> ps)
+        public void OnRemove(DataGateKey gkey, IDictionary<string, object> ps)
         {
         }
     }
