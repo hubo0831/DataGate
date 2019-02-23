@@ -100,6 +100,12 @@ namespace DataGate.App.DataService
         /// 将直接返回此数据
         /// </summary>
         public JToken Data { get; set; }
+
+        /// <summary>
+        /// 该会话的数据库帮助类
+        /// </summary>
+        [JsonIgnore]
+        public DBHelper DB { get; set; }
     }
 
     internal class JoinInfo

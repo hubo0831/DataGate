@@ -2,6 +2,6 @@
   {
     "Name": "TstTestRecord",
     "Remark": "数据表的简单定义测试，只用于单元测试，无需输出到运行目录",
-    "Fields": "id,name,createDate,userName,updateDate,isDeleted,num"
+    "Fields": "id,name,timeStamp,userName,num,isDeleted"
   }
 ]

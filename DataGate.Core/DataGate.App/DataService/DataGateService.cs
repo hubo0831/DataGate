@@ -56,6 +56,7 @@ namespace DataGate.App.DataService
                     LogAction?.Invoke(gkey, sql, ps);
                 };
             }
+            gkey.DB = _db; //将DB对象传递给可能的DataGate前后切面数据处理程序
             return gkey;
         }
 
@@ -340,6 +341,7 @@ namespace DataGate.App.DataService
                 _db.RollbackTrans();
                 throw new InvalidOperationException("错误操作，根据ID删除的记录数过多");
             }
+            gkey.DataGate.OnRemoved(gkey, psin);
             return r;
         }
 
@@ -358,21 +360,36 @@ namespace DataGate.App.DataService
                 .Select(f => f.Name).Intersect(psin.Select(kv => kv.Key),
                  StringComparer.OrdinalIgnoreCase).ToList();
 
-            gkey.DataGate.OnAdd(gkey, fields, psin);
 
             string id = null;
-
-            //假定ID字段是GUID
-            if (tableMeta.PrimaryKeys.Count()==1 && fields.Contains(tableMeta.PrimaryKey.Name, StringComparer.OrdinalIgnoreCase))
+            string getMaxIdSql = null;
+            if (tableMeta.PrimaryKeys.Count() == 1 && fields.Contains(tableMeta.PrimaryKey.Name, StringComparer.OrdinalIgnoreCase))
             {
                 var field = tableMeta.PrimaryKey;
 
                 var pkey = psin.Keys.First(k => k.Equals(field.Name, StringComparison.OrdinalIgnoreCase));
-                if (psin.ContainsKey(pkey) && (psin[pkey] as string).IsEmpty() && field.DataType != "Number")
+                if (psin.ContainsKey(pkey) && (psin[pkey] as string).IsEmpty())
                 {
-                    psin[pkey] = CommOp.NewId();
+                    if (field.DataType == "Number") //当主键为Number型时，认为是自增字段，为空时从参数中去掉，让数据库自动生成
+                    {
+                        psin.Remove(pkey);
+                        var ff = fields.FirstOrDefault(f => f.Equals(pkey, StringComparison.OrdinalIgnoreCase));
+                        if (ff != null) fields.Remove(ff);
+                        getMaxIdSql = $"select max({field.FixDbName}) from {tableMeta.FixDbName}";
+                    }
+                    else //非number型，则认为是32位的guid字符串，为它自动生成
+                    {
+                        id = CommOp.NewId();
+                        psin[pkey] = id;
+                    }
+                }
+                else if (psin.ContainsKey(pkey))
+                {
+                    id = CommOp.ToStr(psin[pkey]);
                 }
             }
+
+            gkey.DataGate.OnAdd(gkey, fields, psin);
 
             var ps = fields.Select(f =>
             {
@@ -388,6 +405,14 @@ namespace DataGate.App.DataService
             string strValues = String.Join(",", ps.Select(p => '@' + p.ParameterName));
             string sql = $"insert into {tableMeta.FixDbName} ({strFields}) values({strValues})";
             await _db.TransNonQueryAsync(sql, ps);
+            if (!getMaxIdSql.IsEmpty())
+            {
+                id = (string)(await _db.TransGetObjectAsync(getMaxIdSql));
+                psin[id] = id;
+            }
+
+            gkey.DataGate.OnAdded(gkey, psin);
+
             return id;
         }
 
@@ -443,6 +468,7 @@ namespace DataGate.App.DataService
                 _db.RollbackTrans();
                 throw new InvalidOperationException("错误操作，根据主键更新的记录数过多");
             }
+            gkey.DataGate.OnChanged(gkey, psin);
             return r;
         }
 
