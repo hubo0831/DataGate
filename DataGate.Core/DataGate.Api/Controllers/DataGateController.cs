@@ -32,6 +32,7 @@ namespace DataGate.Api.Controllers
         public DataGateController(DataGateService dg)
         {
             _dg = dg;
+            _dg.Session = this.GetSession();
             _dg.LogAction = (gkey, sql, ps) =>
              {
                  Log.Abstract = gkey.Name;

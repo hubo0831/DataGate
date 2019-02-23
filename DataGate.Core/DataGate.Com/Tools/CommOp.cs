@@ -104,7 +104,7 @@ namespace DataGate.Com
         }
 
         /// <summary>
-        /// 转换成Int64(有符号)
+        /// 转换成可为空的Int64(有符号)
         /// </summary>
         /// <param name="s"></param>
         /// <returns></returns>
@@ -1353,10 +1353,11 @@ namespace DataGate.Com
         public static Dictionary<string, object> ToDictionary(object obj)
         {
             Dictionary<string, object> dict = new Dictionary<string, object>();
-            foreach (var p in obj.GetType().GetProperties())
-            {
-                dict[p.Name] = p.GetValue(obj, null);
-            }
+            if (obj != null)
+                foreach (var p in obj.GetType().GetProperties())
+                {
+                    dict[p.Name] = p.GetValue(obj, null);
+                }
             return dict;
         }
     }

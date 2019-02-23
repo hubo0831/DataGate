@@ -22,8 +22,14 @@ namespace DataGate.App.DataService
     /// </summary>
     public class DataGateService : IDisposable
     {
-        DBHelper _db;
+        public DBHelper DB { get; set; }
         IMetaService _ms;
+
+        /// <summary>
+        /// 用户会话信息
+        /// </summary>
+        public UserSession Session { get; set; }
+
         public DataGateService(IMetaService ms)
         {
             _ms = ms;
@@ -48,15 +54,15 @@ namespace DataGate.App.DataService
             //如果是多数据库，则需要在*Keys.json中配置数据库连接名称ConnName
 
             //注意这里在单个生命周期内_db只能有一个
-            if (_db == null)
+            if (DB == null)
             {
-                _db = DBFactory.CreateDBHelper(gkey.ConnName ?? "Default");
-                _db.Log = (sql, ps) =>
+                DB = DBFactory.CreateDBHelper(gkey.ConnName ?? "Default");
+                DB.Log = (sql, ps) =>
                 {
                     LogAction?.Invoke(gkey, sql, ps);
                 };
             }
-            gkey.DB = _db; //将DB对象传递给可能的DataGate前后切面数据处理程序
+            gkey.DataService = this; //将DB对象传递给可能的DataGate前后切面数据处理程序
             return gkey;
         }
 
@@ -69,16 +75,23 @@ namespace DataGate.App.DataService
         /// 获取指定表指定条件的数据列表
         /// </summary>
         /// <param name="key"></param>
-        /// <param name="param"></param>
+        /// <param name="paramObj">字典对象或实体对象</param>
         /// <returns></returns>
-        public async Task<object> QueryAsync(string key, Dictionary<string, object> param)
+        public async Task<object> QueryAsync(string key, object paramObj)
         {
             DataGateKey gkey = GetDataGate(key);
+            if (!(paramObj is IDictionary<string, object> param))
+            {
+                param = CommOp.ToDictionary(paramObj);
+            }
             object result = gkey.Data;
             if (result != null)
             {
                 return result;
             }
+
+            gkey.DataGate.OnQuery(gkey, param);
+
             switch (gkey.OpType)
             {
                 case DataOpType.GetArray:
@@ -155,8 +168,8 @@ namespace DataGate.App.DataService
                     {
                         throw new NoNullAllowedException("在执行NonQuery命令时，Sql是必须的");
                     }
-                    var ps = _db.GetParameter(param);
-                    return await _db.ExecNonQueryAsync(gkey.Sql, ps.ToArray());
+                    var ps = DB.GetParameter(param);
+                    return await DB.ExecNonQueryAsync(gkey.Sql, ps.ToArray());
             }
             return 0;
         }
@@ -164,32 +177,6 @@ namespace DataGate.App.DataService
         public async Task<int> NonQueryAsync(string key, object param)
         {
             return await NonQueryAsync(key, CommOp.ToDictionary(param));
-        }
-
-        /// <summary>
-        /// 根据查询参数对象调用Query, 主要用于服务端自身调用
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="obj">对象参数</param>
-        /// <returns></returns>
-        public async Task<object> QueryAsync(string key, object obj)
-        {
-            Dictionary<string, object> param = CommOp.ToDictionary(obj);
-            DataGateKey gkey = GetDataGate(key);
-            object result = null;
-            switch (gkey.OpType)
-            {
-                case DataOpType.GetArray:
-                    result = await GetArrayAsync(gkey, param);
-                    break;
-                case DataOpType.GetObject:
-                    result = await GetObjectAsync(gkey, param);
-                    break;
-                case DataOpType.GetPage:
-                    result = await GetPageAsync(gkey, param);
-                    break;
-            }
-            return result;
         }
 
         /// <summary>
@@ -210,7 +197,7 @@ namespace DataGate.App.DataService
 
             IEnumerable<string> ids = new string[0];
 
-            _db.BeginTrans();
+            DB.BeginTrans();
             //先删子表
             foreach (var detail in request.Details)
             {
@@ -247,7 +234,7 @@ namespace DataGate.App.DataService
                     await UpdateManyAsync(dkey, detail.Changed);
                 }
             }
-            _db.EndTrans();
+            DB.EndTrans();
             return ids;
         }
 
@@ -307,7 +294,7 @@ namespace DataGate.App.DataService
                 {
                     //@号表示排除参数，取查询子句后面的属性名称, 加入_db.DBComm.FieldPrefix
                     //以防止多表时，两表字段名相同时的重复替换
-                    reg = new Regex($"([^\\w@\\{_db.DBComm.FieldPrefix}]+|^){field.Name}(\\W+|$)", RegexOptions.IgnoreCase);
+                    reg = new Regex($"([^\\w@\\{DB.DBComm.FieldPrefix}]+|^){field.Name}(\\W+|$)", RegexOptions.IgnoreCase);
 
                     if (reg.IsMatch(filter))
                     {
@@ -329,16 +316,16 @@ namespace DataGate.App.DataService
             var ps = fields.Select(f =>
              {
                  var psKey = psin.Keys.First(key => key.Equals(f, StringComparison.OrdinalIgnoreCase));
-                 return _db.CreateParameter(psKey, psin[psKey]);
+                 return DB.CreateParameter(psKey, psin[psKey]);
              }).ToList();
 
             string filter = CreateKeyFilter(tableMeta);
             string sql = $"delete from {tableMeta.FixDbName} where {filter}";
 
-            int r = await _db.TransNonQueryAsync(sql, ps.ToArray());
+            int r = await DB.TransNonQueryAsync(sql, ps.ToArray());
             if (r > 1)
             {
-                _db.RollbackTrans();
+                DB.RollbackTrans();
                 throw new InvalidOperationException("错误操作，根据ID删除的记录数过多");
             }
             gkey.DataGate.OnRemoved(gkey, psin);
@@ -399,15 +386,15 @@ namespace DataGate.App.DataService
                 //外键字段pass掉
                 if (ff != null && !ff.ForeignField.IsEmpty()) return null;
                 var psKey = psin.Keys.First(key => key.Equals(f, StringComparison.OrdinalIgnoreCase));
-                return _db.CreateParameter(psKey, psin[psKey]);
+                return DB.CreateParameter(psKey, psin[psKey]);
             }).Where(p => p != null).ToArray();
-            string strFields = String.Join(",", fields.Select(p => _db.AddFix(p.Trim())));
+            string strFields = String.Join(",", fields.Select(p => DB.AddFix(p.Trim())));
             string strValues = String.Join(",", ps.Select(p => '@' + p.ParameterName));
             string sql = $"insert into {tableMeta.FixDbName} ({strFields}) values({strValues})";
-            await _db.TransNonQueryAsync(sql, ps);
+            await DB.TransNonQueryAsync(sql, ps);
             if (!getMaxIdSql.IsEmpty())
             {
-                id = (string)(await _db.TransGetObjectAsync(getMaxIdSql));
+                id = (string)(await DB.TransGetObjectAsync(getMaxIdSql));
                 psin[id] = id;
             }
 
@@ -426,9 +413,9 @@ namespace DataGate.App.DataService
         {
             var gkey = GetDataGate(key);
             var jToken = JObject.FromObject(ps);
-            _db.BeginTrans();
+            DB.BeginTrans();
             var r = await UpdateOneAsync(gkey, jToken);
-            _db.EndTrans();
+            DB.EndTrans();
             return r;
         }
 
@@ -444,7 +431,7 @@ namespace DataGate.App.DataService
             var ps = fields.Select(f =>
             {
                 var psKey = psin.Keys.First(key => key.Equals(f, StringComparison.OrdinalIgnoreCase));
-                return _db.CreateParameter(psKey, psin[psKey]);
+                return DB.CreateParameter(psKey, psin[psKey]);
             }).ToArray();
 
             string strFields = String.Join(",", fields.Select(f =>
@@ -456,16 +443,16 @@ namespace DataGate.App.DataService
                 //外来表字段pass掉
                 if (ff != null && !ff.ForeignField.IsEmpty()) return null;
                 var p = ps.First(p1 => p1.ParameterName.Equals(f, StringComparison.OrdinalIgnoreCase));
-                return _db.AddFix(f) + "=@" + p;
+                return DB.AddFix(f) + "=@" + p;
             }).Where(f => f != null));
 
             string filter = CreateKeyFilter(tableMeta);
 
             string sql = $"update {tableMeta.FixDbName} set {strFields} where {filter}";
-            int r = await _db.TransNonQueryAsync(sql, ps);
+            int r = await DB.TransNonQueryAsync(sql, ps);
             if (r > 1)
             {
-                _db.RollbackTrans();
+                DB.RollbackTrans();
                 throw new InvalidOperationException("错误操作，根据主键更新的记录数过多");
             }
             gkey.DataGate.OnChanged(gkey, psin);
@@ -484,7 +471,7 @@ namespace DataGate.App.DataService
             return r;
         }
 
-        private async Task<object> GetObjectAsync(DataGateKey gkey, Dictionary<string, object> parameters)
+        async Task<IDictionary<string, object>> GetObjectAsync(DataGateKey gkey, IDictionary<string, object> parameters)
         {
             var result = await GetArrayAsync(gkey, parameters);
             if (result is DataTable)
@@ -503,7 +490,7 @@ namespace DataGate.App.DataService
             {
                 JArray jarr = result as JArray;
                 if (jarr.Count == 0) return null;
-                return jarr[0];
+                return jarr[0].ToDictionary();
             }
         }
 
@@ -515,7 +502,7 @@ namespace DataGate.App.DataService
             {
                 foreach (DataColumn dc in dt.Columns)
                 {
-                    dc.ColumnName = _db.DbNameConverter.ToPropName(dc.ColumnName);
+                    dc.ColumnName = DB.DbNameConverter.ToPropName(dc.ColumnName);
                 }
             }
             else
@@ -532,7 +519,7 @@ namespace DataGate.App.DataService
         }
 
         //从参数表中获取值并移除参数中中该项，通常用于分页查询中获取分页参数
-        string GetValueRemoveKey(Dictionary<string, object> parameters, string key)
+        string GetValueRemoveKey(IDictionary<string, object> parameters, string key)
         {
             string dictKey = parameters.Keys.FirstOrDefault(k => k.Equals(key, StringComparison.OrdinalIgnoreCase));
             if (dictKey != null)
@@ -550,8 +537,12 @@ namespace DataGate.App.DataService
         /// <param name="gkey">查询Key名称</param>
         /// <param name="parameters">查询参数</param>
         /// <returns>{ total: 总数, data:DataTable}</returns>
-        private async Task<PageResult> GetPageAsync(DataGateKey gkey, Dictionary<string, object> parameters)
+        private async Task<PageResult> GetPageAsync(DataGateKey gkey, object obj)
         {
+            if (!(obj is IDictionary<string, object> parameters))
+            {
+                parameters = CommOp.ToDictionary(obj);
+            }
             if (gkey.TableJoins.Length > 1)
             {
                 return await GetMasterDetailPageAsync(gkey, parameters);
@@ -559,10 +550,10 @@ namespace DataGate.App.DataService
             var tableMeta = GetMainTable(gkey);
             CreateFilterStr(gkey, tableMeta, parameters);
             CreateOrderStr(gkey, tableMeta, parameters);
-            var ps = _db.GetParameter(parameters);
+            var ps = DB.GetParameter(parameters);
             IPager pager = BuildPager(gkey, parameters);
 
-            using (var dr = await _db.DBComm.ExecPageReaderAsync(pager, ps.ToArray()))
+            using (var dr = await DB.DBComm.ExecPageReaderAsync(pager, ps.ToArray()))
             {
                 DataTable dt = new DataTable();
                 dt.Load(dr);
@@ -581,15 +572,15 @@ namespace DataGate.App.DataService
         /// <param name="gkey"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        private async Task<PageResult> GetMasterDetailPageAsync(DataGateKey gkey, Dictionary<string, object> parameters)
+        private async Task<PageResult> GetMasterDetailPageAsync(DataGateKey gkey, IDictionary<string, object> parameters)
         {
             var tableMeta = gkey.TableJoins[0].Table;
             CreateFilterStr(gkey, tableMeta, parameters);
             CreateOrderStr(gkey, tableMeta, parameters);
-            var ps = _db.GetParameter(parameters);
+            var ps = DB.GetParameter(parameters);
             IPager pager = BuildMasterDetailPager(gkey, parameters);
 
-            using (var dr = await _db.DBComm.ExecPageReaderAsync(pager, ps.ToArray()))
+            using (var dr = await DB.DBComm.ExecPageReaderAsync(pager, ps.ToArray()))
             {
                 DataTable dt = new DataTable();
                 dt.Load(dr);
@@ -692,7 +683,7 @@ namespace DataGate.App.DataService
         /// <param name="tableMeta"></param>
         /// <param name="ps"></param>
         /// <returns></returns>
-        private void CreateFilterStr(DataGateKey gkey, TableMeta tableMeta, Dictionary<string, object> ps)
+        private void CreateFilterStr(DataGateKey gkey, TableMeta tableMeta, IDictionary<string, object> ps)
         {
             if (!ps.ContainsKey(Consts.FilterKey)) return;
             var filterStr = CommOp.ToStr(ps[Consts.FilterKey]);
@@ -772,7 +763,7 @@ namespace DataGate.App.DataService
         }
 
         //生成排序子句,排序子句的传入规则是  field1 a/d field2 a/d ...
-        private void CreateOrderStr(DataGateKey gkey, TableMeta tableMeta, Dictionary<string, object> ps)
+        private void CreateOrderStr(DataGateKey gkey, TableMeta tableMeta, IDictionary<string, object> ps)
         {
             if (!ps.ContainsKey(Consts.SortKey)) return;
             var sortStr = CommOp.ToStr(ps[Consts.SortKey]);
@@ -811,7 +802,7 @@ namespace DataGate.App.DataService
         private string GetSortField(string f, DataGateKey gkey)
         {
             string[] qfs = gkey.QueryFieldsTerm.Split(',');
-            var ff = _db.AddFix(f);
+            var ff = DB.AddFix(f);
             for (var i = 0; i < qfs.Length; i++)
             {
                 if (qfs[i] == ff) return qfs[i];
@@ -846,7 +837,7 @@ namespace DataGate.App.DataService
         /// <param name="gkey">查询Key名称</param>
         /// <param name="parameters">查询参数</param>
         /// <returns>DataTable</returns>
-        private async Task<object> GetArrayAsync(DataGateKey gkey, Dictionary<string, object> parameters)
+        private async Task<object> GetArrayAsync(DataGateKey gkey, IDictionary<string, object> parameters)
         {
             if (gkey.TableJoins?.Length > 1)
             {
@@ -858,14 +849,14 @@ namespace DataGate.App.DataService
                 CreateFilterStr(gkey, tableMeta, parameters);
                 CreateOrderStr(gkey, tableMeta, parameters);
             }
-            var ps = _db.GetParameter(parameters);
+            var ps = DB.GetParameter(parameters);
             string sql = BuildSql(gkey);
-            var dt = await _db.ExecDataTableAsync(sql, ps.ToArray());
+            var dt = await DB.ExecDataTableAsync(sql, ps.ToArray());
             ReNameColumns(tableMeta, dt);
             return dt;
         }
 
-        private async Task<JArray> GetMasterDetaiArrayAsync(DataGateKey gkey, Dictionary<string, object> parameters)
+        private async Task<JArray> GetMasterDetaiArrayAsync(DataGateKey gkey, IDictionary<string, object> parameters)
         {
             var tableMeta = gkey.TableJoins[0].Table;
             if (gkey.Sql.IsEmpty())
@@ -873,10 +864,10 @@ namespace DataGate.App.DataService
                 CreateFilterStr(gkey, tableMeta, parameters);
                 CreateOrderStr(gkey, tableMeta, parameters);
             }
-            var ps = _db.GetParameter(parameters);
+            var ps = DB.GetParameter(parameters);
             string sql = BuildMasterDetailSql(gkey);
 
-            DataTable dt = await _db.ExecDataTableAsync(sql, ps.ToArray());
+            DataTable dt = await DB.ExecDataTableAsync(sql, ps.ToArray());
             var data = CreateMasterArray(tableMeta, dt);
             return data;
         }
@@ -900,7 +891,7 @@ namespace DataGate.App.DataService
         }
 
         //单表的分页
-        private IPager BuildPager(DataGateKey gkey, Dictionary<string, object> parameters)
+        private IPager BuildPager(DataGateKey gkey, IDictionary<string, object> parameters)
         {
             if (!gkey.Sql.IsEmpty())
             {
@@ -934,7 +925,7 @@ namespace DataGate.App.DataService
         /// <param name="gkey"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        private IPager BuildSqlPager(DataGateKey gkey, Dictionary<string, object> parameters)
+        private IPager BuildSqlPager(DataGateKey gkey, IDictionary<string, object> parameters)
         {
             var mainModel = GetMainTable(gkey);
             string filter = FormatFilter(gkey.Filter, mainModel);
@@ -959,7 +950,7 @@ namespace DataGate.App.DataService
         }
 
         //构造分页主从表查询分页对象
-        private IPager BuildMasterDetailPager(DataGateKey gkey, Dictionary<string, object> parameters)
+        private IPager BuildMasterDetailPager(DataGateKey gkey, IDictionary<string, object> parameters)
         {
             var mainModel = gkey.TableJoins[0].Table;
 
@@ -1014,7 +1005,7 @@ namespace DataGate.App.DataService
             var fieldArr = orders.Select(o =>
             {
                 string prop = o.Split(' ')[0].Trim();
-                string field = String.Join(".", prop.Split('.').Select(a => _db.AddFix(a)));
+                string field = String.Join(".", prop.Split('.').Select(a => DB.AddFix(a)));
                 return new { prop, field };
             });
             fieldArr.OrderBy(pf => -pf.field.Length)
@@ -1024,10 +1015,10 @@ namespace DataGate.App.DataService
 
         public void Dispose()
         {
-            if (_db != null)
+            if (DB != null)
             {
-                _db.Dispose();
-                _db = null;
+                DB.Dispose();
+                DB = null;
             }
         }
     }

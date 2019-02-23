@@ -102,10 +102,10 @@ namespace DataGate.App.DataService
         public JToken Data { get; set; }
 
         /// <summary>
-        /// 该会话的数据库帮助类
+        /// 该Key对应的正在执行的数据服务
         /// </summary>
         [JsonIgnore]
-        public DBHelper DB { get; set; }
+        public DataGateService DataService { get; set; }
     }
 
     internal class JoinInfo

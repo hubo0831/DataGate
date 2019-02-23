@@ -6,7 +6,7 @@ using System.Text;
 namespace DataGate.App.DataService
 {
     /// <summary>
-    /// 查询结果数据过滤接口
+    /// 查询前和查询后结果数据过滤接口
     /// </summary>
     public interface IQueryDataGate: IDataGate
     {
@@ -15,7 +15,7 @@ namespace DataGate.App.DataService
         /// </summary>
         /// <param name="gkey"></param>
         /// <param name="param"></param>
-        void OnQuery(DataGateKey gkey, Dictionary<string, object> param);
+        void OnQuery(DataGateKey gkey, IDictionary<string, object> param);
 
         /// <summary>
         /// 结果过滤

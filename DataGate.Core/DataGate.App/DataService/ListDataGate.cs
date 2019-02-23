@@ -57,11 +57,11 @@ namespace DataGate.App.DataService
             }
         }
 
-        public void OnQuery(DataGateKey gkey, Dictionary<string, object> param)
+        public void OnQuery(DataGateKey gkey, IDictionary<string, object> param)
         {
             foreach (var dg in _dataGates.OfType<IQueryDataGate>())
             {
-                dg.OnResult(gkey, param);
+                dg.OnQuery(gkey, param);
             }
         }
 
