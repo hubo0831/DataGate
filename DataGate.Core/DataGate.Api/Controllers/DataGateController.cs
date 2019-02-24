@@ -32,7 +32,6 @@ namespace DataGate.Api.Controllers
         public DataGateController(DataGateService dg)
         {
             _dg = dg;
-            _dg.Session = this.GetSession();
             _dg.LogAction = (gkey, sql, ps) =>
              {
                  Log.Abstract = gkey.Name;
@@ -41,6 +40,12 @@ namespace DataGate.Api.Controllers
                  if (Log.Message.Length > 4000) Log.Message = Log.Message.Remove(4000);
                  Log.ObjectId = gkey.Key;
              };
+        }
+
+        public override void OnActionExecuting(ActionExecutingContext context)
+        {
+            base.OnActionExecuting(context);
+            _dg.Session = this.GetSession();
         }
 
         /// <summary>

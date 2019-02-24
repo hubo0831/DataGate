@@ -26,7 +26,7 @@ namespace DataGate.Api.Controllers
         }
 
         /// <summary>
-        /// 登录用户的令牌
+        /// 登录用户的令牌,不要在构造函数使用
         /// </summary>
         public string Token
         {
@@ -36,7 +36,10 @@ namespace DataGate.Api.Controllers
             }
         }
 
-
+        /// <summary>
+        /// 获取用户的会话，不要在构造函数使用
+        /// </summary>
+        /// <returns></returns>
         public UserSession GetSession()
         {
             if (Token != null)
