@@ -30,6 +30,8 @@ namespace DataGate.Tests
     {
         protected TestServer _testServer;
         protected DBHelper _db;
+        private HttpClient _sessionClient;
+
         public AppDataTest()
         {
             Consts.IsTesting = true;
@@ -101,6 +103,21 @@ namespace DataGate.Tests
         }
 
         /// <summary>
+        /// 用以保持会话的客户端
+        /// </summary>
+        protected HttpClient SessionClient
+        {
+            get
+            {
+                if (_sessionClient == null)
+                {
+                   _sessionClient = _testServer.CreateClient();
+                }
+                return _sessionClient;
+            }
+        }
+
+        /// <summary>
         /// 测试登录 
         /// </summary>
         /// <param name="account">用户名</param>
@@ -120,25 +137,37 @@ namespace DataGate.Tests
             return result;
         }
 
+        /// <summary>
+        /// 用以保持会话的客户端提交HttpPost请求
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="url"></param>
+        /// <param name="p"></param>
+        /// <returns></returns>
         protected async Task<T> HttpPostAsync<T>(string url, object p)
         {
-            var client = _testServer.CreateClient();
-            HttpResponseMessage response = await client.PostAsync(url,
-              new FormUrlEncodedContent(ToDict(p)));
+            var content = new FormUrlEncodedContent(ToDict(p));
+            HttpResponseMessage response = await SessionClient.PostAsync(url, content);
             var resultStr = await response.Content.ReadAsStringAsync();
             Console.WriteLine("HTTPPOST-RESULT-STRING=" + resultStr);
             Assert.True(response.IsSuccessStatusCode);
             return await response.Content.ReadAsAsync<T>();
         }
 
+        /// <summary>
+        /// 用以保持会话的客户端提交HttpGet请求
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="url"></param>
+        /// <param name="p"></param>
+        /// <returns></returns>
         protected async Task<T> HttpGetAsync<T>(string url, object p = null)
         {
-            var client = _testServer.CreateClient();
             if (p != null)
             {
                 url += "?" + new FormUrlEncodedContent(ToDict(p));
             }
-            HttpResponseMessage response = await client.GetAsync(url);
+            HttpResponseMessage response = await SessionClient.GetAsync(url);
             var resultStr = await response.Content.ReadAsStringAsync();
             Console.WriteLine("HTTPGET-RESULT-STRING=" + resultStr);
             Assert.True(response.IsSuccessStatusCode);
@@ -147,6 +176,7 @@ namespace DataGate.Tests
 
         protected IEnumerable<KeyValuePair<string, string>> ToDict(object entity)
         {
+            if (entity == null) yield break;
             Type type = entity.GetType();
             PropertyInfo[] props = type.GetProperties();
             foreach (PropertyInfo prop in props)

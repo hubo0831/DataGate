@@ -22,16 +22,33 @@ namespace DataGate.Com.DB
             Helper = helper;
         }
 
-        public async Task<IList<T>> GetListAsync(string strAfterWhere = null, IDictionary<string, object> param = null)
+        /// <summary>
+        /// 获取实体列表
+        /// </summary>
+        /// <param name="strAfterWhere">Where后的查询条件</param>
+        /// <param name="param">查询参数，通常是匿名对象或字典对象</param>
+        /// <returns></returns>
+        public async Task<IList<T>> GetListAsync(string strAfterWhere = null, object param = null)
         {
             return await Helper.GetListAsync<T>(strAfterWhere, param);
         }
 
-        public async Task<T> GetModelByWhereAsync(string where, params IDataParameter[] ps)
+        /// <summary>
+        /// 根据条件获取单个实体。如果查询出多个实体则返回空
+        /// </summary>
+        /// <param name="where"></param>
+        /// <param name="param">查询参数，通常是匿名对象或字典对象</param>
+        /// <returns>单个实体</returns>
+        public async Task<T> GetModelByWhereAsync(string where, object param = null)
         {
-            return await Helper.GetModelByWhereAsync<T>(where, ps);
+            return await Helper.GetModelByWhereAsync<T>(where, param);
         }
 
+        /// <summary>
+        /// 根据ID获取单个对象，实体必须有Id属性
+        /// </summary>
+        /// <param name="id">ID值</param>
+        /// <returns>单个实体</returns>
         public async Task<T> GetModelByIdAsync(TId id)
         {
             return await Helper.GetModelByIdAsync<T, TId>(id);
@@ -52,16 +69,34 @@ namespace DataGate.Com.DB
             return await Helper.DeleteModelAsync<T, TId>(t.Id);
         }
 
-        public async Task<int> DeleteManyAsync(string where, IDictionary<string, object> t)
+        /// <summary>
+        /// 根据条件删除多个实体
+        /// </summary>
+        /// <param name="where"></param>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public async Task<int> DeleteManyAsync(string where, object t)
         {
-            return await Helper.DeleteModelAsync<T>(where, t);
+            return await Helper.DeleteManyAsync<T>(where, t);
         }
 
+        /// <summary>
+        /// 替换单个实体
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
         public async Task<int> UpdateAsync(T t)
         {
             return await Helper.UpdateModelAsync<T, TId>(t);
         }
 
+        /// <summary>
+        /// 同时更新多个实体
+        /// </summary>
+        /// <param name="where"></param>
+        /// <param name="update"></param>
+        /// <param name="p"></param>
+        /// <returns></returns>
         public async Task<int> UpdateManyAsync(string where, object update, object p)
         {
             return await Helper.UpdateManyAsync<T>(where, update, p);

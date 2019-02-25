@@ -15,174 +15,6 @@ namespace DataGate.Com.DB
     /// </summary>
     partial class DBHelper
     {
-        #region  T
-
-        /// <summary>
-        /// 通过指定条件返回一个T的列表
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="strAfterWhere"></param>
-        /// <param name="sp"></param>
-        /// <returns></returns>
-        public virtual List<T> GetList<T>(string strAfterWhere = null, params IDataParameter[] sp)
-            where T : new()
-        {
-            if (strAfterWhere != null)
-            {
-                strAfterWhere = "where " + strAfterWhere;
-            }
-            string sql = $"select * from {GetDbObjName(typeof(T).Name)} {strAfterWhere}";
-            return GetSqlList<T>(sql, sp);
-        }
-
-        /// <summary>
-        /// 通过执行sql语句返回一个泛型T的列表
-        /// </summary>
-        /// <typeparam name="T">实体类型</typeparam>
-        /// <param name="sql">查询语句</param>
-        /// <param name="sp">参数列表</param>
-        /// <returns>T的泛型列表</returns>
-        public virtual List<T> GetSqlList<T>(string sql, params IDataParameter[] sp)
-            where T : new()
-        {
-            using (IDataReader reader = ExecReader(sql, sp))
-            {
-                DataTable schemaTable = reader.GetSchemaTable();
-                PropertyInfo[] infos = typeof(T).GetProperties();
-                var readerCols = schemaTable.Rows.Cast<DataRow>().Select(dr => dr["ColumnName"].ToString().ToLower());
-                List<T> listT = new List<T>();
-                while (reader.Read())
-                {
-                    T t = new T();
-                    foreach (PropertyInfo info in infos)
-                    {
-                        if (readerCols.Contains(info.Name.ToLower()))
-                        {
-                            SetValue(t, info, reader[info.Name]);
-                        }
-                    }
-                    listT.Add(t);
-                }
-
-                return listT;
-            }
-        }
-
-        /// <summary>
-        /// 根据唯一ID获取对象,返回实体，实体为数据表
-        /// </summary>
-        /// <param name="id">ID值</param>
-        /// <returns>返回实体类</returns>
-        public T GetModelById<T>(string id) where T : IId<string>, new()
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return default(T);
-            }
-
-            T model = new T();
-            Type type = model.GetType();
-            StringBuilder sb = new StringBuilder();
-            sb.Append("SELECT * FROM ").Append(AddFix(type.Name)).Append(" WHERE ID=@ID");
-            List<IDataParameter> list = new List<IDataParameter>();
-            DataTable dt = this.ExecDataTable(sb.ToString(), CreateParameter("ID", id));
-            if (dt.Rows.Count > 0)
-            {
-                return RowToModel<T>(dt.Rows[0]);
-            }
-            return model;
-        }
-
-        /// <summary>
-        /// 根据查询条件获取对象,返回实体，实体为数据表
-        /// </summary>
-        /// <param name="where">条件</param>
-        /// <param name="param">参数化</param>
-        /// <returns>返回实体类</returns>
-        public T GetModelByWhere<T>(string where, params IDataParameter[] param) where T : new()
-        {
-            Type type = typeof(T);
-            StringBuilder strSql = new StringBuilder();
-            strSql.Append("SELECT * FROM " + AddFix(type.Name) + " WHERE 1=1");
-            strSql.Append(where);
-            DataTable dt = this.ExecDataTable(strSql.ToString(), param);
-            if (dt.Rows.Count > 0)
-            {
-                return RowToModel<T>(dt.Rows[0]);
-            }
-            return default(T);
-        }
-
-        /// <summary>
-        /// 根据查询条件获取对象,返回实体，实体可为业务Model
-        /// </summary>
-        /// <typeparam name="T">实体类型</typeparam>
-        /// <param name="sql">查询语句</param>
-        /// <param name="param">查询参数</param>
-        /// <returns>对象</returns>
-        public T GetModel<T>(string sql, params IDataParameter[] param) where T : new()
-        {
-            Type type = typeof(T);
-            DataTable dt = this.ExecDataTable(sql, param);
-            if (dt.Rows.Count > 0)
-            {
-                return RowToModel<T>(dt.Rows[0]);
-            }
-            return default(T);
-        }
-
-        /// <summary>
-        /// 插入新对象到表
-        /// </summary>
-        /// <typeparam name="T">对象类型</typeparam>
-        /// <param name="t">对象</param>
-        /// <returns>插入的条数</returns>
-        public int InsertModel<T>(T t)
-        {
-            string sql = PrepareInsertSqlString(t);
-            var sp = GetParameter(t);
-            return ExecNonQuery(sql, sp.ToArray());
-        }
-
-        /// <summary>
-        /// 更新字符串ID的对象
-        /// </summary>
-        /// <typeparam name="T">要更新的对象类型</typeparam>
-        /// <param name="t">对象</param>
-        /// <returns>更新条数</returns>
-        public int UpdateModel<T>(T t) where T : IId<string>
-        {
-            return UpdateModel<T, string>(t);
-        }
-
-        /// <summary>
-        /// 更新对象
-        /// </summary>
-        /// <typeparam name="T">要更新的对象类型</typeparam>
-        /// <param name="t">对象</param>
-        /// <returns>更新条数</returns>
-        public int UpdateModel<T, TId>(T t) where T : IId<TId>
-        {
-            string sql = PrepareUpdateSqlString<T, TId>(t);
-            var sp = GetParameter(t);
-            return ExecNonQuery(sql, sp.ToArray());
-        }
-
-        /// <summary>
-        /// 根据ID删除指定对象
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public int DeleteModel<T>(string id) where T : IId<string>
-        {
-            string sql = PrepareDeleteSqlString<T>(id);
-            var sp = CreateParameter("@ID", id);
-            return ExecNonQuery(sql, sp);
-        }
-
-        #endregion
-
         #region 对象参数转换SqlParam
         /// <summary>
         /// 字典对象参数转换
@@ -190,7 +22,7 @@ namespace DataGate.Com.DB
         /// <param name="dict"></param>
         /// <param name="suffix">是否要在参数名后加后缀</param>
         /// <returns></returns>
-        public IEnumerable<IDataParameter> GetParameter(IDictionary<string, object> dict, string suffix = null)
+        IEnumerable<IDataParameter> GetParameter(IDictionary<string, object> dict, string suffix = null)
         {
             if (dict == null)
             {
@@ -208,23 +40,9 @@ namespace DataGate.Com.DB
         /// <param name="entity">实体</param>
         /// <param name="suffix">为和查询参数相区别对应的后缀</param>
         /// <returns></returns>
-        IEnumerable<IDataParameter> GetParameter(object entity, string suffix = null)
+        public IEnumerable<IDataParameter> GetParameter(object entity, string suffix = null)
         {
-            if (entity is IDictionary<string, object> dict)
-            {
-                foreach (var a in GetParameter(dict, suffix))
-                {
-                    yield return a;
-                }
-                yield break;
-            }
-            if (entity == null) yield break;
-            Type type = entity.GetType();
-            PropertyInfo[] props = type.GetProperties();
-            foreach (PropertyInfo prop in props)
-            {
-                yield return CreateParameter(prop.Name + suffix, prop.GetValue(entity, null));
-            }
+            return GetParameter(CommOp.ToStrObjDict(entity));
         }
 
         #endregion

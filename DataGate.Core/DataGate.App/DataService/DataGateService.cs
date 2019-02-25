@@ -82,7 +82,7 @@ namespace DataGate.App.DataService
             DataGateKey gkey = GetDataGate(key);
             if (!(paramObj is IDictionary<string, object> param))
             {
-                param = CommOp.ToDictionary(paramObj);
+                param = CommOp.ToStrObjDict(paramObj);
             }
             object result = gkey.Data;
             if (result != null)
@@ -176,7 +176,7 @@ namespace DataGate.App.DataService
 
         public async Task<int> NonQueryAsync(string key, object param)
         {
-            return await NonQueryAsync(key, CommOp.ToDictionary(param));
+            return await NonQueryAsync(key, CommOp.ToStrObjDict(param));
         }
 
         /// <summary>
@@ -541,7 +541,7 @@ namespace DataGate.App.DataService
         {
             if (!(obj is IDictionary<string, object> parameters))
             {
-                parameters = CommOp.ToDictionary(obj);
+                parameters = CommOp.ToStrObjDict(obj);
             }
             if (gkey.TableJoins.Length > 1)
             {

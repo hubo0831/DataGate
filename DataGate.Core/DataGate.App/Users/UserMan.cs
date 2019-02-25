@@ -14,30 +14,34 @@ namespace DataGate.App
     {
         public UserMan() : base(DBFactory.CreateDBHelper("Default")) { }
 
+        /// <summary>
+        /// 根据账号返回用户
+        /// </summary>
+        /// <param name="account"></param>
+        /// <returns></returns>
         public async Task<AppUser> GetAsync(string account)
         {
-            AppUser user = null;
-            user = await Helper.GetModelByWhereAsync<AppUser>("account=@account", Helper.CreateParameter("account", account.ToLower()));
-            if (user != null)
-            {
-                return user;
-            }
-            if (CommOp.IsEmail(account))
-            {
-                user = await Helper.GetModelByWhereAsync<AppUser>("email=@email", Helper.CreateParameter("email", account.ToLower()));
-            }
-            else if (CommOp.IsPhoneNumber(account))
-            {
-                user = await Helper.GetModelByWhereAsync<AppUser>("tel=@tel", Helper.CreateParameter("tel", account.ToLower()));
-            }
-            return user;
+            return await GetModelByWhereAsync("account=@account", new { account });
         }
 
-        public async Task<AppUser> GetByIdAsync(string id)
+        /// <summary>
+        /// 根据Email返回单个用户，有多个则返回空
+        /// </summary>
+        /// <param name="tel"></param>
+        /// <returns></returns>
+        public async Task<AppUser> GetByTelAsync(string tel)
         {
-            var appUser = await Helper.GetModelByIdAsync<AppUser>(id);
-            return appUser;
+            return await GetModelByWhereAsync("tel=@tel", new { tel });
         }
 
+        /// <summary>
+        /// 根据电话号码返回单个用户，有多个则返回空
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public async Task<AppUser> GetByEmailAsync(string email)
+        {
+            return await GetModelByWhereAsync("email=@email", new { email });
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using DataGate.App.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,5 +32,27 @@ namespace DataGate.App
         /// 用户的ID
         /// </summary>
         public string Id { get; internal set; }
+
+        private Dictionary<string, object> Data { get; set; } = new Dictionary<string, object>();
+
+        /// <summary>
+        /// 获取或设置会话临时数据
+        /// </summary>
+        /// <param name="key">数据的键</param>
+        /// <returns></returns>、
+        [JsonIgnore]
+        public object this[string key]
+        {
+            get
+            {
+                if (Data.ContainsKey(key))
+                    return Data[key];
+                return null;
+            }
+            set
+            {
+                Data[key] = value;
+            }
+        }
     }
 }

@@ -1346,18 +1346,26 @@ namespace DataGate.Com
         }
 
         /// <summary>
-        /// 将对象转化成字典
+        /// 将对象转化成字符串-对象字典
         /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
-        public static Dictionary<string, object> ToDictionary(object obj)
+        /// <param name="obj">要转字典的对象</param>
+        /// <returns>字典对象</returns>
+        public static Dictionary<string, object> ToStrObjDict(object obj)
         {
-            Dictionary<string, object> dict = new Dictionary<string, object>();
-            if (obj != null)
-                foreach (var p in obj.GetType().GetProperties())
-                {
-                    dict[p.Name] = p.GetValue(obj, null);
-                }
+            if (obj == null) return null;
+            Dictionary<string, object> dict = obj as Dictionary<string, object>;
+            if (dict != null)
+            {
+                return dict;
+            }
+            if (obj is IDictionary idict)
+            {
+                dict = idict.Keys.Cast<string>().ToDictionary(key => key, key => idict[key]);
+            }
+            else if (obj != null)
+            {
+                dict = obj.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(obj, null));
+            }
             return dict;
         }
     }

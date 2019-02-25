@@ -17,21 +17,6 @@ namespace DataGate.Com.DB
     partial class DBHelper
     {
         #region  T
-
-        /// <summary>
-        /// 根据查询参对象返回T的列表异步版本
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="strAfterWhere"></param>
-        /// <param name="paramObj"></param>
-        /// <returns></returns>
-        public virtual async Task<List<T>> GetListAsync<T>(string strAfterWhere, IDictionary<string, object> paramObj)
-            where T : new()
-        {
-            var ps = GetParameter(paramObj);
-            return await GetListAsync<T>(strAfterWhere, ps.ToArray());
-        }
-
         /// <summary>
         /// 通过指定条件返回一个T的列表
         /// </summary>
@@ -39,7 +24,7 @@ namespace DataGate.Com.DB
         /// <param name="strAfterWhere"></param>
         /// <param name="sp"></param>
         /// <returns></returns>
-        public virtual async Task<List<T>> GetListAsync<T>(string strAfterWhere = null, params IDataParameter[] sp)
+        public virtual async Task<List<T>> GetListAsync<T>(string strAfterWhere = null, object param = null)
             where T : new()
         {
             string strFields = String.Join(",", typeof(T).GetProperties()
@@ -49,7 +34,7 @@ namespace DataGate.Com.DB
                 strAfterWhere = "where " + strAfterWhere;
             }
             string sql = $"select {strFields} from {GetDbObjName(typeof(T).Name)} {strAfterWhere}";
-            return await GetSqlListAsync<T>(sql, sp);
+            return await GetSqlListAsync<T>(sql, GetParameter(param).ToArray());
         }
 
         /// <summary>
@@ -59,9 +44,10 @@ namespace DataGate.Com.DB
         /// <param name="sql">查询语句</param>
         /// <param name="sp">参数列表</param>
         /// <returns>T的泛型列表</returns>
-        public virtual async Task<List<T>> GetSqlListAsync<T>(string sql, params IDataParameter[] sp)
+        public virtual async Task<List<T>> GetSqlListAsync<T>(string sql, object param = null)
             where T : new()
         {
+            var sp = GetParameter(param).ToArray();
             using (IDataReader reader = await ExecReaderAsync(sql, sp))
             {
                 DataTable schemaTable = reader.GetSchemaTable();
@@ -127,33 +113,17 @@ namespace DataGate.Com.DB
         /// <param name="where">条件</param>
         /// <param name="param">参数化</param>
         /// <returns>返回实体类</returns>
-        public async Task<T> GetModelByWhereAsync<T>(string where, params IDataParameter[] param)
+        public async Task<T> GetModelByWhereAsync<T>(string where, object param = null)
 where T : new()
         {
+            var ps = GetParameter(param).ToArray();
             Type type = typeof(T);
-            StringBuilder strSql = new StringBuilder();
-            strSql.Append("SELECT * FROM " + AddFix(type.Name) + " WHERE ");
-            strSql.Append(where);
-            DataTable dt = await this.ExecDataTableAsync(strSql.ToString(), param);
-            if (dt.Rows.Count == 1)
-            {
-                return RowToModel<T>(dt.Rows[0]);
-            }
-            return default(T);
-        }
+            string sql = $"SELECT COUNT(1) FROM {AddFix(type.Name)} WHERE {where}";
+            int cnt = CommOp.ToInt(await this.ExecGetObjectAsync(sql, ps));
+            if (cnt != 1) return default(T);
 
-        /// <summary>
-        /// 根据查询条件获取单个对象,返回实体，如有多个则返回空
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="sql"></param>
-        /// <param name="param"></param>
-        /// <returns></returns>
-        public async Task<T> GetModelAsync<T>(string sql, params IDataParameter[] param)
-  where T : new()
-        {
-            Type type = typeof(T);
-            DataTable dt = await this.ExecDataTableAsync(sql, param);
+            sql = $"SELECT * FROM {AddFix(type.Name)} WHERE {where}";
+            DataTable dt = await this.ExecDataTableAsync(sql, ps);
             if (dt.Rows.Count == 1)
             {
                 return RowToModel<T>(dt.Rows[0]);
@@ -229,13 +199,13 @@ where T : new()
         /// 根据条件批量删除指定对象的异步版本
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="where"></param>
+        /// <param name="strAfterWhere"></param>
         /// <param name="ps"></param>
         /// <returns></returns>
-        public async Task<int> DeleteModelAsync<T>(string where, IDictionary<string, object> ps)
+        public async Task<int> DeleteManyAsync<T>(string strAfterWhere, object param = null)
         {
-            String sql = $"delete from {AddFix(typeof(T).Name)} where " + where;
-            var sp = GetParameter(ps).ToArray();
+            String sql = $"delete from {AddFix(typeof(T).Name)} where {strAfterWhere}";
+            var sp = GetParameter(param).ToArray();
             return await ExecNonQueryAsync(sql, sp);
         }
 
