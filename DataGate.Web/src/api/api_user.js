@@ -26,13 +26,15 @@ function getUserInfo() {
 
 //用户登录，获取唯一的token存于cookie
 function login(account) {
+  return loginUrl('/api/Check/Login', account);
+}
+
+function loginUrl(url, param) {
   return new Promise((resolve, reject) => {
-    API.POST('/api/Check/Login', account)
+    API.POST(url, param)
       .then(result => {
         if (!result.$code) {
-          userState.token = result.token;
-          util.setCookie("remember", result.remember, 14 * 24 * 60); //保存密码两周
-          bus.$emit("login");
+          loginSuccess(result);
           resolve(result);
         } else {
           reject(result);
@@ -41,27 +43,19 @@ function login(account) {
   });
 }
 
+function loginSuccess(result) {
+  userState.token = result.token;
+  util.setCookie("remember", result.remember, 14 * 24 * 60); //保存密码两周
+  bus.$emit("login");
+}
+
 //勾了“记住我”后下次的登录
 function rememberLogin() {
-  return new Promise((resolve, reject) => {
-    var remember = util.getCookie("remember");
-    if ((remember || '').length < 10) {
-      reject(0);
-      return;
-    }
-    API.POST('/api/Check/Login', {
-        remember
-      })
-      .then(result => {
-        if (!result.$code) {
-          userState.token = result.token;
-          util.setCookie("remember", result.remember, 14 * 24 * 60); //保存密码两周
-          bus.$emit("login");
-          resolve(result);
-        } else {
-          reject(1);
-        }
-      });
+  var remember = util.getCookie("remember");
+  if ((remember || '').length < 10) {
+    return Promise.reject(0);
+  } else return loginUrl('/api/Check/Login', {
+    remember
   });
 }
 
@@ -74,8 +68,7 @@ function logout() {
     var remember = util.getCookie("remember");
     if (remember) {
       util.setCookie("remember", 1);
-    }
-    else{
+    } else {
       util.removeCookie("remember");
     }
     bus.$emit('logout');
@@ -95,4 +88,5 @@ export default {
   rememberLogin,
   //登出
   logout,
+  loginUrl,
 }

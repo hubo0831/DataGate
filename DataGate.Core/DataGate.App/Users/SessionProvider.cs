@@ -4,6 +4,7 @@ using DataGate.Com;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
@@ -232,6 +233,48 @@ namespace DataGate.App
             };
         }
 
+        async Task<AppUser> CreateTempUser(string tempId)
+        {
+            DataGateService dataSvc = Consts.Get<DataGateService>();
+            var newUser = new AppUser
+            {
+                Id = tempId,
+                Account = tempId,
+                Name = tempId,
+                Password = CommOp.NewId().Substring(8, 16)
+            };
+
+            await dataSvc.SubmitAsync("SaveUser", new
+            {
+                Added = new object[] { newUser }
+            });
+
+            return newUser;
+        }
+
+        /// <summary>
+        /// 使用临时信息登录游客账号
+        /// </summary>
+        /// <param name="tempId"></param>
+        /// <returns></returns>
+        public async Task<LoginResult> TempLogin(string tempId)
+        {
+            AppUser user =  await _user.GetModelByIdAsync(tempId);
+            if (user == null)
+            {
+                user = await CreateTempUser(tempId);
+            }
+            else if (user.Account != user.Id) //这是正式用户
+            {
+                return MSG.NotLogined;
+            }
+            return await Login(new LoginRequest
+            {
+                Account = user.Account,
+                Password = user.Password,
+                Remember = "1"
+            }, false);
+        }
 
         private void RestoreFormRemember(LoginRequest request)
         {
@@ -240,6 +283,40 @@ namespace DataGate.App
             if (userPasswords.Length != 2) return;
             request.Account = userPasswords[0];
             request.Password = userPasswords[1];
+        }
+
+        public async Task<LoginResult> Register(AppUser user)
+        {
+            DataGateService dataSvc = Consts.Get<DataGateService>();
+            AppUser existsUser = await _user.GetAsync(user.Account);
+            if (existsUser != null)
+            {
+                throw new Exception("该用户已存在");
+            }
+
+            existsUser = await _user.GetModelByIdAsync(user.Id);
+
+            if (existsUser != null)
+            {
+                await dataSvc.SubmitAsync("SaveUser", new
+                {
+                    Changed = new object[] { user }
+                });
+            }
+            else
+            {
+                await dataSvc.SubmitAsync("SaveUser", new
+                {
+                    Added = new object[] { user }
+                });
+            }
+
+            return await Login(new LoginRequest
+            {
+                Account = user.Account,
+                Password = user.Password,
+                Remember = "1"
+            });
         }
 
         /// <summary>

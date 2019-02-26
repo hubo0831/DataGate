@@ -203,7 +203,7 @@ namespace DataGate.Com
         /// <summary>
         /// 异步发送邮件
         /// </summary>
-        public void SendAsync()
+        public async Task SendAsync()
         {
             System.Net.Mail.MailMessage message = MakeMessage();
             ErrorMessage = String.Empty;
@@ -217,7 +217,7 @@ namespace DataGate.Com
 
             try
             {
-                client.SendAsync(message, UserState);
+               await client.SendMailAsync(message);
             }
             catch (Exception ex)
             {

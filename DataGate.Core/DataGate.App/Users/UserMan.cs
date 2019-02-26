@@ -43,5 +43,15 @@ namespace DataGate.App
         {
             return await GetModelByWhereAsync("email=@email", new { email });
         }
+
+        /// <summary>
+        /// 根据用户名、手机或邮箱获取用户,这要求这三者在数据库都唯一
+        /// </summary>
+        /// <param name="info"></param>
+        /// <returns>用户名、手机或邮箱</returns>
+        public async Task<AppUser> GetByAllAsync(string info)
+        {
+            return await GetModelByWhereAsync("account=@info OR email=@info OR tel=@info", new { info });
+        }
     }
 }
