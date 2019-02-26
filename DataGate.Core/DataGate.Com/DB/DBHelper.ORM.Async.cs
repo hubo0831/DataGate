@@ -73,7 +73,7 @@ namespace DataGate.Com.DB
         }
 
         /// <summary>
-        /// 根据唯一ID获取对象,返回实体，实体为数据表
+        /// 根据唯一ID获取对象,返回实体，如果有多个则报错
         /// </summary>
         /// <param name="id">ID</param>
         /// <returns>返回实体类</returns>
@@ -83,18 +83,22 @@ namespace DataGate.Com.DB
             {
                 return default(T);
             }
+            var pid = CreateParameter("ID", id);
+            Type type = typeof(T);
+            string sql = $"SELECT COUNT(1) FROM {AddFix(type.Name)} where ID=@ID";
+            int cnt = CommOp.ToInt(await this.ExecGetObjectAsync(sql, pid));
+            if (cnt == 0) return default(T);
+            if (cnt > 1) throw new Exception("根据唯一的ID查到不止一条记录");
 
-            T model = new T();
-            Type type = model.GetType();
             StringBuilder sb = new StringBuilder();
-            sb.Append("SELECT * FROM ").Append(AddFix(type.Name)).Append(" Where ID=@ID");
+            sql = "SELECT * FROM {AddFix(type.Name)} where ID=@ID";
             List<IDataParameter> list = new List<IDataParameter>();
-            DataTable dt = await this.ExecDataTableAsync(sb.ToString(), CreateParameter("ID", id));
-            if (dt.Rows.Count > 0)
+            DataTable dt = await this.ExecDataTableAsync(sb.ToString(), pid);
+            if (dt.Rows.Count == 1)
             {
                 return RowToModel<T>(dt.Rows[0]);
             }
-            return model;
+            return default(T);
         }
 
         /// <summary>

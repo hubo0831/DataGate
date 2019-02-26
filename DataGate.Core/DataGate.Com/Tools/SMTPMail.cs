@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace DataGate.Com
 {
-    
+
     /// <summary>
     /// 邮件发送的帮助类
     /// </summary>
@@ -99,7 +99,7 @@ namespace DataGate.Com
         /// </summary>
         void GetAccount(string mailSettings)
         {
-            StringSpliter hp = new StringSpliter(mailSettings, ";", "=");
+            StringSpliter hp = new StringSpliter(mailSettings, "&", "=");
 
             Server = hp["Server"];
             Port = hp["Port"].ToInt();
@@ -111,47 +111,6 @@ namespace DataGate.Com
         }
 
         /// <summary>
-        /// 根据发送地址等信息，构造新的邮件工具类
-        /// </summary>
-        /// <param name="from">发送地址</param>
-        /// <param name="to">到达地址</param>
-        /// <param name="subject">标题</param>
-        /// <param name="body">正文</param>
-        /// <param name="files">附件文件名列表</param>
-        public SMTPMail(string from, string to, string cc, string subject, string body, params string[] files)
-        {
-            int idx = DefaultFrom.IndexOf('<');
-            if ((from ?? "").IndexOf('@') > 0)
-            {
-                From = from;
-            }
-            else if (idx > 0)
-            {
-                From = from + DefaultFrom.Substring(idx);
-            }
-            To = to;
-            CC = cc;
-            Subject = subject;
-            Body = body;
-            Files = files;
-        }
-
-        /// <summary>
-        /// 生成SMTPMail,根据发送到,主题和内容
-        /// </summary>
-        /// <param name="to">发送目的邮件地址</param>
-        /// <param name="subject">主题</param>
-        /// <param name="body">邮件正文</param>
-        public SMTPMail(string to, string subject, string body)
-        {
-            From = DefaultFrom;
-            To = to;
-            Subject = subject;
-            Body = body;
-            Files = null;
-        }
-
-        /// <summary>
         /// 生成邮件信息对象
         /// </summary>
         /// <returns>邮件信息对象</returns>
@@ -159,7 +118,7 @@ namespace DataGate.Com
         {
             //MailMessage message = new MailMessage(From, To, Subject, Body);
             System.Net.Mail.MailMessage message = new System.Net.Mail.MailMessage();
-            message.From = new MailAddress(From);
+            message.From = new MailAddress(From ?? DefaultFrom);
             string[] emails = To.Replace(',', ';').Split(';');
             foreach (string email in emails)
             {
@@ -201,23 +160,25 @@ namespace DataGate.Com
         }
 
         /// <summary>
-        /// 异步发送邮件
+        /// 异步发送邮件, 通过SendCompleted捕捉回调事件
         /// </summary>
-        public async Task SendAsync()
+        public void SendAsync()
         {
             System.Net.Mail.MailMessage message = MakeMessage();
             ErrorMessage = String.Empty;
 
-            SmtpClient client = new SmtpClient(Server);
-            client.Port = Port;
-            client.Credentials = new NetworkCredential(UserName, Password);
+            SmtpClient client = new SmtpClient(Server)
+            {
+                Port = Port,
+                Credentials = new NetworkCredential(UserName, Password)
+            };
             client.SendCompleted += new SendCompletedEventHandler(client_SendCompleted);
-
+            
             client.DeliveryMethod = SmtpDeliveryMethod.Network;
 
             try
             {
-               await client.SendMailAsync(message);
+                client.SendAsync(message, UserState);
             }
             catch (Exception ex)
             {
@@ -226,18 +187,20 @@ namespace DataGate.Com
         }
 
         //// <summary>
-        /// 组织邮件内容并同步发送邮件
+        /// 组织邮件内容并发送邮件
         /// </summary>
-        public void Send()
+        public async Task SendMailAsync()
         {
             System.Net.Mail.MailMessage message = MakeMessage();
             ErrorMessage = String.Empty;
-            SmtpClient client = new SmtpClient(Server);
-            client.Port = Port;
-            client.Credentials = new NetworkCredential(UserName, Password);
+            SmtpClient client = new SmtpClient(Server)
+            {
+                Port = Port,
+                Credentials = new NetworkCredential(UserName, Password)
+            };
             try
             {
-                client.Send(message);
+                await client.SendMailAsync(message);
             }
             catch (Exception ex)
             {
@@ -259,10 +222,7 @@ namespace DataGate.Com
         /// <param name="e"></param>
         void client_SendCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
         {
-            if (SendCompleted != null)
-            {
-                SendCompleted(sender, e);
-            }
+            SendCompleted?.Invoke(sender, e);
         }
     }
 }

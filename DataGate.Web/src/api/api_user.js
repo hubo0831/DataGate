@@ -29,6 +29,7 @@ function login(account) {
   return loginUrl('/api/Check/Login', account);
 }
 
+//使用指定的url地址登录
 function loginUrl(url, param) {
   return new Promise((resolve, reject) => {
     API.POST(url, param)
