@@ -44,10 +44,9 @@ namespace DataGate.Com.DB
         /// <param name="sql">查询语句</param>
         /// <param name="sp">参数列表</param>
         /// <returns>T的泛型列表</returns>
-        public virtual async Task<List<T>> GetSqlListAsync<T>(string sql, object param = null)
+        async Task<List<T>> GetSqlListAsync<T>(string sql, params IDataParameter[] sp)
             where T : new()
         {
-            var sp = GetParameter(param).ToArray();
             using (IDataReader reader = await ExecReaderAsync(sql, sp))
             {
                 DataTable schemaTable = reader.GetSchemaTable();

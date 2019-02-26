@@ -292,9 +292,10 @@ namespace DataGate.App.DataService
 
                 foreach (var field in tableMeta.Fields)
                 {
+                    string prefixReg = DB.DBComm.FieldPrefix.IsEmpty() ? "" : $"\\{DB.DBComm.FieldPrefix}";
                     //@号表示排除参数，取查询子句后面的属性名称, 加入_db.DBComm.FieldPrefix
                     //以防止多表时，两表字段名相同时的重复替换
-                    reg = new Regex($"([^\\w@\\{DB.DBComm.FieldPrefix}]+|^){field.Name}(\\W+|$)", RegexOptions.IgnoreCase);
+                    reg = new Regex($"([^\\w@{prefixReg}]+|^){field.Name}(\\W+|$)", RegexOptions.IgnoreCase);
 
                     if (reg.IsMatch(filter))
                     {

@@ -50,7 +50,7 @@ namespace DataGate
 
         private void GetSourceMetaList()
         {
-            _sourceMetaList = _db.GetSqlListAsync<ColumnMeta>(_dictFor.DictSql).Result;
+            _sourceMetaList = _db.GetListAsync<ColumnMeta>(_dictFor.DictSql).Result;
             IEnumerable<ColumnMeta> tb1 = new List<ColumnMeta>();
             IEnumerable<ColumnMeta> tb2 = new List<ColumnMeta>();
             if (!_settings.Tables.IsEmpty())
