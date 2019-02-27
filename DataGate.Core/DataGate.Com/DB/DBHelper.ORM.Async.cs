@@ -89,10 +89,9 @@ namespace DataGate.Com.DB
             if (cnt == 0) return default(T);
             if (cnt > 1) throw new Exception("根据唯一的ID查到不止一条记录");
 
-            StringBuilder sb = new StringBuilder();
-            sql = "SELECT * FROM {AddFix(type.Name)} where ID=@ID";
+            sql = $"SELECT * FROM {AddFix(type.Name)} where ID=@ID";
             List<IDataParameter> list = new List<IDataParameter>();
-            DataTable dt = await this.ExecDataTableAsync(sb.ToString(), pid);
+            DataTable dt = await this.ExecDataTableAsync(sql, pid);
             if (dt.Rows.Count == 1)
             {
                 return RowToModel<T>(dt.Rows[0]);

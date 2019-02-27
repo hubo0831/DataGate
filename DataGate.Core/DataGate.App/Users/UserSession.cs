@@ -31,7 +31,7 @@ namespace DataGate.App
         /// <summary>
         /// 用户的ID
         /// </summary>
-        public string Id { get; internal set; }
+        public string Id { get; set; }
 
         private Dictionary<string, object> Data { get; set; } = new Dictionary<string, object>();
 

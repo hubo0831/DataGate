@@ -69,16 +69,6 @@ namespace DataGate.Com
         public string Password { get; set; }
 
         /// <summary>
-        /// 默认发件人
-        /// </summary>
-        public string DefaultFrom { get; set; }
-
-        /// <summary>
-        /// 错误信息
-        /// </summary>
-        public string ErrorMessage { get; set; }
-
-        /// <summary>
         /// 创建一个邮件发送类
         /// </summary>
         public SMTPMail(string mailSettings) { GetAccount(mailSettings); }
@@ -105,7 +95,7 @@ namespace DataGate.Com
             Port = hp["Port"].ToInt();
             UserName = hp["UserName"];
             Password = hp["Password"];
-            DefaultFrom = hp["From"];
+            From = hp["From"];
 
             if (Port == 0) Port = 25;
         }
@@ -118,7 +108,7 @@ namespace DataGate.Com
         {
             //MailMessage message = new MailMessage(From, To, Subject, Body);
             System.Net.Mail.MailMessage message = new System.Net.Mail.MailMessage();
-            message.From = new MailAddress(From ?? DefaultFrom);
+            message.From = new MailAddress(From);
             string[] emails = To.Replace(',', ';').Split(';');
             foreach (string email in emails)
             {
@@ -165,7 +155,6 @@ namespace DataGate.Com
         public void SendAsync()
         {
             System.Net.Mail.MailMessage message = MakeMessage();
-            ErrorMessage = String.Empty;
 
             SmtpClient client = new SmtpClient(Server)
             {
@@ -173,26 +162,19 @@ namespace DataGate.Com
                 Credentials = new NetworkCredential(UserName, Password)
             };
             client.SendCompleted += new SendCompletedEventHandler(client_SendCompleted);
-            
+
             client.DeliveryMethod = SmtpDeliveryMethod.Network;
 
-            try
-            {
-                client.SendAsync(message, UserState);
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage = ex.Message;
-            }
+            client.SendAsync(message, UserState);
         }
 
         //// <summary>
         /// 组织邮件内容并发送邮件
         /// </summary>
+        /// <returns>错误信息，无错误返回空</returns>
         public async Task SendMailAsync()
         {
             System.Net.Mail.MailMessage message = MakeMessage();
-            ErrorMessage = String.Empty;
             SmtpClient client = new SmtpClient(Server)
             {
                 Port = Port,
@@ -202,16 +184,13 @@ namespace DataGate.Com
             {
                 await client.SendMailAsync(message);
             }
-            catch (Exception ex)
-            {
-                ErrorMessage = ex.Message;
-            }
             finally
             {
                 foreach (Attachment att in message.Attachments)
                 {
                     att.Dispose();
                 }
+                client.Dispose();
             }
         }
 
