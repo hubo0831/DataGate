@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -33,17 +34,17 @@ namespace DataGate.App.DataService
             set
             {
                 _fields = value;
-                var pkey = Fields.FirstOrDefault(f => f.PrimaryKey ==true);
+                var pkey = Fields.FirstOrDefault(f => f.PrimaryKey == true);
                 if (pkey == null)
                 {
-                    pkey = Fields.FirstOrDefault(f => 
+                    pkey = Fields.FirstOrDefault(f =>
                     f.Name.Equals(Consts.DefaultKeyName, StringComparison.OrdinalIgnoreCase));
                     if (pkey != null) pkey.PrimaryKey = true;
                 }
                 var sort = Fields.FirstOrDefault(f => f.DataType == Consts.DataTypeSortOrder);
                 if (sort == null)
                 {
-                    sort = Fields.FirstOrDefault(f => 
+                    sort = Fields.FirstOrDefault(f =>
                     f.Name.Equals(Consts.DefaultSortName, StringComparison.OrdinalIgnoreCase));
                     if (sort != null) sort.DataType = Consts.DataTypeSortOrder;
                 }
@@ -56,16 +57,9 @@ namespace DataGate.App.DataService
         public string Remark { get; set; }
 
         /// <summary>
-        /// 字段名称集合
+        /// 动态的其他属性
         /// </summary>
-        [JsonIgnore]
-        public IEnumerable<string> PropNames
-        {
-            get
-            {
-                return Fields.Select(f => f.Name);
-            }
-        }
+        public JToken Attr { get; set; }
 
         /// <summary>
         /// 获取主键集合
@@ -109,5 +103,10 @@ namespace DataGate.App.DataService
             }
         }
 
+        /// <summary>
+        /// 定义它的原文件
+        /// </summary>
+        [JsonIgnore]
+        public string Source { get; set; }
     }
 }

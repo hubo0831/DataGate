@@ -28,7 +28,7 @@ namespace DataGate.Tests
     /// </summary>
     public class AppDataTest : BaseTest
     {
-        protected TestServer _testServer;
+        TestServer _testServer;
         protected DBHelper _db;
         private HttpClient _sessionClient;
 
@@ -53,20 +53,6 @@ namespace DataGate.Tests
             var client = _testServer.CreateClient();
             //var result = await PostLoginTest("system", "123456");
             //client.DefaultRequestHeaders.Add("token", result.Token);
-            return client;
-        }
-
-        /// <summary>
-        /// 生成带登录后Token的Web客户端
-        /// </summary>
-        /// <returns></returns>
-        [Theory]
-        [InlineData("system", "123456")]
-        protected async Task<HttpClient> CreateLoginedClientAsync(string account, string passWord)
-        {
-            var client = _testServer.CreateClient();
-            var result = await PostLoginTest(account, passWord);
-            client.DefaultRequestHeaders.Add("token", result.Token);
             return client;
         }
 
@@ -111,7 +97,7 @@ namespace DataGate.Tests
             {
                 if (_sessionClient == null)
                 {
-                   _sessionClient = _testServer.CreateClient();
+                    _sessionClient = _testServer.CreateClient();
                 }
                 return _sessionClient;
             }
@@ -125,15 +111,15 @@ namespace DataGate.Tests
         /// <returns></returns>
         [Theory]
         [InlineData("System", "123456")]
-        public async Task<LoginResult> PostLoginTest(string account, string password)
+        public async Task<LoginResult> LoginAsync(string account, string password)
         {
-            var client = _testServer.CreateClient();
-            HttpResponseMessage response = await client.PostAsync("/api/check/login",
+            HttpResponseMessage response = await SessionClient.PostAsync("/api/check/login",
               new FormUrlEncodedContent(new Dictionary<string, string>(){
                   { "Account", account },
                   {"Password",password }}));
             var result = await response.Content.ReadAsAsync<LoginResult>();
             Assert.Equal(0, result.Code);
+            SessionClient.DefaultRequestHeaders.Add("token", result.Token);
             return result;
         }
 
@@ -153,6 +139,23 @@ namespace DataGate.Tests
             Assert.True(response.IsSuccessStatusCode);
             return await response.Content.ReadAsAsync<T>();
         }
+
+        /// <summary>
+        /// 用以保持会话的客户端提交HttpPost请求
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="url"></param>
+        /// <param name="p"></param>
+        /// <returns></returns>
+        protected async Task<T> HttpJsonPostAsync<T>(string url, object p)
+        {
+            HttpResponseMessage response = await SessionClient.PostAsJsonAsync(url, p);
+            var resultStr = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("HTTPJSONPOST-RESULT-STRING=" + resultStr);
+            Assert.True(response.IsSuccessStatusCode);
+            return await response.Content.ReadAsAsync<T>();
+        }
+
 
         /// <summary>
         /// 用以保持会话的客户端提交HttpGet请求
@@ -288,17 +291,10 @@ namespace DataGate.Tests
         [InlineData("GetAllRoleMenus")]
         //[InlineData("GetAuthMenus")]
         [Theory]
-        public async Task<JToken> Query(string key, object parm = null)
+        public async Task<JToken> QueryAsync(string key, object parm = null)
         {
-            var client = _testServer.CreateClient();
-            string sql = $"/api/dg/{key}{SerialzeToUrl(parm)}";
-            HttpResponseMessage response = await client.GetAsync(sql);
-            var result = await response.Content.ReadAsAsync<JToken>();
-            string resStr = await response.Content.ReadAsStringAsync();
-            string resultStr = result.ToString();
-            Debug.WriteLine("QUERY-RESULT-STRING=" + resultStr);
-            Debug.WriteLine("QUERY-RESULT-COUNT=" + result.Count());
-            Assert.True(response.IsSuccessStatusCode);
+            string url = $"/api/dg/{key}{SerialzeToUrl(parm)}";
+            var result = await HttpGetAsync<JToken>(url);
             return result;
         }
 
@@ -306,7 +302,7 @@ namespace DataGate.Tests
         [InlineData("00000000000000000000000000000001")]
         public async Task TestGetUserMenus(string userId)
         {
-            var array = await Query("GetUserMenuIds", new { userId });
+            var array = await QueryAsync("GetUserMenuIds", new { userId });
             Assert.True(array.Count() > 0);
         }
 
@@ -318,12 +314,8 @@ namespace DataGate.Tests
         /// <returns></returns>
         protected async Task<JObject> PageQuery(string key, object parm = null)
         {
-            var client = _testServer.CreateClient();
-            string sql = $"/api/dg/{key}{SerialzeToUrl(parm)}";
-            HttpResponseMessage response = await client.GetAsync(sql);
-            var result = await response.Content.ReadAsAsync<JObject>();
-            Debug.WriteLine("QUERY-RESULT-COUNT=" + result.Count);
-            Assert.True(response.IsSuccessStatusCode);
+            string url = $"/api/dg/{key}{SerialzeToUrl(parm)}";
+            var result = await HttpGetAsync<JObject>(url);
             return result;
         }
 
@@ -337,10 +329,7 @@ namespace DataGate.Tests
         [InlineData("test")]
         public async Task<string> GetMetadata(string key)
         {
-            var client = _testServer.CreateClient();
-
-            HttpResponseMessage response = await client.GetAsync($"/api/dg/m/{key}");
-            var result = await response.Content.ReadAsStringAsync();
+            var result = await HttpGetAsync<String>($"/api/dg/m/{key}");
             Debug.WriteLine("Metadata-RESULT=" + result);
             return result;
         }
@@ -374,13 +363,12 @@ namespace DataGate.Tests
                 num = rand.NextDouble() * 10000
             });
             var client = _testServer.CreateClient();
-            HttpResponseMessage response = await client.PostAsJsonAsync("/api/dg/s/test", new
+            var result =await SubmitAsync("test", new
             {
                 added = objs,
                 changed = new string[0],
                 removedKeys = new string[0]
             });
-            var result = await response.Content.ReadAsAsync<string[]>();
             Assert.Equal(objs.Count(), result.Length);
             return result;
         }
@@ -390,11 +378,8 @@ namespace DataGate.Tests
         {
             var inserts = await TestInsertMany(3);
             var objIds = JsonConvert.SerializeObject(inserts);
-            var client = _testServer.CreateClient();
             string url = "/api/dg/testin?ids=" + WebUtility.UrlEncode(objIds);
-            HttpResponseMessage response = await client.GetAsync(url);
-            //string resStr = await response.Content.ReadAsStringAsync(); ;
-            var result = await response.Content.ReadAsAsync<JArray>();
+            var result = await HttpGetAsync<JArray>(url);
             Assert.Equal(inserts.Count(), result.Count);
             return result;
         }
@@ -408,12 +393,10 @@ namespace DataGate.Tests
                 t["userName"] = "新的用户";
                 t["updateDate"] = new DateTime(1999, 3, 8);
             }
-            var client = _testServer.CreateClient();
-            HttpResponseMessage response = await client.PostAsJsonAsync("/api/dg/s/test", new
+            var result = await SubmitAsync("test", new
             {
                 changed = insertsArray
             });
-            var result = await response.Content.ReadAsAsync<string[]>();
             Assert.True(0 == result.Length);
         }
 
@@ -422,8 +405,7 @@ namespace DataGate.Tests
         {
             var insertsArray = await TestInQuery();
 
-            var client = _testServer.CreateClient();
-            HttpResponseMessage response = await client.PostAsJsonAsync("/api/dg/s/test", new
+            HttpResponseMessage response = await SessionClient.PostAsJsonAsync("/api/dg/s/test", new
             {
                 removed = insertsArray.Select(a => new
                 {
@@ -522,11 +504,7 @@ namespace DataGate.Tests
                 }
             };
 
-            var client = _testServer.CreateClient();
-            var response = await client.PostAsJsonAsync("/api/dg/s/SaveUser", task);
-            string resultStr = await response.Content.ReadAsStringAsync();
-            Console.WriteLine("RESULT=" + resultStr);
-            var result = await response.Content.ReadAsAsync<string[]>();
+            var result = await SubmitAsync("SaveUser", task);
             Assert.True(1 == result.Length);
 
             var user1 = new
@@ -559,8 +537,7 @@ namespace DataGate.Tests
                 }
             };
 
-            response = await client.PostAsJsonAsync("/api/dg/s/SaveUser", task1);
-            result = await response.Content.ReadAsAsync<string[]>();
+            result = await SubmitAsync("SaveUser", task1);
             Assert.True(0 == result.Length);
 
             var task2 = new
@@ -576,19 +553,13 @@ namespace DataGate.Tests
                 }
             };
 
-            response = await client.PostAsJsonAsync("/api/dg/s/SaveUser", task2);
-            result = await response.Content.ReadAsAsync<string[]>();
+            result = await SubmitAsync("SaveUser", task2);
             Assert.True(0 == result.Length);
         }
 
-        protected async Task<string[]> Submit(string key, object sumitData)
+        protected async Task<string[]> SubmitAsync(string key, object sumitData)
         {
-            var client = _testServer.CreateClient();
-            var response = await client.PostAsJsonAsync($"/api/dg/s/{key}", sumitData);
-            string resultStr = await response.Content.ReadAsStringAsync();
-            Console.WriteLine("SUBMIT-RESULT=" + resultStr);
-            Assert.True(response.IsSuccessStatusCode);
-            var result = await response.Content.ReadAsAsync<string[]>();
+            var result = await HttpJsonPostAsync<string[]>($"/api/dg/s/{key}", sumitData);
             return result;
         }
 
@@ -629,11 +600,7 @@ namespace DataGate.Tests
                 }
             };
 
-            var client = _testServer.CreateClient();
-            var response = await client.PostAsJsonAsync("/api/dg/s/SaveRole", task);
-            string resultStr = await response.Content.ReadAsStringAsync();
-            Console.WriteLine("RESULT=" + resultStr);
-            var result = await response.Content.ReadAsAsync<string[]>();
+            var result = await SubmitAsync("SaveRole", task);
             Assert.True(1 == result.Length);
 
             var role1 = new
@@ -663,8 +630,7 @@ namespace DataGate.Tests
                 }
             };
 
-            response = await client.PostAsJsonAsync("/api/dg/s/SaveRole", task1);
-            result = await response.Content.ReadAsAsync<string[]>();
+            result = await SubmitAsync("SaveRole", task1);
             Assert.True(0 == result.Length);
 
             var task2 = new
@@ -680,8 +646,7 @@ namespace DataGate.Tests
                 }
             };
 
-            response = await client.PostAsJsonAsync("/api/dg/s/SaveRole", task2);
-            result = await response.Content.ReadAsAsync<string[]>();
+            result = await SubmitAsync("SaveRole", task2);
             Assert.True(0 == result.Length);
         }
     }

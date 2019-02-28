@@ -866,6 +866,7 @@ namespace DataGate.Com
         /// <returns></returns>
         public static bool IsVariableName(this string str)
         {
+            if (str == null) return false;
             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"^[a-zA-Z0-9_]+$");
             return regex.IsMatch(str);
         }

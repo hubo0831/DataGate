@@ -106,6 +106,18 @@ namespace DataGate.App.DataService
         /// </summary>
         [JsonIgnore]
         public DataGateService DataService { get; set; }
+
+        /// <summary>
+        /// 定义所在的文件名
+        /// </summary>
+        [JsonIgnore]
+        public string Source { get;  set; }
+
+        /// <summary>
+        /// 动态的其他属性
+        /// </summary>
+        public JToken Attr { get; set; }
+
     }
 
     internal class JoinInfo

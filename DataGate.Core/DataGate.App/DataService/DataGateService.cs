@@ -354,10 +354,10 @@ namespace DataGate.App.DataService
         {
             var tableMeta = GetMainTable(gkey);
             IDictionary<string, object> psin = jToken.ToDictionary();
+            gkey.DataGate.OnAdd(gkey, psin);
             List<string> fields = tableMeta.Fields.Where(f => !f.IsArray && f.ForeignField.IsEmpty())
                 .Select(f => f.Name).Intersect(psin.Select(kv => kv.Key),
                  StringComparer.OrdinalIgnoreCase).ToList();
-
 
             string id = null;
             string getMaxIdSql = null;
@@ -387,7 +387,6 @@ namespace DataGate.App.DataService
                 }
             }
 
-            gkey.DataGate.OnAdd(gkey, fields, psin);
 
             var ps = fields.Select(f =>
             {
@@ -405,7 +404,7 @@ namespace DataGate.App.DataService
             await _db.TransNonQueryAsync(sql, ps);
             if (!getMaxIdSql.IsEmpty())
             {
-                id = (string)(await _db.TransGetObjectAsync(getMaxIdSql));
+                id = CommOp.ToStr(await _db.TransGetObjectAsync(getMaxIdSql));
                 psin[id] = id;
             }
 
@@ -434,11 +433,11 @@ namespace DataGate.App.DataService
         {
             var tableMeta = GetMainTable(gkey);
             IDictionary<string, object> psin = jToken.ToDictionary();
+            gkey.DataGate.OnChange(gkey, psin);
             List<string> fields = tableMeta.Fields.Where(f => !f.IsArray && f.ForeignField.IsEmpty())
                 .Select(f => f.Name).Intersect(psin.Select(kv => kv.Key),
                  StringComparer.OrdinalIgnoreCase).ToList();
 
-            gkey.DataGate.OnChange(gkey, fields, psin);
             var ps = fields.Select(f =>
             {
                 var psKey = psin.Keys.First(key => key.Equals(f, StringComparison.OrdinalIgnoreCase));

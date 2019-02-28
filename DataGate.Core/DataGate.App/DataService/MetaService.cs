@@ -24,7 +24,7 @@ namespace DataGate.App.DataService
         Dictionary<string, TableMeta> _tableMetas = new Dictionary<string, TableMeta>();
 
         //为保证原始添加顺序，不用Dictionary<>
-        static List<KeyValuePair<string, IDataGate>> _dataGateEntrys = new List<KeyValuePair<string, IDataGate>>();
+        static List<DataGateEntry> _dataGateEntrys = new List<DataGateEntry>();
         FileSystemWatcher fw;
         string _appDataDir;
 
@@ -75,22 +75,17 @@ namespace DataGate.App.DataService
         /// </summary>
         private void CreateDataGateList()
         {
-            foreach (var kv in _dataKeysDict)
+            foreach (var gkey in _dataKeysDict.Values)
             {
                 List<IDataGate> dataGates = new List<IDataGate>();
                 foreach (var kvEntry in _dataGateEntrys)
                 {
-                    string pattern = kvEntry.Key;
-                    if (pattern.IsVariableName())
+                    if (kvEntry.IsMatch(gkey))
                     {
-                        pattern = '^' + pattern + "$";
-                    }
-                    if (Regex.IsMatch(kv.Key, pattern, RegexOptions.IgnoreCase))
-                    {
-                        dataGates.Add(kvEntry.Value);
+                        dataGates.Add(kvEntry.DataGate);
                     }
                 }
-                kv.Value.DataGate = new ListDataGate(dataGates);
+                gkey.DataGate = new ListDataGate(dataGates);
             }
         }
 
@@ -103,6 +98,7 @@ namespace DataGate.App.DataService
                 List<DataGateKey> keys = JsonConvert.DeserializeObject<List<DataGateKey>>(json);
                 keys.ForEach(key =>
                 {
+                    key.Source = new FileInfo(keyFile).Name;
                     if (key.Model.IsEmpty()) return;
                     key.TableJoins = GetJoinInfos(key).ToArray();
                     var mainModel = key.TableJoins[0].Table;
@@ -141,11 +137,21 @@ namespace DataGate.App.DataService
                 if (tableJArr == null) //json文件是字典对象
                 {
                     tableMetas = tableJson.ToDictionary().
-                    Select(kv => CreateTableMeta(kv.Key, JToken.FromObject(kv.Value)));
+                    Select(kv =>
+                    {
+                        var tb = CreateTableMeta(kv.Key, JToken.FromObject(kv.Value));
+                        tb.Source = new FileInfo(modelFile).Name;
+                        return tb;
+                    });
                 }
                 else //json文件是数组对象
                 {
-                    tableMetas = tableJArr.Select(jtoken => CreateTableMeta((JObject)jtoken));
+                    tableMetas = tableJArr.Select(jtoken =>
+                    {
+                        var tb = CreateTableMeta((JObject)jtoken);
+                        tb.Source = new FileInfo(modelFile).Name;
+                        return tb;
+                    });
                 }
                 allTableMetas.AddRange(tableMetas);
             }
@@ -182,8 +188,19 @@ namespace DataGate.App.DataService
         public static void RegisterDataGate(string key, IDataGate dataGate)
         {
             key = key.ToLower();
-            _dataGateEntrys.Add(new KeyValuePair<string, IDataGate>(key, dataGate));
+            _dataGateEntrys.Add(new DataGateEntry(key, dataGate));
         }
+
+        /// <summary>
+        /// 注册一个数据处理前后的监视程序
+        /// </summary>
+        /// <param name="key">一个完全匹配的key(只包含字母、数字和下划线）或一个匹配的正则表达式</param>
+        /// <param name="dataGate">实现IDataGate接口的处理程序</param>
+        public static void RegisterDataGate(Func<DataGateKey, bool> filter, IDataGate dataGate)
+        {
+            _dataGateEntrys.Add(new DataGateEntry(filter, dataGate));
+        }
+
 
         //支持逗号分隔的字符串/字符串数组/对象数组/混合数组
         private IEnumerable<FieldMeta> ParseMetadata(JToken jToken)
@@ -488,6 +505,48 @@ namespace DataGate.App.DataService
                 _tempDict[connName] = DBFactory.CreateDBHelper(connName);
             }
             return _tempDict[connName];
+        }
+    }
+
+    /// <summary>
+    /// 用于注册DataGate的内部类
+    /// </summary>
+    class DataGateEntry
+    {
+        public DataGateEntry(string key, IDataGate dataGate)
+        {
+            Key = key;
+            DataGate = dataGate;
+        }
+
+        public DataGateEntry(Func<DataGateKey, bool> filter, IDataGate dataGate)
+        {
+            Filter = filter;
+            DataGate = dataGate;
+        }
+
+        public string Key { get; set; }
+
+        public IDataGate DataGate { get; set; }
+
+        public Func<DataGateKey, bool> Filter { get; set; }
+
+        public bool IsMatch(DataGateKey gkey)
+        {
+            if (Filter != null)
+            {
+                return Filter(gkey);
+            }
+            string pattern = Key;
+            if (pattern.IsVariableName())
+            {
+                pattern = '^' + pattern + "$";
+            }
+            if (Regex.IsMatch(gkey.Key, pattern, RegexOptions.IgnoreCase))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

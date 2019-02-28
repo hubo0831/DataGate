@@ -11,25 +11,26 @@ namespace DataGate.App.DataService
     /// </summary>
     class ListDataGate : ISubmitDataGate, ISubmitedDataGate, IQueryDataGate, IExportDataGate
     {
-         List<IDataGate> _dataGates { get; set; } 
+        List<IDataGate> _dataGates { get; set; }
         public ListDataGate(List<IDataGate> datagates)
         {
-            _dataGates = datagates;
+            _dataGates = datagates.GroupBy(g => g.GetType())
+                .Select(g => g.First()).ToList();
         }
 
-        public void OnAdd(DataGateKey gkey, List<string> fields, IDictionary<string, object> ps)
+        public void OnAdd(DataGateKey gkey, IDictionary<string, object> ps)
         {
             foreach (var dg in _dataGates.OfType<ISubmitDataGate>())
             {
-                dg.OnAdd(gkey, fields, ps);
+                dg.OnAdd(gkey, ps);
             }
         }
 
-        public void OnChange(DataGateKey gkey, List<string> fields, IDictionary<string, object> ps)
+        public void OnChange(DataGateKey gkey, IDictionary<string, object> ps)
         {
             foreach (var dg in _dataGates.OfType<ISubmitDataGate>())
             {
-                dg.OnChange(gkey, fields, ps);
+                dg.OnChange(gkey, ps);
             }
         }
 
