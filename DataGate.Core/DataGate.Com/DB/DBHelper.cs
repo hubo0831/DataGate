@@ -154,21 +154,21 @@ namespace DataGate.Com.DB
         /// 结束事务
         /// </summary>
         /// <returns>结束事务出错时返回的错误信息</returns>
-        public virtual String EndTrans()
+        public virtual void EndTrans()
         {
-            String s = "";
             try
             {
                 _trans.Commit();
             }
-            catch (DbException ex)
+            catch (DbException)
             {
                 _trans.Rollback();
-                s = ex.Message;
+                throw;
             }
-
-            _transConn.Close();
-            return s;
+            finally
+            {
+                _transConn.Close();
+            }
         }
 
         /// <summary>

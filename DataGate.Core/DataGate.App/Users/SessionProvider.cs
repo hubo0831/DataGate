@@ -179,7 +179,7 @@ namespace DataGate.App
         /// <param name="request"></param>
         /// <param name="validate">验证密码</param>
         /// <returns></returns>
-        public async Task<LoginResult> Login(LoginRequest request, bool validate=true)
+        public async Task<LoginResult> Login(LoginRequest request, bool validate = true)
         {
             LoginResult result = new LoginResult();
             string requestPass = null;
@@ -259,7 +259,7 @@ namespace DataGate.App
         /// <returns></returns>
         public async Task<LoginResult> TempLogin(string tempId)
         {
-            AppUser user =  await _user.GetModelByIdAsync(tempId);
+            AppUser user = await _user.GetModelByIdAsync(tempId);
             if (user == null)
             {
                 user = await CreateTempUser(tempId);
@@ -285,16 +285,51 @@ namespace DataGate.App
             request.Password = userPasswords[1];
         }
 
-        public async Task<LoginResult> Register(AppUser user)
+        /// <summary>
+        /// 检查用户信息合法性
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public async Task<ApiResult> CheckNewUserAsync(AppUser user)
         {
-            DataGateService dataSvc = Consts.Get<DataGateService>();
+            ApiResult result = new ApiResult();
+
             AppUser existsUser = await _user.GetAsync(user.Account);
             if (existsUser != null)
             {
-                throw new Exception("该用户已存在");
+                throw new Exception("账号已存在，请换一个名称");
             }
 
-            existsUser = await _user.GetModelByIdAsync(user.Id);
+            if (!user.Tel.IsEmpty())
+            {
+                existsUser = await _user.GetByTelAsync(user.Tel);
+            }
+            if (existsUser != null)
+            {
+                throw new Exception("该号码被注册过了");
+            }
+
+            if (!user.Email.IsEmpty())
+            {
+                existsUser = await _user.GetByEmailAsync(user.Email);
+            }
+            if (existsUser != null)
+            {
+                throw new Exception("该邮箱被注册过了");
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 注册新用户
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public async Task<ApiResult> RegisterAsync(AppUser user)
+        {
+            var result = await CheckNewUserAsync(user);
+            DataGateService dataSvc = Consts.Get<DataGateService>();
+            var existsUser = await _user.GetModelByIdAsync(user.Id);
 
             if (existsUser != null)
             {
@@ -310,13 +345,8 @@ namespace DataGate.App
                     Added = new object[] { user }
                 });
             }
-
-            return await Login(new LoginRequest
-            {
-                Account = user.Account,
-                Password = user.Password,
-                Remember = "1"
-            });
+            result.Message = "注册成功";
+            return result;
         }
 
         /// <summary>
