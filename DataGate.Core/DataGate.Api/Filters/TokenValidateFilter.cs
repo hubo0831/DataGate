@@ -84,11 +84,5 @@ namespace DataGate.Api.Filters
                 }
             }
         }
-
-        static List<string> ExcludedActions = new List<string>
-        {
-           $"{typeof(CheckController)}.{nameof(CheckController.Login)}",
-           $"{typeof(HomeController)}.{nameof(HomeController.Index)}"
-        };
     }
 }

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using DataGate.Com;
 using DataGate.App;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DataGate.Api.Controllers
 {

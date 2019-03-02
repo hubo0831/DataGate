@@ -26,13 +26,14 @@ namespace DataGate.Api.Controllers
         }
 
         /// <summary>
-        /// 登录用户的令牌,不要在构造函数使用
+        /// 登录用户的令牌,不要在构造函数使用, 参数需传小写的token在header中或url参数中
         /// </summary>
         public string Token
         {
             get
             {
-                return this.HttpContext.Request.Headers["token"].FirstOrDefault();
+                return this.HttpContext.Request.Headers["token"].FirstOrDefault()
+                     ?? this.HttpContext.Request.Query["token"];
             }
         }
 

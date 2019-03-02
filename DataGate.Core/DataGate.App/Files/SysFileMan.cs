@@ -1,4 +1,5 @@
 ﻿using DataGate.App.DataService;
+using DataGate.Com;
 using DataGate.Com.DB;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace DataGate.App.Files
         /// <returns></returns>
         public async Task<int> Duplicate(SysFile file)
         {
-            file.Id = Guid.NewGuid().ToString("N");
+            file.Id = CommOp.NewId();
             return await Helper.InsertModelAsync<SysFile>(file);
         }
 
@@ -28,7 +29,7 @@ namespace DataGate.App.Files
         /// <returns></returns>
         public async Task<SysFile> GetByMd5Async(string md5)
         {
-            var doc = await GetModelByWhereAsync("Md5=@Md5", Helper.CreateParameter("Md5", md5));
+            var doc = await GetModelByWhereAsync("Md5=@Md5", new { Md5 = md5 });
             return doc;
         }
     }
