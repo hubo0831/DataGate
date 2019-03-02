@@ -23,7 +23,7 @@ namespace DataGate.App.DataService
     /// </summary>
     public class DataGateService : IDisposable
     {
-         DBHelper _db { get; set; }
+        DBHelper _db { get; set; }
         IMetaService _ms;
 
         /// <summary>
@@ -349,45 +349,55 @@ namespace DataGate.App.DataService
             return gkey.TableJoins[0].Table;
         }
 
+        //在新增记录时，对于单一主键的记录，检查主键字段是否自增或是guid,是否值为空,
+        //如果是自增，则去掉传过来的值，由库自动生成，如果是guid并且为空，则生成一个guid
+        private void CheckPrimaryKey(TableMeta tableMeta, IDictionary<string, object> psin, out string id, out string getMaxIdSql)
+        {
+            id = null;
+            getMaxIdSql = null;
+            var pKeyField = tableMeta.PrimaryKey;
+            if (pKeyField == null) return;
+
+            if (pKeyField.DataType == "Number")
+            {
+                getMaxIdSql = $"select max({pKeyField.FixDbName}) from {tableMeta.FixDbName}";
+            }
+
+            var pkey = psin.Keys.FirstOrDefault(k => k.Equals(pKeyField.Name, StringComparison.OrdinalIgnoreCase));
+
+            //没有传主键字段过来
+            if (pkey == null)
+            {
+                pkey = pKeyField.Name;
+                psin.Add(pkey, null);
+            }
+
+            //当主键为Number型时，认为是自增字段，为空时从参数中去掉，让数据库自动生成
+            if (pKeyField.DataType == "Number")
+            {
+                psin.Remove(pkey);
+            }
+            //非number型，并且为空，则认为是32位的guid字符串，为它自动生成
+            else if (CommOp.IsEmpty(psin[pkey]))
+            {
+                id = CommOp.NewId();
+                psin[pkey] = id;
+            }
+            else
+            {
+                id = CommOp.ToStr(psin[pkey]);
+            }
+        }
 
         private async Task<string> InsertOneAsync(DataGateKey gkey, JToken jToken)
         {
             var tableMeta = GetMainTable(gkey);
             IDictionary<string, object> psin = jToken.ToDictionary();
+            CheckPrimaryKey(tableMeta, psin, out string id, out string getMaxIdSql);
             gkey.DataGate.OnAdd(gkey, psin);
             List<string> fields = tableMeta.Fields.Where(f => !f.IsArray && f.ForeignField.IsEmpty())
                 .Select(f => f.Name).Intersect(psin.Select(kv => kv.Key),
                  StringComparer.OrdinalIgnoreCase).ToList();
-
-            string id = null;
-            string getMaxIdSql = null;
-            if (tableMeta.PrimaryKeys.Count() == 1 && fields.Contains(tableMeta.PrimaryKey.Name, StringComparer.OrdinalIgnoreCase))
-            {
-                var field = tableMeta.PrimaryKey;
-
-                var pkey = psin.Keys.First(k => k.Equals(field.Name, StringComparison.OrdinalIgnoreCase));
-                if (psin.ContainsKey(pkey) && (psin[pkey] as string).IsEmpty())
-                {
-                    if (field.DataType == "Number") //当主键为Number型时，认为是自增字段，为空时从参数中去掉，让数据库自动生成
-                    {
-                        psin.Remove(pkey);
-                        var ff = fields.FirstOrDefault(f => f.Equals(pkey, StringComparison.OrdinalIgnoreCase));
-                        if (ff != null) fields.Remove(ff);
-                        getMaxIdSql = $"select max({field.FixDbName}) from {tableMeta.FixDbName}";
-                    }
-                    else //非number型，则认为是32位的guid字符串，为它自动生成
-                    {
-                        id = CommOp.NewId();
-                        psin[pkey] = id;
-                    }
-                }
-                else if (psin.ContainsKey(pkey))
-                {
-                    id = CommOp.ToStr(psin[pkey]);
-                }
-            }
-
-
             var ps = fields.Select(f =>
             {
                 //集合字段不进入Insert语句
@@ -401,7 +411,9 @@ namespace DataGate.App.DataService
             string strFields = String.Join(",", fields.Select(p => _db.AddFix(p.Trim())));
             string strValues = String.Join(",", ps.Select(p => '@' + p.ParameterName));
             string sql = $"insert into {tableMeta.FixDbName} ({strFields}) values({strValues})";
+
             await _db.TransNonQueryAsync(sql, ps);
+
             if (!getMaxIdSql.IsEmpty())
             {
                 id = CommOp.ToStr(await _db.TransGetObjectAsync(getMaxIdSql));
@@ -553,7 +565,7 @@ namespace DataGate.App.DataService
             {
                 parameters = CommOp.ToStrObjDict(obj);
             }
-            if (gkey.TableJoins.Length > 1)
+            if (gkey.TableJoins.Count > 1)
             {
                 return await GetMasterDetailPageAsync(gkey, parameters);
             }
@@ -707,7 +719,7 @@ namespace DataGate.App.DataService
                 string left = field.ForeignField.IsEmpty() ? (gkey.TableJoins[0].Alias ?? tableMeta.Name) + "." + field.Name : field.ForeignField;
 
                 //当有sql语句并且有模型定义时
-                if (!gkey.Sql.IsEmpty() && gkey.TableJoins.Length > 0)
+                if (!gkey.Sql.IsEmpty() && gkey.TableJoins.Count > 0)
                 {
                     left = field.Name;
                 }
@@ -849,7 +861,7 @@ namespace DataGate.App.DataService
         /// <returns>DataTable</returns>
         private async Task<object> GetArrayAsync(DataGateKey gkey, IDictionary<string, object> parameters)
         {
-            if (gkey.TableJoins?.Length > 1)
+            if (gkey.TableJoins?.Count > 1)
             {
                 return await GetMasterDetaiArrayAsync(gkey, parameters);
             }

@@ -100,12 +100,12 @@ namespace DataGate.App.DataService
                 {
                     key.Source = new FileInfo(keyFile).Name;
                     if (key.Model.IsEmpty()) return;
-                    key.TableJoins = GetJoinInfos(key).ToArray();
+                    key.TableJoins = GetJoinInfos(key).ToList();
                     var mainModel = key.TableJoins[0].Table;
                     //string tableJoins = mainModel.FixDbName;
                     string tableJoins = key.TableJoins[0].Alias == null ? mainModel.FixDbName :
                        mainModel.FixDbName + " " + key.TableJoins[0].Alias;
-                    for (var i = 1; i < key.TableJoins.Length; i++)
+                    for (var i = 1; i < key.TableJoins.Count; i++)
                     {
                         string joins = BuildTableJoins(key, i);
                         tableJoins += joins;
@@ -253,11 +253,14 @@ namespace DataGate.App.DataService
                 OpType = gkey.OpType,
                 OrderBy = gkey.OrderBy,
                 Sql = gkey.Sql,
-                TableJoins = gkey.TableJoins,
+                TableJoins = gkey.TableJoins.ToList(),
                 JoinSubTerm = gkey.JoinSubTerm,
                 QueryFieldsTerm = gkey.QueryFieldsTerm,
                 ConnName = gkey.ConnName,
                 Data = gkey.Data,
+                Attr = gkey.Attr,
+                QueryFields = gkey.QueryFields,
+                Source = gkey.Source
             };
         }
 
@@ -411,7 +414,7 @@ namespace DataGate.App.DataService
             var mainModel = gkey.TableJoins[0];
             var mainTable = mainModel.Table;
             List<string> allFields = new List<string>();
-            if (gkey.TableJoins.Length > 1)
+            if (gkey.TableJoins.Count > 1)
             {
                 var otherTableFields = mainTable.Fields.Where(f => !f.ArrayItemType.IsEmpty());
                 foreach (var other in otherTableFields)
@@ -461,7 +464,7 @@ namespace DataGate.App.DataService
                 else if (!f.ForeignField.IsEmpty())
                 {
                     //单表查询不考虑联查字段
-                    if (gkey.TableJoins.Length <= 1) return null;
+                    if (gkey.TableJoins.Count <= 1) return null;
 
                     //排除掉没有参与联查的表的字段
                     if (gkey.TableJoins.All(tj =>

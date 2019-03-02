@@ -58,7 +58,7 @@ namespace DataGate.App.DataService
         internal ListDataGate DataGate { get; set; }
 
         [JsonIgnore]
-        internal JoinInfo[] TableJoins { get; set; }
+        internal IList<JoinInfo> TableJoins { get; set; }
 
         /// <summary>
         /// 主表信息
@@ -116,7 +116,7 @@ namespace DataGate.App.DataService
         /// <summary>
         /// 动态的其他属性
         /// </summary>
-        public JToken Attr { get; set; }
+        public JObject Attr { get; set; } = new JObject();
 
     }
 
