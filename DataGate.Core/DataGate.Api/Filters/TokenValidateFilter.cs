@@ -55,7 +55,8 @@ namespace DataGate.Api.Filters
                 return;
             }
 
-            if (ExcludedActions.Contains($"{context.Controller.GetType()}.{action.ActionName}"))
+            //标记了[AllowAnonymous]的方法被Pass掉
+            if (action.MethodInfo.CustomAttributes.Any(attr => attr.AttributeType == typeof(AllowAnonymousAttribute)))
             {
                 return;
             }

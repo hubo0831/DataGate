@@ -9,11 +9,11 @@ namespace DataGate.App.Logs
 {
     public class NLogImpl : ILog
     {
-        readonly Logger logger;
+        readonly Logger _nlogger;
 
         public NLogImpl(string name)
         {
-            logger = LogManager.GetLogger(name);
+            _nlogger = LogManager.GetLogger(name);
         }
 
         public void Write(LogInfo logInfo, Exception ex = null)
@@ -34,18 +34,18 @@ namespace DataGate.App.Logs
             logEvent.TimeStamp = logInfo.OpTime;
             logEvent.Exception = ex;
             logEvent.Level = ConvertLevel(logInfo.LogLevel);
-            logger.Log(logEvent);
+            _nlogger.Log(logEvent);
         }
 
         private LogLevel ConvertLevel(LogType logType)
         {
             switch (logType)
             {
+                case LogType.Info: return NLog.LogLevel.Info;
                 case LogType.Debug: return NLog.LogLevel.Debug;
+                case LogType.Warn: return NLog.LogLevel.Warn;
                 case LogType.Error: return NLog.LogLevel.Error;
                 case LogType.Fatal: return NLog.LogLevel.Fatal;
-                case LogType.Info: return NLog.LogLevel.Info;
-                case LogType.Warning: return NLog.LogLevel.Warn;
                 default:
                     return NLog.LogLevel.Trace;
             }

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using DataGate.Com;
 using DataGate.App.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DataGate.Api.Controllers
 {
@@ -98,6 +99,7 @@ namespace DataGate.Api.Controllers
         /// <param name="request">登录参数</param>
         /// <returns></returns>
         [HttpPost]
+        [AllowAnonymous]
         public async Task<LoginResult> Login(LoginRequest request)
         {
             var result = await _session.Login(request);

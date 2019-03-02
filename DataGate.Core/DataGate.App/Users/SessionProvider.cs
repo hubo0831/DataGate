@@ -134,6 +134,10 @@ namespace DataGate.App
                 return MSG.SessionExpired;
             }
             var user = await _user.GetAsync(userSession.Account);
+            if (user == null)
+            {
+                return new UserInfoResult(MSG.UserNotExists);
+            }
             return new UserInfoResult
             {
                 Id = user.Id,

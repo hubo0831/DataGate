@@ -56,6 +56,7 @@ namespace DataGate.App
             Code = 1010,
             Message = "Token已过期"
         };
+
         #endregion
 
         #region 杂项

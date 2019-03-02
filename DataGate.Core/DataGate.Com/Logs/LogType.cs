@@ -7,10 +7,10 @@ namespace DataGate.Com.Logs
 {
     public enum LogType
     {
-        None = 0,
+        Trace = 0,
         Debug = 1,
         Info = 2,
-        Warning = 3,
+        Warn = 3,
         Error = 4,
         Fatal = 5
     }

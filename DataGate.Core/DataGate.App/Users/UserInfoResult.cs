@@ -12,6 +12,18 @@ namespace DataGate.App
     /// </summary>
     public class UserInfoResult : ApiResult
     {
+
+        public UserInfoResult()
+        {
+
+        }
+
+        public UserInfoResult(ApiResult apiResult)
+        {
+            Code = apiResult.Code;
+            Message = apiResult.Message;
+        }
+
         /// <summary>
         /// 用户ID
         /// </summary>
