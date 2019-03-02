@@ -330,21 +330,14 @@ namespace DataGate.App
             var result = await CheckNewUserAsync(user);
             DataGateService dataSvc = Consts.Get<DataGateService>();
             var existsUser = await _user.GetModelByIdAsync(user.Id);
-
-            if (existsUser != null)
+            if (existsUser == null)
             {
-                await dataSvc.SubmitAsync("SaveUser", new
-                {
-                    Changed = new object[] { user }
-                });
+                throw new Exception("非法的注册信息");
             }
-            else
+            await dataSvc.SubmitAsync("SaveUser", new
             {
-                await dataSvc.SubmitAsync("SaveUser", new
-                {
-                    Added = new object[] { user }
-                });
-            }
+                Changed = new object[] { user }
+            });
             result.Message = "注册成功";
             return result;
         }

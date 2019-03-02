@@ -135,7 +135,7 @@ namespace DataGate.Tests
             var content = new FormUrlEncodedContent(ToDict(p));
             HttpResponseMessage response = await SessionClient.PostAsync(url, content);
             var resultStr = await response.Content.ReadAsStringAsync();
-            Console.WriteLine("HTTPPOST-RESULT-STRING=" + resultStr);
+            Debug.WriteLine("HTTPPOST-RESULT-STRING=" + resultStr);
             Assert.True(response.IsSuccessStatusCode);
             return await response.Content.ReadAsAsync<T>();
         }

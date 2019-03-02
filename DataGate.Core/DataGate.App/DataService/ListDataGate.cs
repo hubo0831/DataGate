@@ -18,6 +18,11 @@ namespace DataGate.App.DataService
                 .Select(g => g.First()).ToList();
         }
 
+        /// <summary>
+        /// 顺序执行新增前的钩子
+        /// </summary>
+        /// <param name="gkey"></param>
+        /// <param name="ps"></param>
         public void OnAdd(DataGateKey gkey, IDictionary<string, object> ps)
         {
             foreach (var dg in _dataGates.OfType<ISubmitDataGate>())
@@ -26,6 +31,11 @@ namespace DataGate.App.DataService
             }
         }
 
+        /// <summary>
+        /// 顺序执行修改前的钩子
+        /// </summary>
+        /// <param name="gkey"></param>
+        /// <param name="ps"></param>
         public void OnChange(DataGateKey gkey, IDictionary<string, object> ps)
         {
             foreach (var dg in _dataGates.OfType<ISubmitDataGate>())
@@ -34,6 +44,11 @@ namespace DataGate.App.DataService
             }
         }
 
+        /// <summary>
+        /// 顺序执行删除前的钩子
+        /// </summary>
+        /// <param name="gkey"></param>
+        /// <param name="ps"></param>
         public void OnRemove(DataGateKey gkey, IDictionary<string, object> ps)
         {
             foreach (var dg in _dataGates.OfType<ISubmitDataGate>())

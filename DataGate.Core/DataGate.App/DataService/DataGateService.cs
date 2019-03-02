@@ -151,9 +151,9 @@ namespace DataGate.App.DataService
         /// <summary>
         /// 执行非查询语句 v0.2.0+
         /// </summary>
-        /// <param name="key"></param>
+        /// <param name="key">关键字</param>
         /// <param name="param">参数</param>
-        /// <returns></returns>
+        /// <returns>受影响的行数</returns>
         public async Task<int> NonQueryAsync(string key, Dictionary<string, object> param)
         {
             DataGateKey gkey = GetDataGate(key);
@@ -162,19 +162,24 @@ namespace DataGate.App.DataService
             {
                 return CommOp.ToInt(result);
             }
-            switch (gkey.OpType)
+            gkey.DataGate.OnQuery(gkey, param);
+            int i = 0;
+            if (gkey.Sql.IsEmpty())
             {
-                case DataOpType.NonQuery:
-                    if (gkey.Sql.IsEmpty())
-                    {
-                        throw new NoNullAllowedException("在执行NonQuery命令时，Sql是必须的");
-                    }
-                    var ps = _db.GetParameter(param);
-                    return await _db.ExecNonQueryAsync(gkey.Sql, ps.ToArray());
+                throw new NoNullAllowedException("在执行NonQuery命令时，Sql是必须的");
             }
-            return 0;
+            var ps = _db.GetParameter(param);
+            i = await _db.ExecNonQueryAsync(gkey.Sql, ps.ToArray());
+            gkey.DataGate.OnResult(gkey, i);
+            return i;
         }
 
+        /// <summary>
+        /// 执行非查询语句，用于内部调用
+        /// </summary>
+        /// <param name="key">关键字</param>
+        /// <param name="param">参数</param>
+        /// <returns></returns>
         public async Task<int> NonQueryAsync(string key, object param)
         {
             return await NonQueryAsync(key, CommOp.ToStrObjDict(param));
