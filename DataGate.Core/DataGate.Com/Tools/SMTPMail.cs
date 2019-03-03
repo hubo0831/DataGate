@@ -178,6 +178,7 @@ namespace DataGate.Com
             SmtpClient client = new SmtpClient(Server)
             {
                 Port = Port,
+                EnableSsl = true,
                 Credentials = new NetworkCredential(UserName, Password)
             };
             try

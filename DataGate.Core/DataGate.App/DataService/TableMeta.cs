@@ -88,7 +88,7 @@ namespace DataGate.App.DataService
         //}
 
         /// <summary>
-        /// 获取唯一主键，主键不只一个就会报错
+        /// 获取唯一主键，主键不只一个就会返回空值
         /// </summary>
         [JsonIgnore]
         public FieldMeta PrimaryKey
