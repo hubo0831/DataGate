@@ -31,14 +31,7 @@ export default {
       form: {},
       rules: {
         name: [{ required: true, message: "请输入姓名", trigger: "blur" }],
-        tel: [
-          { required: true, message: "请输入手机或电话", trigger: "blur" },
-          {
-            type: "tel",
-            message: "请输入正确的手机或电话号码",
-            trigger: "blur,change"
-          }
-        ],
+        tel: [{ required: true, message: "请输入手机或电话", trigger: "blur" }],
         email: [
           { required: true, message: "请输入邮箱", trigger: "blur" },
           {
