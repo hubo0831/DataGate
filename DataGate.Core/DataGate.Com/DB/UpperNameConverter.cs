@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace DataGate.Com.DB
 {
     /// <summary>
-    /// 将Pascal命名规则的属性名转成带下划线全大写的字段名
+    /// 将Pascal或camel命名规则的属性名转成带下划线全大写的字段名
     /// </summary>
     public class UpperNameConverter : INameConverter
     {

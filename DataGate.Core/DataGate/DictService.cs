@@ -27,6 +27,7 @@ namespace DataGate
         {
             _dictFor = dictFor;
             _db = DBFactory.CreateDBHelper("Default");
+            _db.DbNameConverter = null; //不转换字典sql中输出的字段名
             _nameConverter = nameConverter;
             _settings = settings;
         }
@@ -50,7 +51,7 @@ namespace DataGate
 
         private void GetSourceMetaList()
         {
-            _sourceMetaList = _db.GetListAsync<ColumnMeta>(_dictFor.DictSql).Result;
+            _sourceMetaList = _db.GetSqlListAsync<ColumnMeta>(_dictFor.DictSql).Result;
             IEnumerable<ColumnMeta> tb1 = new List<ColumnMeta>();
             IEnumerable<ColumnMeta> tb2 = new List<ColumnMeta>();
             if (!_settings.Tables.IsEmpty())
@@ -75,7 +76,7 @@ namespace DataGate
             var result = tables.Select(tb =>
              new
              {
-                 Name = tb.Key,
+                 Name = _nameConverter.ToPropName(tb.Key),
                  Remark = tb.FirstOrDefault()?.Remark,
                  Fields = tb.Select(f => new
                  {
@@ -111,7 +112,7 @@ namespace DataGate
                 Key = "Get" + FirstUpper(_nameConverter.ToPropName(tb.Key)),
                 tb.First().Remark,
                 Name = tb.First().Remark,
-                Model = tb.Key,
+                Model = _nameConverter.ToPropName(tb.Key),
                 OpType = DataOpType.GetArray.ToString(),
                 ConnName = "Default",
             });

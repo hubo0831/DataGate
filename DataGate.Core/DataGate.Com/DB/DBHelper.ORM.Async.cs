@@ -34,7 +34,7 @@ namespace DataGate.Com.DB
                 strAfterWhere = "where " + strAfterWhere;
             }
             string sql = $"select {strFields} from {GetDbObjName(typeof(T).Name)} {strAfterWhere}";
-            return await GetSqlListAsync<T>(sql, GetParameter(param).ToArray());
+            return await GetSqlListAsync<T>(sql, param);
         }
 
         /// <summary>
@@ -42,12 +42,12 @@ namespace DataGate.Com.DB
         /// </summary>
         /// <typeparam name="T">实体类型</typeparam>
         /// <param name="sql">查询语句</param>
-        /// <param name="sp">参数列表</param>
+        /// <param name="sp">参数列表或参数数组</param>
         /// <returns>T的泛型列表</returns>
-        async Task<List<T>> GetSqlListAsync<T>(string sql, params IDataParameter[] sp)
-            where T : new()
+        public async Task<List<T>> GetSqlListAsync<T>(string sql, object param = null)
+             where T : new()
         {
-            using (IDataReader reader = await ExecReaderAsync(sql, sp))
+            using (IDataReader reader = await ExecReaderAsync(sql, GetParameter(param).ToArray()))
             {
                 DataTable schemaTable = reader.GetSchemaTable();
                 PropertyInfo[] infos = typeof(T).GetProperties();

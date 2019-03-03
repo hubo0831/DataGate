@@ -37,11 +37,15 @@ namespace DataGate.Com.DB
         /// <summary>
         /// 实体类对象参数转换
         /// </summary>
-        /// <param name="entity">实体</param>
+        /// <param name="entity">可以是实体对象/匿名对象/数据库参数数组/字典对象</param>
         /// <param name="suffix">为和查询参数相区别对应的后缀</param>
         /// <returns></returns>
         public IEnumerable<IDataParameter> GetParameter(object entity, string suffix = null)
         {
+            if (entity is IEnumerable<IDataParameter> param)
+            {
+                return param;
+            }
             return GetParameter(CommOp.ToStrObjDict(entity));
         }
 

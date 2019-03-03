@@ -6,10 +6,13 @@
           <el-input v-model="form.account" disabled></el-input>
         </el-form-item>
         <el-form-item prop="name" label="姓名">
-          <el-input v-model="form.name" required></el-input>
+          <el-input v-model="form.name" required placeholder="请输入真实姓名"></el-input>
+        </el-form-item>
+        <el-form-item prop="tel" label="电话">
+          <el-input v-model="form.tel" required placeholder="请输入手机或电话"></el-input>
         </el-form-item>
         <el-form-item prop="email" label="邮箱">
-          <el-input v-model="form.email" required></el-input>
+          <el-input v-model="form.email" required placeholder="请输入电子邮件地址"></el-input>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="doSave">提交</el-button>
@@ -25,10 +28,17 @@ import * as API from "../../api";
 export default {
   data() {
     return {
-      form: {
-      },
+      form: {},
       rules: {
         name: [{ required: true, message: "请输入姓名", trigger: "blur" }],
+        tel: [
+          { required: true, message: "请输入手机或电话", trigger: "blur" },
+          {
+            type: "tel",
+            message: "请输入正确的手机或电话号码",
+            trigger: "blur,change"
+          }
+        ],
         email: [
           { required: true, message: "请输入邮箱", trigger: "blur" },
           {
@@ -40,7 +50,7 @@ export default {
       }
     };
   },
-  created(){
+  created() {
     this.form = $.extend({}, this.userState.currentUser);
   },
   methods: {
@@ -50,6 +60,7 @@ export default {
         if (valid) {
           let args = {
             name: that.form.name,
+            tel: that.form.tel,
             email: that.form.email
           };
           API.POST("/api/check/ChangeProfile", args).done(r => {
