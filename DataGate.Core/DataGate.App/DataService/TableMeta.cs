@@ -97,9 +97,9 @@ namespace DataGate.App.DataService
             {
                 if (PrimaryKeys.Count() > 1)
                 {
-                    throw new ArgumentOutOfRangeException("该表不止一个主键");
+                    return null;
                 }
-                return PrimaryKeys.FirstOrDefault();
+                return PrimaryKeys.First();
             }
         }
 
