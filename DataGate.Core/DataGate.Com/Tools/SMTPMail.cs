@@ -14,7 +14,7 @@ namespace DataGate.Com
 {
 
     /// <summary>
-    /// 邮件发送的帮助类
+    /// 邮件发送的帮助类,这个试过只能25端口，SSL的465端口好象不行
     /// </summary>
     public class SMTPMail
     {
