@@ -54,5 +54,14 @@ namespace DataGate.App
                 Data[key] = value;
             }
         }
+
+        /// <summary>
+        /// 移除相关会话数据
+        /// </summary>
+        /// <param name="key"></param>
+        public void RemoveData(string key)
+        {
+            Data.Remove(key);
+        }
     }
 }

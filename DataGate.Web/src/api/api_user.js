@@ -6,6 +6,7 @@ import util from "../common/util.js"
 import appConfig from "../appConfig.js"
 import userState from "../userState.js"
 import bus from "../bus"
+
 //获取用户完整信息，包括有权限的菜单
 function getUserInfo() {
   return new Promise((resolve, reject) => {
@@ -59,7 +60,6 @@ function rememberLogin() {
     remember
   });
 }
-
 
 //退出登录，主动退出或超时退出都会进入此方法，则需要保留是否记住我的勾选状态同时清空记住我的内容
 function logout() {
