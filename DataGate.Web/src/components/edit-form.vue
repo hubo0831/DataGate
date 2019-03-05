@@ -65,7 +65,7 @@
           :placeholder="getPlaceholder(item)" style="width:100%">
         </el-input>
         <!-- 自定义输入组件 -->
-        <component v-else :is="item.uitype" v-model="task.editBuffer[item.name]" :meta="item" in-edit :obj="task.editBuffer"
+        <component v-else :is="item.uitype" v-model="task.editBuffer[item.name]" :meta="item" :in-edit="true" :obj="task.editBuffer"
           :task="task" v-on:change="handleChange(item)" :placeholder="getPlaceholder(item)" style="width:100%"></component>
       </el-form-item>
     </el-form>

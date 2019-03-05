@@ -22,7 +22,7 @@
       </el-option>
     </el-select>
     <!-- 自定义输入组件 -->
-    <component v-else :is="meta.uitype" v-model="obj[meta.name]" :meta="meta" :obj="obj" in-edit style="width:100%"></component>
+    <component v-else :is="meta.uitype" v-model="obj[meta.name]" :meta="meta" :obj="obj" :in-edit="true" style="width:100%"></component>
   </div>
 </template>
 <script>
