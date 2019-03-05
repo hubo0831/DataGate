@@ -1,3 +1,7 @@
+###v0.2.9 2019-03-03
+1. inEdit作为属性名时只能写成in-edit
+2. UserProfie增加电话号码修改。
+
 ###v0.2.8 2019-03-03
 1. 增加formEdit自定义输入控件的inEdit=true
 2. UserProfie增加电话号码修改。
