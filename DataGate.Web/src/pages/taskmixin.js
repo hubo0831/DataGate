@@ -47,7 +47,7 @@ export default {
     loadData() {
       //由子类实现
     },
-    //根据url的参数进行查询
+    //根据url的参数进行查询， 通常用于子类的loadData方法中加载数据
     apiUrlPageQuery(key) {
       return API.QUERY(key, this.urlQuery)
         .then(result => this.apiDataFilter(key, result))
@@ -68,6 +68,5 @@ export default {
         .done(() => this.$message.success(successTips))
         .done(this.loadData);
     }
-
   }
 }

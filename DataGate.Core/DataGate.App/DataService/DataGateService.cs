@@ -405,6 +405,12 @@ namespace DataGate.App.DataService
             }
         }
 
+        /// <summary>
+        /// 插入单条记录
+        /// </summary>
+        /// <param name="gkey"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
         private async Task<string> InsertOneAsync(DataGateKey gkey, JToken jToken)
         {
             var tableMeta = GetMainTable(gkey);
@@ -442,18 +448,36 @@ namespace DataGate.App.DataService
         }
 
         /// <summary>
-        /// 根据主键更新数据库,主要用于非API的内部调用
+        /// 插入新记录，主要用于非API的服务端内部调用
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="ps"></param>
+        /// <returns></returns>
+        public async Task<string> InsertOneAsync(string key, object ps)
+        {
+            bool singleCall = this.DB == null; //是否不在事务中,是单独调用
+            var gkey = GetDataGate(key);
+            var jToken = JObject.FromObject(ps);
+            if (singleCall) _db.BeginTrans();
+            var r = await InsertOneAsync(gkey, jToken);
+            if (singleCall) _db.EndTrans();
+            return r;
+        }
+
+        /// <summary>
+        /// 根据主键更新数据库,主要用于非API的服务端内部调用
         /// </summary>
         /// <param name="key"></param>
         /// <param name="ps"></param>
         /// <returns></returns>
         public async Task<int> UpdateOneAsync(string key, object ps)
         {
+            bool singleCall = this.DB == null; //是否不在事务中,是单独调用
             var gkey = GetDataGate(key);
             var jToken = JObject.FromObject(ps);
-            _db.BeginTrans();
+            if (singleCall) _db.BeginTrans();
             var r = await UpdateOneAsync(gkey, jToken);
-            _db.EndTrans();
+            if (singleCall) _db.EndTrans();
             return r;
         }
 

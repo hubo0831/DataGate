@@ -3,7 +3,7 @@
   <div>
     <el-form size="mini" class="meta-form" :model="task.editBuffer" v-if="task.editBuffer" label-width="90px" ref="editForm"
       :disabled="disabled || task.selection.length==0" :rules="rules" status-icon inline-message>
-      <el-form-item v-for="item in metadataFilter" :key="item.name" :label="item.title" v-if="item.uitype!='File' || task.selection.length<=1"
+      <el-form-item v-for="item in metadataFilter" :key="item.name" :label="item.title"
         :prop="item.name" :class="{multiValue:item.multiValue}">
         <!-- 不能编辑 -->
         <template v-if="item.readonly">
@@ -117,7 +117,7 @@
       },
       metadataFilter() {
         //从传入的元数据集合筛选中能在表单中处理的子集
-        return this.task.metadata.filter(m => m.formorder >= 0);
+        return this.task.metadata.filter(m => m.formorder >= 0);// && (item.uitype!='File' || task.selection.length<=1));
       }
     },
     methods: {
