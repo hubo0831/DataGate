@@ -178,7 +178,7 @@ namespace DataGate.App
         }
 
         /// <summary>
-        /// 登录
+        /// 登录,根据用户名，手机，邮箱来登录，当同一手机，邮箱不止一个用户使用时，将不成登录成功
         /// </summary>
         /// <param name="request"></param>
         /// <param name="validate">验证密码</param>
@@ -194,8 +194,19 @@ namespace DataGate.App
                 RestoreFormRemember(request);
                 requestPass = request.Password;
             }
-
-            AppUser user = await _user.GetAsync(request.Account);
+            AppUser user = null;
+            if (user == null && CommOp.IsEmail(request.Account))
+            {
+                user = await _user.GetByEmailAsync(request.Account);
+            }
+            if (user == null && CommOp.IsPhoneNumber(request.Account))
+            {
+                user = await _user.GetByTelAsync(request.Account);
+            }
+            if (user == null)
+            {
+                user = await _user.GetAsync(request.Account);
+            }
             if (user == null)
             {
                 return MSG.UserNotExists;
