@@ -56,7 +56,7 @@ namespace DataGate.Api.Filters
             }
 
             //标记了[AllowAnonymous]的方法被Pass掉
-            if (action.MethodInfo.CustomAttributes.Any(attr => attr.AttributeType == typeof(AllowAnonymousAttribute)))
+            if (action.MethodInfo.CustomAttributes.Any(attr => typeof(AllowAnonymousAttribute).IsAssignableFrom(attr.AttributeType)))
             {
                 return;
             }
