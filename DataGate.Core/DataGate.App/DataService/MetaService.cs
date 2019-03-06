@@ -99,28 +99,37 @@ namespace DataGate.App.DataService
                 keys.ForEach(key =>
                 {
                     key.Source = new FileInfo(keyFile).Name;
-                    if (key.Model.IsEmpty()) return;
-                    key.TableJoins = GetJoinInfos(key).ToList();
-                    var mainModel = key.TableJoins[0].Table;
-                    //string tableJoins = mainModel.FixDbName;
-                    string tableJoins = key.TableJoins[0].Alias == null ? mainModel.FixDbName :
-                       mainModel.FixDbName + " " + key.TableJoins[0].Alias;
-                    for (var i = 1; i < key.TableJoins.Count; i++)
-                    {
-                        string joins = BuildTableJoins(key, i);
-                        tableJoins += joins;
-                    };
-                    key.JoinSubTerm = tableJoins;
-                    //暂不考虑修改数据时生成表查询字段和语句
-                    if (key.OpType != DataOpType.Save)
-                    {
-                        key.QueryFieldsTerm = BuildQueryFields(key);
-                    }
+                    BuildKey(key);
                 });
 
                 allKeys.AddRange(keys);
             }
             _dataKeysDict = allKeys.ToDictionary(m => m.Key.ToLower());
+        }
+
+        /// <summary>
+        /// 构建DataGateKye, 生成其中的某些默认值
+        /// </summary>
+        /// <param name="key"></param>
+        public void BuildKey(DataGateKey key)
+        {
+            if (key.Model.IsEmpty()) return;
+            key.TableJoins = GetJoinInfos(key).ToList();
+            var mainModel = key.TableJoins[0].Table;
+            //string tableJoins = mainModel.FixDbName;
+            string tableJoins = key.TableJoins[0].Alias == null ? mainModel.FixDbName :
+               mainModel.FixDbName + " " + key.TableJoins[0].Alias;
+            for (var i = 1; i < key.TableJoins.Count; i++)
+            {
+                string joins = BuildTableJoins(key, i);
+                tableJoins += joins;
+            };
+            key.JoinSubTerm = tableJoins;
+            //暂不考虑修改数据时生成表查询字段和语句
+            if (key.OpType != DataOpType.Save)
+            {
+                key.QueryFieldsTerm = BuildQueryFields(key);
+            }
         }
 
         void GetTableMetas()
@@ -253,7 +262,7 @@ namespace DataGate.App.DataService
                 OpType = gkey.OpType,
                 OrderBy = gkey.OrderBy,
                 Sql = gkey.Sql,
-                TableJoins = gkey.TableJoins.ToList(),
+                TableJoins = gkey.TableJoins?.ToList(),
                 JoinSubTerm = gkey.JoinSubTerm,
                 QueryFieldsTerm = gkey.QueryFieldsTerm,
                 ConnName = gkey.ConnName,

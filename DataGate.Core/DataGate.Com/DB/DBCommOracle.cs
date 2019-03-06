@@ -45,6 +45,7 @@ namespace DataGate.Com.DB
             {
                 return CreateImageParameter(parameterName, (byte[])value);
             }
+            
             var p = new Oracle.ManagedDataAccess.Client.OracleParameter(parameterName, CommOp.TestNull(value));
             return p;
         }

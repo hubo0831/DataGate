@@ -27,6 +27,17 @@ namespace DataGate.App.DataService
         IMetaService _ms;
 
         /// <summary>
+        /// 在事务中的DBHelper
+        /// </summary>
+        public DBHelper DB
+        {
+            get
+            {
+                return _db;
+            }
+        }
+
+        /// <summary>
         /// 用户会话信息
         /// </summary>
         public UserSession Session { get; set; }

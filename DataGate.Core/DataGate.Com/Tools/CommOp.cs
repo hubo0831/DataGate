@@ -1347,13 +1347,13 @@ namespace DataGate.Com
         }
 
         /// <summary>
-        /// 将对象转化成字符串-对象字典
+        /// 将对象转化成字符串-对象字典, 不会返回null
         /// </summary>
         /// <param name="obj">要转字典的对象</param>
         /// <returns>字典对象</returns>
         public static Dictionary<string, object> ToStrObjDict(object obj)
         {
-            if (obj == null) return null;
+            if (obj == null) return new Dictionary<string, object>();
             Dictionary<string, object> dict = obj as Dictionary<string, object>;
             if (dict != null)
             {
