@@ -116,7 +116,7 @@ namespace DataGate.App.DataService
         /// <summary>
         /// 动态的其他属性
         /// </summary>
-        public JObject Attr { get; set; } = new JObject();
+        public Dictionary<string, object> Attr { get; set; } = new Dictionary<string, object>();
 
     }
 
