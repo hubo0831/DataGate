@@ -28,7 +28,6 @@
   </el-row>
 </template>
 <script>
-  // import "jquery-slimscroll";
   import taskmixin from "../taskmixin.js";
   import * as API from "../../api";
   import util from "../../common/util";

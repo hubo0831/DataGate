@@ -19,7 +19,11 @@ Vue.mixin({
     formatDateTime(date) {
       return util.formatDate(date, "yyyy-MM-dd hh:mm:ss")
     },
-    //xx万元
+    //年月日时分
+    formatDateTime2(date) {
+      return util.formatDate(date, "yyyy-MM-dd hh:mm")
+    },
+   //xx万元
     formatWan(num) {
       return util.formatWan(num);
     },

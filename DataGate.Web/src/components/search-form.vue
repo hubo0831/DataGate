@@ -3,7 +3,8 @@
     <!-- @*筛选条件组件*@ -->
     <el-form :inline="true">
       <el-form-item v-for="meta in metaFilter" :key="meta.name" :label="meta.title">
-        <div v-if="meta.uitype=='List'" class="search-input">
+        <div class="search-input">
+        <template v-if="meta.uitype=='List'">
           <el-select
             v-model="meta.value"
             multiple
@@ -20,8 +21,8 @@
               :value="sel.value"
             ></el-option>
           </el-select>
-        </div>
-        <div v-else-if="meta.uitype=='DropdownList'" class="search-input">
+        </template>
+        <template v-else-if="meta.uitype=='DropdownList'">
           <el-select
             v-model="meta.value"
             clearable
@@ -37,7 +38,7 @@
               :value="sel.value"
             ></el-option>
           </el-select>
-        </div>
+        </template>
         <el-checkbox
           v-else-if="meta.uitype=='CheckBox'"
           v-model="meta.value"
@@ -45,7 +46,7 @@
           :indeterminate="meta.value !=1 && meta.value!=0"
           :false-label="'0'"
         ></el-checkbox>
-        <div v-else-if="meta.uitype=='Date'|| meta.uitype=='DateTime'">
+        <template v-else-if="meta.uitype=='Date'|| meta.uitype=='DateTime'">
           <div v-if="meta.operator=='bt'">
             <span>
               <el-date-picker v-model="meta.value" type="date" clearable placeholder="起始日期"></el-date-picker>
@@ -57,17 +58,17 @@
           <span v-else>
             <el-date-picker v-model="meta.value" type="date" clearable :placeholder="meta.title"></el-date-picker>
           </span>
-        </div>
-        <div v-else-if="meta.uitype=='TextBox'" class="search-input">
+        </template>
+        <template v-else-if="meta.uitype=='TextBox'">
           <el-input v-model="meta.value" clearable :placeholder="meta.title"></el-input>
-        </div>
-        <div v-else-if="meta.uitype=='TextArea'" class="search-input">
+        </template>
+        <template v-else-if="meta.uitype=='TextArea'">
           <el-input v-model="meta.value" clearable :placeholder="meta.title"></el-input>
-        </div>
+        </template>
         <!-- Custom自定义组件暂时用文本框 -->
-        <div v-else-if="meta.uitype=='Custom'" class="search-input">
+        <template v-else-if="meta.uitype=='Custom'">
           <el-input v-model="meta.value" clearable :placeholder="meta.title"></el-input>
-        </div>
+        </template>
         <!-- 自定义输入组件 -->
         <component
           v-else-if="meta.uitype"
@@ -79,8 +80,9 @@
           :placeholder="meta.title"
         ></component>
         <!-- 没有明确定义的组件 -->
-        <div v-else class="search-input">
+        <template v-else>
           <el-input v-model="meta.value" clearable :placeholder="meta.title"></el-input>
+        </template>
         </div>
       </el-form-item>
       <el-form-item>
@@ -260,6 +262,6 @@ export default {
   margin-bottom: 10px;
 }
 .search-input {
-  width: 140px;
+  max-width: 140px;
 }
 </style>

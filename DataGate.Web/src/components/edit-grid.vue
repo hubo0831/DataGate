@@ -1,27 +1,61 @@
 <!--将element-ui的table加上编辑功能-->
 <template>
   <div @keyup.enter="submitRow()" @keyup.escape="cancelEdit()">
-    <el-form :inline="true" :model="rowBuffer" ref="gridForm" :rules="task.rules" status-icon :show-message="false">
-      <el-table v-bind:data="dataList" ref="dataGrid" border fit highlight-current-row 
-      @current-change="doCurrentChange" @sort-change="doSortChange" :stripe="stripe" :height="height"
-        @selection-change="doSelectionChange" @row-dblclick="doRowDblClick" @row-click="doRowClick"
-        tooltip-effect="light" style="width: 100%;">
+    <el-form
+      :inline="true"
+      :model="rowBuffer"
+      ref="gridForm"
+      :rules="task.rules"
+      status-icon
+      :show-message="false"
+    >
+      <el-table
+        v-bind:data="dataList"
+        ref="dataGrid"
+        border
+        fit
+        highlight-current-row
+        @current-change="doCurrentChange"
+        @sort-change="doSortChange"
+        :stripe="stripe"
+        :height="height"
+        @selection-change="doSelectionChange"
+        @row-dblclick="doRowDblClick"
+        @row-click="doRowClick"
+        tooltip-effect="light"
+        style="width: 100%;"
+      >
         <el-table-column type="selection" v-if="multiSelect"></el-table-column>
         <el-table-column type="index" v-if="showIndex"></el-table-column>
-        <el-table-column  :show-overflow-tooltip="meta.column.minWidth>120" :prop="meta.name" :label="meta.title"
-          v-for="meta in metaFilter" :key="meta.name" header-align="center" v-bind="meta.column" >
+        <el-table-column
+          :show-overflow-tooltip="meta.column.minWidth>120"
+          :prop="meta.name"
+          :label="meta.title"
+          v-for="meta in metaFilter"
+          :key="meta.name"
+          header-align="center"
+          v-bind="meta.column"
+        >
           <template slot-scope="scope">
             <!-- 非当前编辑行或只读字段只显示 -->
             <template v-if="(scope.row != editingRow) || scope.row.readonly || editMode !='inline'">
               <slot name="display-col" v-if="meta.uitype=='Custom'" :meta="meta" :obj="scope.row">
                 <!-- <span>自定义显示状态的数据列内容</span> -->
               </slot>
-              <slot name="display-op-col" v-else-if="meta.uitype=='Operator'" :meta="meta" :obj="scope.row">
+              <slot
+                name="display-op-col"
+                v-else-if="meta.uitype=='Operator'"
+                :meta="meta"
+                :obj="scope.row"
+              >
                 <!-- <span>自定义显示状态的操作列内容</span> -->
               </slot>
-              <display-item v-else :meta="meta" v-model="scope.row[meta.name]" :obj="scope.row">
-                {{showArray(scope.row, meta)}}
-              </display-item>
+              <display-item
+                v-else
+                :meta="meta"
+                v-model="scope.row[meta.name]"
+                :obj="scope.row"
+              >{{showArray(scope.row, meta)}}</display-item>
             </template>
             <!-- 下面是编辑状态时的编辑界面 -->
             <!-- 显示时是一个字段，编辑时又是另一个字段的情况 -->
@@ -33,10 +67,15 @@
               <span>没有自定义编辑列内容</span>
             </slot>
             <!-- 自定义操作列的内容 -->
-            <slot name="edit-op-col" :obj="scope.row" :meta="meta" v-else-if="meta.uitype=='Operator'">
+            <slot
+              name="edit-op-col"
+              :obj="scope.row"
+              :meta="meta"
+              v-else-if="meta.uitype=='Operator'"
+            >
               <span>没有自定义编辑状态的操作列内容</span>
             </slot>
-           <!-- 常规编辑 -->
+            <!-- 常规编辑 -->
             <el-form-item v-else :prop="meta.name">
               <edit-item :obj="rowBuffer" :meta="meta"></edit-item>
             </el-form-item>
@@ -46,20 +85,17 @@
     </el-form>
     <template v-if="editMode=='popup'">
       <!-- 不能用v-show -->
-      <el-dialog :visible.sync="showEdit">
+      <el-dialog :visible.sync="showEdit" :close-on-click-modal="false" top="10vh">
         <template slot="title">
           <slot name="editer-title" :new-item="newItem">
             <template v-if="newItem">
-              <i class="fa fa-plus"></i>新增{{task.productName}}
+              <i class="fa fa-plus"></i>
+              新增{{task.productName}}
             </template>
-            <template v-else>
-              修改{{task.productName}}
-            </template>
+            <template v-else>修改{{task.productName}}</template>
           </slot>
         </template>
-        <div class="editer-container" style="height?{height:height - 200 +'px'}:{}">
-          <edit-form ref="editorForm" :task="task"></edit-form>
-        </div>
+        <edit-form ref="editorForm" :task="task" :height="height?height - 90:0"></edit-form>
         <span slot="footer" class="dialog-footer">
           <el-button type="primary" @click="doSave">保存</el-button>
           <el-button @click="cancelEdit">取消</el-button>
@@ -92,7 +128,7 @@ export default {
       type: Boolean, //显示行号
       default: true
     },
-    stripe:{
+    stripe: {
       type: Boolean, //显示斑马线
       default: true
     },
@@ -128,6 +164,10 @@ export default {
     //   this.metadata = this.task.metadata;
     // }
   },
+  // mounted(){
+  //   if (this.editMode == "popup")
+  //   $('.editer-container').silmScroll();
+  // },
   directives: {
     focus: {
       // 指令的定义
@@ -367,7 +407,9 @@ export default {
   margin: 0;
   padding: 0;
 }
-
+.editer-container {
+  overflow: auto;
+}
 .side-edit {
   position: fixed;
   top: 80px;

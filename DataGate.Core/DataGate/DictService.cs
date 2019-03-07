@@ -83,8 +83,10 @@ namespace DataGate
                      Name = _nameConverter.ToPropName(f.ColumnName),
                      f.Title,
                      DataType = MapDataTypes(f.TypeName, CommOp.ToInt(f.MaxLength), CommOp.ToInt(f.Precision)),
+                     UIType = MapUITypes(f.TypeName, CommOp.ToInt(f.MaxLength), CommOp.ToInt(f.Precision)),
                      f.PrimaryKey,
                      Order = tb.ToList().IndexOf(f) + 1,
+                     FormOrder = tb.ToList().IndexOf(f) + 1,
                      f.MaxLength,
                      f.Required,
                      Value = f.Value.IsEmpty() ? null : f.Value,
@@ -110,11 +112,9 @@ namespace DataGate
             var result = tables.Select(tb => new
             {
                 Key = "Get" + FirstUpper(_nameConverter.ToPropName(tb.Key)),
-                tb.First().Remark,
                 Name = tb.First().Remark,
                 Model = _nameConverter.ToPropName(tb.Key),
-                OpType = DataOpType.GetArray.ToString(),
-                ConnName = "Default",
+                OpType = DataOpType.GetArray.ToString()
             });
             string output = JsonConvert.SerializeObject(result, Formatting.Indented, new JsonSerializerSettings
             {
@@ -142,6 +142,9 @@ namespace DataGate
             switch (columnType.ToLower())
             {
                 case "varchar2":
+                case "varchar":
+                case "char":
+                case "nchar":
                 case "nvarchar2":
                 default:
                     if (length > 200)
@@ -150,6 +153,8 @@ namespace DataGate
                         return "String";
                 case "date":
                     return "Date";
+                case "datetime":
+                    return "DateTime";
                 case "number":
                 case "integer":
                 case "numeric":
@@ -162,6 +167,39 @@ namespace DataGate
                         return "Boolean";
                     else
                         return "Number";
+
+            }
+        }
+        string MapUITypes(string columnType, int length, int precision)
+        {
+            switch (columnType.ToLower())
+            {
+                case "varchar2":
+                case "varchar":
+                case "char":
+                case "nchar":
+                case "nvarchar2":
+                default:
+                    if (length > 200)
+                        return "TextArea";
+                    else
+                        return "TextBox";
+                case "date":
+                    return "Date";
+                case "datetime":
+                    return "DateTime";
+                case "number":
+                case "integer":
+                case "numeric":
+                case "int":
+                case "double":
+                case "float":
+                case "longint":
+                case "long":
+                    if (length == 1)
+                        return "CheckBox";
+                    else
+                        return "TextBox";
 
             }
         }
