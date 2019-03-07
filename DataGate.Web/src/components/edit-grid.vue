@@ -115,7 +115,7 @@
   </div>
 </template>
 <script>
-import util from "../common/util";
+import {Util, Bus} from "../";
 export default {
   props: {
     task: Object, //包含数据，元数据的对象
@@ -203,6 +203,7 @@ export default {
     },
     //用户点击列标题排序的事件
     doSortChange(cpo) {
+      if (!this.$emitPass('sort-change', cpo).passed)return;
       if (!cpo.prop) this.$delete(this.urlQuery, "_sort");
       else
         this.urlQuery._sort =

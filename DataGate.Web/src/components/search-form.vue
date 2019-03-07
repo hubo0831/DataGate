@@ -86,7 +86,7 @@
         </div>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" v-on:click="search">查询</el-button>
+        <el-button type="primary" v-on:click.native.prevent="search">查询</el-button>
         <el-button type="primary" v-on:click="reset">重置</el-button>
         <slot></slot>
       </el-form-item>
