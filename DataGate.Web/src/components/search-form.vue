@@ -86,8 +86,10 @@
         </div>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" v-on:click.native.prevent="search">查询</el-button>
-        <el-button type="primary" v-on:click="reset">重置</el-button>
+        <el-button-group>
+        <el-button type="primary" icon="fa fa-search" title="搜索" v-on:click.native.prevent="search"></el-button>
+        <el-button icon="fa fa-rotate-right" title="重置"  v-on:click="reset"></el-button>
+        </el-button-group>
         <slot></slot>
       </el-form-item>
     </el-form>
