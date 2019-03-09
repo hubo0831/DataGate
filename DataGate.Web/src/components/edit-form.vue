@@ -16,10 +16,14 @@
       <el-form-item
         v-for="item in metadataFilter"
         :key="item.name"
-        :label="item.title"
         :prop="item.name"
         :class="{multiValue:item.multiValue}"
       >
+        <!-- 控件起始区内容插槽 -->
+        <slot :meta="item" :obj="task.editBuffer" name="item-header"></slot>
+        <label slot="label" :meta="item">
+          <slot name="item-label" :meta="item">{{item.title}}</slot>
+        </label>
         <!-- 不能编辑 -->
         <template v-if="item.readonly">
           <display-item :meta="item" v-model="task.editBuffer[item.name]"></display-item>
@@ -161,6 +165,8 @@
           :placeholder="getPlaceholder(item)"
           style="width:100%"
         ></component>
+        <!-- 控件结束区内容插槽 -->
+        <slot :meta="item" :obj="task.editBuffer" name="item-footer"></slot>
       </el-form-item>
     </el-form>
     <el-dialog title="重新上传文件" top="10px" :modal="false" :visible.sync="uploaderVisible">

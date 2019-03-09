@@ -95,6 +95,7 @@
             <template v-else>修改{{task.productName}}</template>
           </slot>
         </template>
+        <slot name="editer-header"></slot>
         <edit-form ref="editorForm" :task="task" :height="height?height - 90:0"></edit-form>
         <span slot="footer" class="dialog-footer">
           <el-button type="primary" @click="doSave">保存</el-button>
@@ -115,7 +116,7 @@
   </div>
 </template>
 <script>
-import {Util, Bus} from "../";
+import { Util, Bus } from "../";
 export default {
   props: {
     task: Object, //包含数据，元数据的对象
@@ -133,7 +134,8 @@ export default {
       default: true
     },
     editMode: {
-      //编辑模式： inline-行内编辑, side-侧边栏编辑, popup-弹出窗, newpage-新页面,none-不能编辑
+      //编辑模式：inline-行内编辑, side-侧边栏编辑, popup-弹出窗, none-不能编辑
+      //如果有其他自定义模式，响应事件 show-edit 来自定义编辑行为，在事件中，通过task.editBuffer来得到当前要编辑的行信息
       type: String,
       default: "inline"
     }
@@ -203,7 +205,7 @@ export default {
     },
     //用户点击列标题排序的事件
     doSortChange(cpo) {
-      if (!this.$emitPass('sort-change', cpo).passed)return;
+      if (!this.$emitPass("sort-change", cpo).passed) return;
       if (!cpo.prop) this.$delete(this.urlQuery, "_sort");
       else
         this.urlQuery._sort =
@@ -262,6 +264,7 @@ export default {
         this.rowBuffer = this.task.editBuffer;
         //  this.task.editBuffer = $.extend({}, this.current);
         this.showEdit = true;
+        this.$emit("show-edit", this.newItem);
       });
     },
     getMaxOrder() {
@@ -291,15 +294,23 @@ export default {
       });
     },
     doSave() {
-      //只有在表单编辑时才会触发
-      this.$refs.editorForm.validate(v => {
-        if (!v) return;
+      var saveTask = () => {
         this.task.acceptChanges();
         this.showEdit = false;
         this.editingRow = null;
         this.newItem = null;
         this.$emit("save-task", this.task);
-      });
+      };
+
+      if (this.editMode == "popup" || this.editMode == "side") {
+        //只有在表单编辑时才会触发
+        this.$refs.editorForm.validate(v => {
+          if (!v) return;
+          saveTask();
+        });
+      } else {
+        this.$emitPass("validate", this.task, saveTask);
+      }
     },
     cancelEdit() {
       if (this.newItem) {
@@ -316,7 +327,7 @@ export default {
           this.$refs.gridForm.validate(v => {
             if (v) {
               //应该是只有在行内编辑时才会触发的分支
-              if (!util.isEqual(this.editingRow, this.rowBuffer)) {
+              if (!Util.isEqual(this.editingRow, this.rowBuffer)) {
                 $.extend(this.editingRow, this.rowBuffer);
                 this.task.changeStatus(this.editingRow, "changed");
               }
