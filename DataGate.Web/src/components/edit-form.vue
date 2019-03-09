@@ -6,8 +6,9 @@
       class="meta-form"
       :model="task.editBuffer"
       v-if="task.editBuffer"
-      label-width="120px"
+      :label-width="labelWidth + 'px'"
       ref="editForm"
+      :readonly="readonly"
       :disabled="disabled || task.selection.length==0"
       :rules="rules"
       status-icon
@@ -25,7 +26,7 @@
           <slot name="item-label" :meta="item">{{item.title}}</slot>
         </label>
         <!-- 不能编辑 -->
-        <template v-if="item.readonly">
+        <template v-if="readonly || item.readonly">
           <display-item :meta="item" v-model="task.editBuffer[item.name]"></display-item>
         </template>
         <!-- 普通文本 -->
@@ -195,13 +196,23 @@ export default {
     task: {
       type: Object
     },
+    //禁用，组件还是输入组件但不能输入
     disabled: {
       type: Boolean,
       default: false
     },
+    //不能修改只能看，组件全是display状态
+    readonly:{
+      type:Boolean,
+      default :false
+    },
     height: {
       type: Number,
       default: 0
+    },
+    labelWidth:{
+      type:Number,
+      default:120
     }
   },
   data() {

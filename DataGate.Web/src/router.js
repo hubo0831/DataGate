@@ -122,7 +122,7 @@ function createRoutes(menus) {
     var rtr = {
       path: menu.route || menu.url,
       component: sysComps[cpath],
-      name: menu.name,
+      name: menu.id,
       props: true, //能通过URL传参给组件的props
       meta: {
         id: menu.id,

@@ -51,7 +51,7 @@ export default {
       this.current = data;
       this.task.setSelection([data]);
     },
-    resotreSelection() {
+    restoreSelection() {
       this.$nextTick(() => {
         this.$refs.tree.setCheckedKeys(this.selection.map(sel => sel.id));
         if (this.current) this.$refs.tree.setCurrentKey(this.current.id);
@@ -72,7 +72,7 @@ export default {
       var menu = this.task.createProduct();
       menu.parentId = this.current ? this.current.parentId : null;
       this.task.changeStatus(menu, "added");
-      this.resotreSelection();
+      this.restoreSelection();
       this.doCurrentChange(menu);
     },
     addChild() {
@@ -84,7 +84,7 @@ export default {
       var menu = this.task.createProduct();
       menu.parentId = this.current.id;
       this.task.changeStatus(menu, "added");
-      this.resotreSelection();
+      this.restoreSelection();
       this.doCurrentChange(menu);
     },
     clone() {
@@ -97,7 +97,7 @@ export default {
       menu.id = util.guid();
       menu.ord = this.task.getMaxOrder();
       this.task.changeStatus(menu, "added");
-      this.resotreSelection();
+      this.restoreSelection();
       this.doCurrentChange(menu);
     },
     doUp() {
@@ -118,7 +118,7 @@ export default {
         this.task.editBuffer.ord = ord;
         this.task.changeStatus(prev, "changed");
         this.task.changeStatus(this.current, "changed");
-        this.resotreSelection();
+        this.restoreSelection();
       }
     },
     doDown() {
@@ -140,7 +140,7 @@ export default {
         this.current.ord = ord;
         this.task.changeStatus(next, "changed");
         this.task.changeStatus(this.current, "changed");
-        this.resotreSelection();
+        this.restoreSelection();
       }
     },
     //拖拽完成：
@@ -211,7 +211,7 @@ export default {
         }
         this.task.changeStatus(item, "removed");
       });
-      this.resotreSelection();
+      this.restoreSelection();
     },
     //保存前的验证
     validate() {
