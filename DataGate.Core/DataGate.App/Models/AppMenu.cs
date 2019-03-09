@@ -41,5 +41,10 @@ namespace DataGate.App.Models
         /// 排序号
         /// </summary>
         public double Ord { get; set; }
+
+        /// <summary>
+        /// 注解
+        /// </summary>
+        public string Remark { get; set; }
     }
 }

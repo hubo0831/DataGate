@@ -57,6 +57,10 @@ Vue.component("LoginBottom", LoginBottom)
 
 Vue.component("Login", Login)
 
+// v0.2.8+
+import MenuTag from "./components/menu-tag"
+Vue.component("MenuTag", MenuTag)
+
 //提供外部注册组件的事件
 bus.$on("register", (name, component) => {
   if (typeof name == "function" || typeof name == "object") {

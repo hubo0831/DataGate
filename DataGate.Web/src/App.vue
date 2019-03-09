@@ -14,8 +14,7 @@
             active-text-color="#ffd04b"
           >
             <el-menu-item :index="item.id" v-for="item in mainMenu" :key="item.id">
-              <i :class="item.iconCls"></i>
-              <span>{{item.name}}</span>
+              <menu-tag :menu="item"/>
             </el-menu-item>
           </el-menu>
         </div>
@@ -29,8 +28,7 @@
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item v-for="item in selfMenu" :key="item.id">
                 <router-link :to="item.url">
-                  <i :class="item.iconCls"></i>
-                  {{item.name}}
+                  <menu-tag :menu="item"/>
                 </router-link>
               </el-dropdown-item>
               <el-dropdown-item divided @click.native="logout">
@@ -59,17 +57,14 @@
                 :key="item.id"
               >
                 <template slot="title">
-                  <i :class="item.iconCls || 'fa fa-file-o'"></i>
-                  <span slot="title">{{item.name}}</span>
+                  <menu-tag :menu="item"/>
                 </template>
                 <el-menu-item v-for="term in item.children" :key="term.id" :index="term.id">
-                  <i :class="term.iconCls || 'fa fa-file-o'"></i>
-                  <span slot="title">{{term.name}}</span>
+                  <menu-tag :menu="term"/>
                 </el-menu-item>
               </el-submenu>
               <el-menu-item v-else :index="item.id" :key="item.id">
-                <i :class="item.iconCls || 'fa fa-file-o'"></i>
-                <span slot="title">{{item.name}}</span>
+                <menu-tag :menu="item"/>
               </el-menu-item>
             </template>
           </el-menu>
