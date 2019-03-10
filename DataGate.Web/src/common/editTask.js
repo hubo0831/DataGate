@@ -299,7 +299,14 @@ export default function editTask() {
       }
     } else if (options) {
       item.options = createOptions(options);
+    }    
+    //在拥有linkto属性的meta没有options的情况下，直接用linkto指向的meta中的options.text赋值
+    else if (item.linkto){
+      this.editBuffer[item.name] = this.getMeta(item.linkto)
+        .options.find(opt => opt.value == this.editBuffer[item.linkto])
+        .text;
     }
+
   };
 
   this.getMeta = name => this.metadata.find(m => m.name == name);
@@ -339,7 +346,7 @@ export default function editTask() {
       }
     }
     var pk = this.getPrimaryKeys();
-    if (pk.length == 1 && !obj[pk[0].name]) obj[pk[0].name] = util.guid();
+    if (pk.length == 1 && !obj[pk[0].name] && pk[0].datatype == "String") obj[pk[0].name] = util.guid();
 
     var ordField = this.getSortField();
     if (ordField && !obj[ordField]) {
@@ -351,7 +358,7 @@ export default function editTask() {
   this.updateAllOptions = function () {
     //准备下拉列表框的选项,这里大致假定一下uitype中有List的就是带下拉列表的元数据
     // 如DropdownList, List, CheckboxList
-    this.metadata.filter(meta => (meta.uitype || "").indexOf("List") >= 0)
+    this.metadata.filter(meta => meta.uitype =="DropdownList" || meta.uitype=="List" || meta.uitype == "CheckboxList")
       .forEach(meta => this.updateOptions(meta));
   };
 

@@ -3,50 +3,7 @@
     <!-- @*筛选条件组件*@ -->
     <el-form :inline="true">
       <el-form-item v-for="meta in metaFilter" :key="meta.name" :label="meta.title">
-        <div class="search-input">
-        <template v-if="meta.uitype=='List'">
-          <el-select
-            v-model="meta.value"
-            multiple
-            filterable
-            allow-create
-            default-first-option
-            style="width:100%"
-            :placeholder="meta.title"
-          >
-            <el-option
-              v-for="sel in meta.options"
-              :key="sel.value"
-              :label="sel.text"
-              :value="sel.value"
-            ></el-option>
-          </el-select>
-        </template>
-        <template v-else-if="meta.uitype=='DropdownList'">
-          <el-select
-            v-model="meta.value"
-            clearable
-            filterable
-            allow-create
-            default-first-option
-            :placeholder="meta.title"
-          >
-            <el-option
-              v-for="sel in meta.options"
-              :key="sel.value"
-              :label="sel.text"
-              :value="sel.value"
-            ></el-option>
-          </el-select>
-        </template>
-        <el-checkbox
-          v-else-if="meta.uitype=='CheckBox'"
-          v-model="meta.value"
-          :true-label="'1'"
-          :indeterminate="meta.value !=1 && meta.value!=0"
-          :false-label="'0'"
-        ></el-checkbox>
-        <template v-else-if="meta.uitype=='Date'|| meta.uitype=='DateTime'">
+        <template v-if="meta.uitype=='Date'|| meta.uitype=='DateTime'">
           <div v-if="meta.operator=='bt'">
             <span>
               <el-date-picker v-model="meta.value" type="date" clearable placeholder="起始日期"></el-date-picker>
@@ -59,36 +16,84 @@
             <el-date-picker v-model="meta.value" type="date" clearable :placeholder="meta.title"></el-date-picker>
           </span>
         </template>
-        <template v-else-if="meta.uitype=='TextBox'">
-          <el-input v-model="meta.value" clearable :placeholder="meta.title"></el-input>
-        </template>
-        <template v-else-if="meta.uitype=='TextArea'">
-          <el-input v-model="meta.value" clearable :placeholder="meta.title"></el-input>
-        </template>
-        <!-- Custom自定义组件暂时用文本框 -->
-        <template v-else-if="meta.uitype=='Custom'">
-          <el-input v-model="meta.value" clearable :placeholder="meta.title"></el-input>
-        </template>
-        <!-- 自定义输入组件 -->
-        <component
-          v-else-if="meta.uitype"
-          :is="meta.uitype"
-          v-model="meta.value"
-          :meta="meta"
-          :obj="meta"
-          :in-edit="true"
-          :placeholder="meta.title"
-        ></component>
-        <!-- 没有明确定义的组件 -->
-        <template v-else>
-          <el-input v-model="meta.value" clearable :placeholder="meta.title"></el-input>
-        </template>
+        <div class="search-input" v-else>
+          <template v-if="meta.uitype=='List'">
+            <el-select
+              v-model="meta.value"
+              multiple
+              filterable
+              allow-create
+              default-first-option
+              style="width:100%"
+              :placeholder="meta.title"
+            >
+              <el-option
+                v-for="sel in meta.options"
+                :key="sel.value"
+                :label="sel.text"
+                :value="sel.value"
+              ></el-option>
+            </el-select>
+          </template>
+          <template v-else-if="meta.uitype=='DropdownList'">
+            <el-select
+              v-model="meta.value"
+              clearable
+              filterable
+              allow-create
+              default-first-option
+              :placeholder="meta.title"
+            >
+              <el-option
+                v-for="sel in meta.options"
+                :key="sel.value"
+                :label="sel.text"
+                :value="sel.value"
+              ></el-option>
+            </el-select>
+          </template>
+          <el-checkbox
+            v-else-if="meta.uitype=='CheckBox'"
+            v-model="meta.value"
+            :true-label="'1'"
+            :indeterminate="meta.value !=1 && meta.value!=0"
+            :false-label="'0'"
+          ></el-checkbox>
+          <template v-else-if="meta.uitype=='TextBox'">
+            <el-input v-model="meta.value" clearable :placeholder="meta.title"></el-input>
+          </template>
+          <template v-else-if="meta.uitype=='TextArea'">
+            <el-input v-model="meta.value" clearable :placeholder="meta.title"></el-input>
+          </template>
+          <!-- Custom自定义组件暂时用文本框 -->
+          <template v-else-if="meta.uitype=='Custom'">
+            <el-input v-model="meta.value" clearable :placeholder="meta.title"></el-input>
+          </template>
+          <!-- 自定义输入组件 -->
+          <component
+            v-else-if="meta.uitype"
+            :is="meta.uitype"
+            v-model="meta.value"
+            :meta="meta"
+            :obj="meta"
+            :in-edit="true"
+            :placeholder="meta.title"
+          ></component>
+          <!-- 没有明确定义的组件 -->
+          <template v-else>
+            <el-input v-model="meta.value" clearable :placeholder="meta.title"></el-input>
+          </template>
         </div>
       </el-form-item>
       <el-form-item>
         <el-button-group>
-        <el-button type="primary" icon="fa fa-search" title="搜索" v-on:click.native.prevent="search"></el-button>
-        <el-button icon="fa fa-rotate-right" title="重置"  v-on:click="reset"></el-button>
+          <el-button
+            type="primary"
+            icon="fa fa-search"
+            title="搜索"
+            v-on:click.native.prevent="search"
+          ></el-button>
+          <el-button icon="fa fa-rotate-right" title="重置" v-on:click="reset"></el-button>
         </el-button-group>
         <slot></slot>
       </el-form-item>
@@ -126,7 +131,7 @@ export default {
         if ((meta.uitype || "").indexOf("List") >= 0) task.updateOptions(meta);
         this.$set(meta, "value1", null);
       });
-     this.restoreFormValue();
+      this.restoreFormValue();
     }
   },
 
@@ -264,6 +269,6 @@ export default {
   margin-bottom: 10px;
 }
 .search-input {
-  max-width: 140px;
+  width: 150px;
 }
 </style>

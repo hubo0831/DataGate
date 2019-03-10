@@ -261,10 +261,10 @@ export default {
     handleChange(item) {
       var that = this;
       for (var i in that.task.metadata) {
-        var metaItem = that.task.metadata[i];
+        var targetItem = that.task.metadata[i];
         //处理联动
-        if (metaItem.linkto == item.name) {
-          this.task.updateOptions(metaItem);
+        if (targetItem.linkto == item.name) {
+          this.task.updateOptions(targetItem);
         }
       }
       this.$emit("change", item);
