@@ -57,7 +57,7 @@ export default function editTask() {
       if (pkey) pkey.primarykey = true;
     }
     if (!pkey) {
-    //  throw "表没有定义主键";
+      //  throw "表没有定义主键";
     }
 
     mtemp.forEach(m => {
@@ -285,7 +285,7 @@ export default function editTask() {
       (!(options && options.length) || item.linkto) && //items为空或是需要联动的字段
       item.optionsfunc //求选项列表值的函数不为空
     ) {
-      var result = item.optionsfunc(item) || [];
+      var result = item.optionsfunc(this.editBuffer, item) || [];
       if (result instanceof Array) {
         //直接返回数组
         item.options = createOptions(result);
@@ -298,9 +298,12 @@ export default function editTask() {
         item.options = [];
       }
     } else if (options) {
-      item.options = createOptions(item.options);
+      item.options = createOptions(options);
     }
   };
+
+  this.getMeta = name => this.metadata.find(m => m.name == name);
+  this.getMetas = names => this.metadata.filter(m => names.indexOf(m.name) >= 0);
 
   ///////////////////////////////////数据修改//////////////////////////////////////
   //获取随机最大排序位

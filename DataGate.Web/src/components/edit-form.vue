@@ -202,17 +202,17 @@ export default {
       default: false
     },
     //不能修改只能看，组件全是display状态
-    readonly:{
-      type:Boolean,
-      default :false
+    readonly: {
+      type: Boolean,
+      default: false
     },
     height: {
       type: Number,
       default: 0
     },
-    labelWidth:{
-      type:Number,
-      default:120
+    labelWidth: {
+      type: Number,
+      default: 120
     }
   },
   data() {
@@ -259,15 +259,15 @@ export default {
       return item.title || item.name;
     },
     handleChange(item) {
-      this.$emit("change", item);
       var that = this;
       for (var i in that.task.metadata) {
         var metaItem = that.task.metadata[i];
         //处理联动
         if (metaItem.linkto == item.name) {
-          that.updateOptions(metaItem);
+          this.task.updateOptions(metaItem);
         }
       }
+      this.$emit("change", item);
     },
     //复制文件数组，以免对原有对象的files数据改写
     getFiles() {

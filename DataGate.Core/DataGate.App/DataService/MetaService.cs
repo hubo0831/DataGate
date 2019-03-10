@@ -165,6 +165,54 @@ namespace DataGate.App.DataService
                 allTableMetas.AddRange(tableMetas);
             }
             _tableMetas = allTableMetas.ToDictionary(m => m.Name);
+
+            CheckPlusFields();
+
+        }
+
+        int _callDeepth = 0;
+        /// <summary>
+        /// 将name 带+号的字段为包含的其他实体定义的字段，进行转换成自身的字段
+        /// </summary>
+        private void CheckPlusFields()
+        {
+            foreach (var tm in _tableMetas.Values)
+            {
+                _callDeepth = 0;
+                CheckPlusField(tm);
+            }
+        }
+
+        private void CheckPlusField(TableMeta tm)
+        {
+            _callDeepth++;
+            if (_callDeepth > 10)
+            {
+                throw new Exception($"递归层次太多，是否产生了循环引用在模型：'{tm.Name}'?");
+            }
+
+            int cnt = tm.Fields.Count;
+
+            //从后往前循环加，是为了让排后面的属性优先级高于前面的同名属性
+            for (int i = cnt - 1; i >= 0; i--)
+            {
+                if (tm.Fields[i].Name.StartsWith("+"))
+                {
+                    var name = tm.Fields[i].Name.Substring(1);
+                    var child = _tableMetas[name];
+                    CheckPlusField(child);
+
+                    tm.Fields.RemoveAt(i);
+                    int j = i;
+                    foreach (var field in child.Fields.ToArray())
+                    {
+                        //如果已有相同属性则跳过
+                        if (tm.Fields.All(f => !f.Name.Equals(field.Name, StringComparison.OrdinalIgnoreCase)))
+                            tm.Fields.Insert(j++, field);
+                    }
+                }
+            }
+            _callDeepth--;
         }
 
         private TableMeta CreateTableMeta(JObject metaObj)
