@@ -83,7 +83,11 @@
               </el-breadcrumb>
             </el-col>
             <el-col :span="24" class="content-wrapper" v-if="logined">
-              <router-view></router-view>
+              <keep-alive>
+                <!--使用keep-alive会将页面缓存 https://www.cnblogs.com/wangyunhui/p/8178392.html-->
+                <router-view v-if="$route.meta.keepAlive"></router-view>
+              </keep-alive>
+              <router-view v-if="!$route.meta.keepAlive"></router-view>
             </el-col>
           </div>
         </section>

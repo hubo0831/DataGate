@@ -223,14 +223,17 @@ export default {
       if (items.length == 1) {
         //刚开始时，鼠标如果正好点到复选框，将不会有当前行， 在此处强行指定
         this.$refs.dataGrid.setCurrentRow(items[0]);
+        this.doCurrentChange(items[0]);
+      } else {
+        this.doCurrentChange(null);
       }
     },
     doCurrentChange(item) {
-      this.$emit("current-change", item);
       this.submitRow(true);
       this.current = item;
       if (!this.multiSelect)
         this.task.setSelection(this.current ? [this.current] : []);
+      this.$emit("current-change", item);
     },
     //统一处理table的行点击事件，当行点击时自动选择
     doRowClick: function(row, event, column) {
@@ -255,6 +258,10 @@ export default {
       });
     },
     doEdit() {
+      if (!this.multiEdit && this.task.selection.length > 1) {
+        this.$message.warning("不能同时编辑多行。");
+        return;
+      }
       if (!this.current) {
         this.$message.warning("您还没有选择要编辑的行。");
         return;
