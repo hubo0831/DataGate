@@ -225,16 +225,9 @@ namespace DataGate.App.DataService
         private TableMeta CreateTableMeta(string key, JToken jt) => new TableMeta
         {
             Name = key,
-            //DbName = _db.GetDbObjName(key),
-            //FixDbName = _db.AddFix(key),
             Fields = ParseMetadata(jt)
             .OrderBy(m => m.Order)
             .ToList()
-            //.ToArray().Each(fm =>
-            //{
-            //    fm.DbName = _db.GetDbObjName(fm.Name);
-            //    fm.FixDbName = _db.AddFix(fm.Name);
-            //})
         };
 
         /// <summary>
@@ -399,12 +392,13 @@ namespace DataGate.App.DataService
 
         void TranslateModelNames(DBHelper db, TableMeta tm)
         {
-            tm.DbName = db.GetDbObjName(tm.Name);
-            tm.FixDbName = db.AddFix(tm.Name);
+            tm.DbName = tm.DbName ?? db.GetDbObjName(tm.Name);
+            tm.FixDbName = db.AddFix(tm.DbName);
             foreach (var fm in tm.Fields)
             {
-                fm.DbName = db.GetDbObjName(fm.Name);
-                fm.FixDbName = db.AddFix(fm.Name);
+                if (fm.DbName.IsEmpty())
+                    fm.DbName = db.GetDbObjName(fm.Name);
+                fm.FixDbName = db.AddFix(fm.DbName);
             }
         }
 

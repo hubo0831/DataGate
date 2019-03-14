@@ -230,7 +230,7 @@ namespace DataGate.App
             _sessionDict.TryAdd(session.Token, session);
 
             DataGateService ds = Consts.Get<DataGateService>();
-            await ds.UpdateOneAsync("UpdateLastLoginTime", new
+            await ds.UpdateAsync("UpdateLastLoginTime", new
             {
                 id = user.Id,
                 LastLoginDate = session.LastOpTime

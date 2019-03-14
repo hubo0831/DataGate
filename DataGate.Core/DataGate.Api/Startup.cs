@@ -110,30 +110,37 @@ namespace DataGate.Api
             LogHelper.Init(Consts.Get<ILogManager>(), "*");
             app.UseMvc(routes =>
             {
+                //批量保存增删改结果
                 routes.MapRoute(name: "datagate-save",
                    template: "api/dg/s/{key}",
                    defaults: new { controller = "DataGate", action = "Submit" });
 
+                //获取某key值对应的数据表的metatata
                 routes.MapRoute(name: "datagate-metadata",
                    template: "api/dg/m/{key}",
                    defaults: new { controller = "DataGate", action = "Metadata" });
 
+                //非查询执行数据库操作
                 routes.MapRoute(name: "datagate-nonquery",
                    template: "api/dg/n/{key}",
                    defaults: new { controller = "DataGate", action = "NonQuery" });
 
+                //导出Excel的路由
                 routes.MapRoute(name: "datagate-export",
                     template: "api/dg/x/{key}",
                     defaults: new { controller = "DataGate", action = "Export" });
 
+                //文件上传的路由
                 routes.MapRoute(name: "datagate-upload",
                     template: "api/dg/u",
                     defaults: new { controller = "Files", action = "Upload" });
 
+                //文件下载的路由，如果通过a链接下载，可能要带上?token=用户的Token作为身份标识
                 routes.MapRoute(name: "datagate-download",
                  template: "api/dg/d/{id}/{filename?}",
                  defaults: new { controller = "Files", action = "DownById" });
 
+                //通用的数据查询路由
                 routes.MapRoute(name: "datagate-query",
                     template: "api/dg/{key}",
                     defaults: new { controller = "DataGate", action = "Query" });

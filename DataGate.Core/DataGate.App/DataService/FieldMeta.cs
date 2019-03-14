@@ -25,9 +25,8 @@ namespace DataGate.App.DataService
         public string ForeignField { get; set; }
 
         /// <summary>
-        /// 经名称转化后的实际数据库中的名称
+        /// 经名称转化后的实际数据库中的名称,通常留空，让系统自动生成
         /// </summary>
-        [JsonIgnore]
         public string DbName { get; set; }
 
         /// <summary>

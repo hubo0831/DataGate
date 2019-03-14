@@ -122,29 +122,6 @@
           type="datetime"
           :placeholder="getPlaceholder(item)"
         ></el-date-picker>
-        <!-- 单文件上传 -->
-        <el-input
-          v-else-if="item.uitype=='File' && task.selection.length==1"
-          v-model="task.editBuffer[item.name]"
-          v-on:change="handleChange(item)"
-          readonly="true"
-          :placeholder="getPlaceholder(item)"
-        >
-          <el-button
-            slot="append"
-            icon="fa fa-folder-open-o"
-            title="选择文件"
-            v-on:click="openUploaderWindow(item)"
-          ></el-button>
-        </el-input>
-        <!-- 多文件上传 -->
-        <div v-else-if="item.uitype=='Files' && task.selection.length==1">
-          <file-upload
-            v-on:upload-success="handleuploadSuccess"
-            :id="'muploader' + item.name"
-            :ref="'muploader' + item.name"
-          ></file-upload>
-        </div>
         <!-- 普通文本 -->
         <el-input
           v-else-if="item.uitype=='TextBox' || !item.uitype"
@@ -170,19 +147,6 @@
         <slot :meta="item" :obj="task.editBuffer" name="item-footer"></slot>
       </el-form-item>
     </el-form>
-    <el-dialog title="重新上传文件" top="10px" :modal="false" :visible.sync="uploaderVisible">
-      <file-upload
-        v-on:upload-success="handleuploadSuccess"
-        v-on:upload-error="uploaderVisible=true"
-        id="metaUploader"
-        :file-list="currentItemFiles"
-        ref="metaUploader"
-        :options="{fileNumLimit:1}"
-      ></file-upload>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" v-on:click="uploaderVisible = false">关闭</el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 <script>
@@ -269,29 +233,7 @@ export default {
       }
       this.$emit("change", item);
     },
-    //复制文件数组，以免对原有对象的files数据改写
-    getFiles() {
-      var files = [];
-      if (this.task.editBuffer.files) {
-        for (var i in this.task.editBuffer.files) {
-          files.push(this.task.editBuffer.files[i]);
-        }
-      }
-      return files;
-    },
-    openUploaderWindow(item) {
-      //映射到filename字段
-      this.uploaderVisible = true;
-      this.currentItem = item;
-      this.currentItemFiles = this.getFiles();
-    },
-    handleuploadSuccess(file) {
-      this.$message.info("'" + file.name + "'上传成功!");
-      this.uploaderVisible = false;
-      this.task.editBuffer[this.currentItem.name] = file.name;
-      this.task.editBuffer.files = [file];
-      this.$emit("change", this.task.editBuffer, this.currentItem);
-    }
+
   }
 };
 </script>

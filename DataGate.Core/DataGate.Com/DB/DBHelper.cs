@@ -147,7 +147,9 @@ namespace DataGate.Com.DB
         public virtual void RollbackTrans()
         {
             _trans.Rollback();
-            _transConn.Close();
+            _trans.Dispose();
+            _transConn = null;
+            _trans = null;
         }
 
         /// <summary>
@@ -167,8 +169,18 @@ namespace DataGate.Com.DB
             }
             finally
             {
-                _transConn.Close();
+                _trans.Dispose();
+                _transConn = null;
+                _trans = null;
             }
+        }
+
+        /// <summary>
+        /// 判断是否在事务中
+        /// </summary>
+        public bool InTrans
+        {
+            get { return _trans != null; }
         }
 
         /// <summary>

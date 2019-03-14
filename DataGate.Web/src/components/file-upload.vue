@@ -1,7 +1,47 @@
 <template>
   <!-- 文件上传组件 -->
   <div>
-    <div :id="id" class="uploader" :style="height?{ height:height+'px' }:{}">
+    <!-- 文件上传组件(简单展示) -->
+    <div :id="id" class="uploader" v-if="options.simple">
+      <div class="queueList" style="border:0">
+        <el-row :id="id + 'dndArea'" class="placeholder">
+          <el-col :span="24">
+            <div v-for="file in fileList" :key="file.id">
+              <a href="#" @click.prevent="download(file)">
+                <i :class="getThumbnail(file)"></i>
+                {{file.name}}
+              </a>
+              <el-tooltip v-bind:content="getStateIco(file).content" placement="top" effect="light">
+                <i v-bind:class="getStateIco(file).ico"></i>
+              </el-tooltip>
+              <i class="el-icon-info" title="有重复的文件" v-if="file.dup"></i>
+              <i class="fa fa-trash-o" style="cursor:pointer" title="删除" @click="removeFile(file)"></i>
+              <div style="position:relative;margin-top:2px">
+                <div
+                  v-if="file.percentage>0 && file.percentage<1"
+                  :style="{background:'#409eff',width:file.percentage * 100 + '%',height:'2px',position:'absolute',left:0,bottom:0}"
+                ></div>
+              </div>
+            </div>
+            <span :id="id +'_filePicker'"></span>&nbsp;
+            <el-button
+              type="primary"
+              size="small"
+              v-if="!options.auto && getCount('waiting') > 0 && !isInProgress"
+              v-on:click="startUpload"
+            >开始上传</el-button>
+            <el-button
+              type="primary"
+              size="small"
+              v-show="getCount('error') > 0 && !isInProgress"
+              v-on:click="retry"
+            >重试</el-button>
+          </el-col>
+        </el-row>
+      </div>
+    </div>
+    <!-- 文件上传组件 (表格展示）-->
+    <div :id="id" class="uploader" v-else :style="height?{ height:height+'px' }:{}">
       <div class="queueList">
         <div class="allFiles">
           <el-table
@@ -57,7 +97,7 @@
                 >
                   <i v-bind:class="getStateIco(scope.row).ico"></i>
                 </el-tooltip>
-                <a :href="scope.row.downUrl" target="_blank">
+                <a href="javascript;" @click="download(scope.row)">
                   <i class="el-icon-download" title="下载文件"/>
                 </a>
                 <a href="javascript:;" v-on:click="removeFile(scope.row)">
@@ -114,6 +154,7 @@
 import WebUploader from "webuploader";
 import "webuploader/css/webuploader.css";
 import "../assets/styles/uploader.css";
+import { Util } from "../";
 export default {
   props: {
     //原始的文件列表和上传后的文件列表
@@ -161,6 +202,21 @@ export default {
   // 'start-drag' => file
   //"selection-changed" => selectedfiles
   //},
+  data() {
+    return {
+      //为区别不同的上传控件的ID
+      id: "UL_" + Util.guid(),
+      selection: [], //勾选的文件集合
+      currentRow: null, //clicked row
+      draging: false, //是否在拖动文件
+      isInProgress: false,
+      progress: [], //用以计算总进度的文件数组
+      totalSize: 0,
+      totalFinishedSize: 0,
+      paused: false //在一次上传过程中暂停
+    };
+  },
+
   mounted() {
     // 实例化 http://fex.baidu.com/webuploader/demo.html#
     // just in case. Make sure it's not an other libaray.
@@ -196,29 +252,27 @@ export default {
       //},
 
       // swf文件路径
-      swf: "/WebUploader/Uploader.swf",
+      swf: "/static/Uploader.swf",
 
       disableGlobalDnd: true, // 是否禁掉整个页面的拖拽功能，如果不禁用，图片拖进来的时候会默认被浏览器打开。
 
       chunked: true,
       chunkSize: chunkSize, //分片大小（3M）,
-      server: "/api/dg/u"
+      server: this.appConfig.apiUrl + "/api/dg/u"
       // 以下已经在geobank.js里配置
       //fileNumLimit: 300,
       //fileSizeLimit: 200 * 1024 * 1024,    // 200 M
       //fileSingleSizeLimit: 50 * 1024 * 1024    // 50 M
     };
 
-    $.extend(optionsDefault, BankConfig.uploadOptions);
+    $.extend(optionsDefault, this.appConfig.uploadOptions);
     //合并默认选项和传入的选项
     for (var i in optionsDefault) {
-      if (!(i in that.options)) {
-        that.options[i] = optionsDefault[i];
-      }
+      that.options[i] = optionsDefault[i];
     }
 
     if (this.options.fileNumLimit == 1) {
-      optionsDefault.pick.multiple = false;
+      that.options.pick.multiple = false;
     }
     // 实例化
     uploader = WebUploader.create(that.options);
@@ -304,6 +358,7 @@ export default {
       } else {
         data.guid = object.file.guid;
       }
+      headers.token = that.userState.token;
     });
 
     // 文件上传过程中创建进度条实时显示。
@@ -397,20 +452,6 @@ export default {
       that.$emit("upload-finished", error);
     });
   },
-  data() {
-    return {
-      //为区别不同的上传控件的ID
-      id: "UL_" + new Date().getTime(),
-      selection: [], //勾选的文件集合
-      currentRow: null, //clicked row
-      draging: false, //是否在拖动文件
-      isInProgress: false,
-      progress: [], //用以计算总进度的文件数组
-      totalSize: 0,
-      totalFinishedSize: 0,
-      paused: false //在一次上传过程中暂停
-    };
-  },
   watch: {
     fileList(files) {
       this.checkFileList(files);
@@ -440,13 +481,12 @@ export default {
     getDownloadUrl(file) {
       if (file.status == "waiting" && window.URL) {
         //IE9没有URL
-        file.downUrl = window.URL.createObjectURL(file.source.source);
+        file.url = window.URL.createObjectURL(file.source.source);
       } else if (file.status == "finished") {
         if (file.source && file.source.source && window.URL) {
-          window.URL.revokeObjectURL(file.downUrl);
+          window.URL.revokeObjectURL(file.url);
         }
-        file.downUrl =
-          "/api/dn/" + file.id + "/" + encodeURIComponent(file.name);
+        file.url = "/api/dg/d/" + file.id + "/" + encodeURIComponent(file.name);
       }
     },
     getCount(status) {
@@ -673,6 +713,14 @@ export default {
           return { ico: "fa fa-spinner fa-spin", content: "正在上传" };
         case "waiting":
           return { ico: "fa fa-hourglass-2", content: "等待上传" };
+      }
+    },
+    download(file) {
+      if (file.url.startsWith("/api/dg/d/")) {
+        var url = file.url + "?token=" + this.userState.token;
+        Util.download({ name: file.name, url });
+      } else {
+        Util.download(file);
       }
     }
   }

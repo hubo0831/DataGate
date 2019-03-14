@@ -160,7 +160,7 @@ namespace DataGate.App.Files
                 {
                     docFile = _uploadPath + doc.RelativePath;
                     File.Move(request.ServerFile, docFile);
-                    await this._fileMan.UpdateManyAsync("Md5=@Md5", new { doc.RelativePath }, new { existsDoc.Md5 });
+                    await this._fileMan.UpdateManyAsync(new { doc.RelativePath, existsDoc.Md5 });
                 }
                 else //如果相同的文件已存在，则新增一条指向原有文件的记录
                 {
@@ -223,7 +223,7 @@ namespace DataGate.App.Files
         {
             var result = new DownloadResult();
             DownloadRequest request = new DownloadRequest();
-            var file = await _fileMan.GetModelByIdAsync(id);
+            var file = await _fileMan.GetByIdAsync(id);
             if (file == null)
             {
                 throw new Exception("指定文件不存在");

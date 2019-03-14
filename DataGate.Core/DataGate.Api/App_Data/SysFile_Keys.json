@@ -1,0 +1,36 @@
+[
+  {
+    "Key": "GetAttachments",
+    "Name": "获取多个附件信息",
+    "Model": "sysFile",
+    "OpType": "GetArray",
+    "Filter": "id in (@ids)"
+  },
+  {
+    "Key": "GetById",
+    "Name": "获取单个附件信息",
+    "Model": "sysFile",
+    "OpType": "GetObject",
+    "Filter": "id=@id"
+  },
+  {
+    "Key": "GetByMd5",
+    "Name": "根据Md5获取附件信息",
+    "Model": "sysFile",
+    "OpType": "GetObject",
+    "Filter": "md5=@md5"
+  },
+  {
+    "Key": "UpdatePath",
+    "Name": "修改已有相同附件但文件缺失的保存地址",
+    "Model": "sysFile",
+    "OpType": "Save",
+    "Filter": "md5=@md5"
+  },
+  {
+    "Key": "SaveFile",
+    "Name": "保存上传的附件信息",
+    "Model": "sysFile",
+    "OpType": "Save"
+  }
+]

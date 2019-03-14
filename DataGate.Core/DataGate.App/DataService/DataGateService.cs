@@ -291,7 +291,7 @@ namespace DataGate.App.DataService
         {
             foreach (var jToken in changed)
             {
-                await UpdateOneAsync(gkey, jToken);
+                await UpdateAsync(gkey, jToken);
             }
         }
 
@@ -342,8 +342,9 @@ namespace DataGate.App.DataService
             gkey.DataGate.OnRemove(gkey, psin);
             var ps = fields.Select(f =>
              {
+                 var ff = tableMeta.GetField(f);
                  var psKey = psin.Keys.First(key => key.Equals(f, StringComparison.OrdinalIgnoreCase));
-                 return _db.CreateParameter(psKey, psin[psKey]);
+                 return _db.CreateParameter(ff.DbName, psin[psKey]);
              }).ToList();
 
             string filter = CreateKeyFilter(tableMeta);
@@ -428,13 +429,17 @@ namespace DataGate.App.DataService
                 //外键字段pass掉
                 if (ff != null && !ff.ForeignField.IsEmpty()) return null;
                 var psKey = psin.Keys.First(key => key.Equals(f, StringComparison.OrdinalIgnoreCase));
-                return _db.CreateParameter(psKey, psin[psKey]);
-            }).Where(p => p != null).ToArray();
-            string strFields = String.Join(",", fields.Select(p => _db.AddFix(p.Trim())));
-            string strValues = String.Join(",", ps.Select(p => '@' + p.ParameterName));
+                return new
+                {
+                    f = ff.FixDbName,
+                    p = _db.CreateParameter(ff.DbName, psin[psKey]),
+                };
+            }).Where(p => p != null);
+            string strFields = String.Join(",", ps.Select(p => p.f));
+            string strValues = String.Join(",", ps.Select(p => '@' + p.p.ParameterName));
             string sql = $"insert into {tableMeta.FixDbName} ({strFields}) values({strValues})";
 
-            await _db.TransNonQueryAsync(sql, ps);
+            await _db.TransNonQueryAsync(sql, ps.Select(p => p.p).ToArray());
 
             if (!getMaxIdSql.IsEmpty())
             {
@@ -455,7 +460,7 @@ namespace DataGate.App.DataService
         /// <returns></returns>
         public async Task<string> InsertOneAsync(string key, object ps)
         {
-            bool singleCall = this.DB == null; //是否不在事务中,是单独调用
+            bool singleCall = this.DB == null || !this.DB.InTrans; //是否不在事务中,是单独调用
             var gkey = GetDataGate(key);
             var jToken = JObject.FromObject(ps);
             if (singleCall) _db.BeginTrans();
@@ -465,23 +470,24 @@ namespace DataGate.App.DataService
         }
 
         /// <summary>
-        /// 根据主键更新数据库,主要用于非API的服务端内部调用
+        /// 根据条件更新数据库,主要用于非API的服务端内部调用
         /// </summary>
         /// <param name="key"></param>
         /// <param name="ps"></param>
         /// <returns></returns>
-        public async Task<int> UpdateOneAsync(string key, object ps)
+        public async Task<int> UpdateAsync(string key, object ps)
         {
-            bool singleCall = this.DB == null; //是否不在事务中,是单独调用
+            bool singleCall = this.DB == null || !this.DB.InTrans; //是否不在事务中,是单独调用
             var gkey = GetDataGate(key);
             var jToken = JObject.FromObject(ps);
             if (singleCall) _db.BeginTrans();
-            var r = await UpdateOneAsync(gkey, jToken);
+            var r = await UpdateAsync(gkey, jToken);
             if (singleCall) _db.EndTrans();
             return r;
         }
 
-        private async Task<int> UpdateOneAsync(DataGateKey gkey, JToken jToken)
+        //在v.0.2.1以后，有可能更新多条，可以带Filter条件更新多条
+        private async Task<int> UpdateAsync(DataGateKey gkey, JToken jToken)
         {
             var tableMeta = GetMainTable(gkey);
             IDictionary<string, object> psin = jToken.ToDictionary();
@@ -492,23 +498,25 @@ namespace DataGate.App.DataService
 
             var ps = fields.Select(f =>
             {
+                var ff = tableMeta.GetField(f);
                 var psKey = psin.Keys.First(key => key.Equals(f, StringComparison.OrdinalIgnoreCase));
-                return _db.CreateParameter(psKey, psin[psKey]);
+                return _db.CreateParameter(ff.DbName, psin[psKey]);
             }).ToArray();
 
             string strFields = String.Join(",", fields.Select(f =>
             {
                 f = f.Trim();
                 //主键或集合字段不进入更新语句
-                var ff = tableMeta.Fields.FirstOrDefault(fd => fd.Name.Equals(f, StringComparison.OrdinalIgnoreCase));
+                var ff = tableMeta.GetField(f);
                 if (ff != null && (ff.IsArray || ff.PrimaryKey)) return null;
                 //外来表字段pass掉
                 if (ff != null && !ff.ForeignField.IsEmpty()) return null;
-                var p = ps.First(p1 => p1.ParameterName.Equals(f, StringComparison.OrdinalIgnoreCase));
-                return _db.AddFix(f) + "=@" + p;
+                var p = ps.First(p1 => p1.ParameterName.Equals(ff.DbName, StringComparison.OrdinalIgnoreCase));
+                return ff.FixDbName + "=@" + p;
             }).Where(f => f != null));
 
-            string filter = CreateKeyFilter(tableMeta);
+            //根据是否带筛选条件决定是根据主键更新单条还是根据条件有可能更新多条
+            string filter = FormatFilter(gkey.Filter, tableMeta) ?? CreateKeyFilter(tableMeta);
 
             string sql = $"update {tableMeta.FixDbName} set {strFields} where {filter}";
             int r = await _db.TransNonQueryAsync(sql, ps);
@@ -854,7 +862,7 @@ namespace DataGate.App.DataService
                 gkey.OrderBy = orderby;
             }
         }
-
+        
         /// <summary>
         /// 获取order by子句的字段序号
         /// </summary>
@@ -864,7 +872,7 @@ namespace DataGate.App.DataService
         private string GetSortField(string f, DataGateKey gkey)
         {
             string[] qfs = gkey.QueryFieldsTerm.Split(',');
-            var ff = _db.AddFix(f);
+            var ff = gkey.GetField(f)?.FixDbName;
             for (var i = 0; i < qfs.Length; i++)
             {
                 if (qfs[i] == ff) return qfs[i];
@@ -942,7 +950,7 @@ namespace DataGate.App.DataService
             {
                 return m.Table;
             });
-            string orderBy = FormatOrderBy(gkey.OrderBy);
+            string orderBy = FormatOrderBy(gkey);
             if (!orderBy.IsEmpty())
             {
                 orderBy = " order by " + orderBy;
@@ -1046,7 +1054,7 @@ namespace DataGate.App.DataService
             {
                 filter = " where " + filter;
             }
-            string orderby = FormatOrderBy(gkey.OrderBy);
+            string orderby = FormatOrderBy(gkey);
             if (!orderby.IsEmpty())
             {
                 orderby = " order by " + orderby;
@@ -1056,8 +1064,9 @@ namespace DataGate.App.DataService
         }
 
         //单表不分页查询，将orderby子句中的属性名替换成数据库字段限定名
-        private string FormatOrderBy(string orderBy)
+        private string FormatOrderBy(DataGateKey gkey)
         {
+            var orderBy = gkey.OrderBy;
             if (orderBy.IsEmpty())
             {
                 return null;

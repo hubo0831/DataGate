@@ -1,0 +1,39 @@
+[
+  {
+    "Name": "sysFile",
+    "Fields": [
+      {
+        "Name": "id",
+        "PrimaryKey": true,
+        "DataType": "Number"
+      },
+      {
+        "Name": "name"
+      },
+      {
+        "Name": "path"
+      },
+      {
+        "Name": "relativePath"
+      },
+      {
+        "Name": "size",
+        "DbName": "SIZES",
+        "DataType": "Number"
+      },
+      {
+        "Name": "contentType"
+      },
+      {
+        "Name": "md5"
+      },
+      {
+        "Name": "userId"
+      },
+      {
+        "Name": "createTime",
+        "DataType": "DateTime"
+      }
+    ]
+  }
+]
