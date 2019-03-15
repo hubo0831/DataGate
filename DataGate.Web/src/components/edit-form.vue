@@ -96,16 +96,17 @@
           v-else-if="item.uitype=='Switch'"
           v-model="task.editBuffer[item.name]"
           v-on:change="handleChange(item)"
-          active-value="1"
-          inactive-value="0"
+          :active-value="1"
+          :inactive-value="0"
         ></el-switch>
-        <el-checkbox
+        <input
+          type="checkbox"
           v-else-if="item.uitype=='CheckBox'"
           v-model="task.editBuffer[item.name]"
-          :true-label="'1'"
-          :false-label="'0'"
-          v-on:change="handleChange(item)"
-        ></el-checkbox>
+          true-value="1"
+          false-value="0"
+          @change="handleChange(item)"
+        >
         <!-- 日期选择 -->
         <el-date-picker
           v-else-if="item.uitype=='Date'"
@@ -132,7 +133,7 @@
         ></el-input>
         <!-- 自定义输入组件 -->
         <component
-          v-else
+          v-else-if="item.uitype!='Custom'"
           :is="item.uitype"
           v-model="task.editBuffer[item.name]"
           :meta="item"
@@ -232,8 +233,7 @@ export default {
         }
       }
       this.$emit("change", item);
-    },
-
+    }
   }
 };
 </script>
@@ -265,6 +265,9 @@ export default {
 
 .meta-form .el-form-item {
   margin-bottom: 5px;
+  label {
+    font-weight: bold;
+  }
 }
 
 .el-table--mini {

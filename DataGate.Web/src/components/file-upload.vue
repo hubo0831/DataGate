@@ -3,15 +3,19 @@
   <div>
     <!-- 文件上传组件(简单展示) -->
     <div :id="id" class="uploader" v-if="options.simple">
-      <div class="queueList" style="border:0">
-        <el-row :id="id + 'dndArea'" class="placeholder">
+      <div class="queueList" style="border:0;margin-top:0">
+        <el-row :id="id + 'dndArea'" class="placeholder" style="border:0;margin-top:0;padding:0">
           <el-col :span="24">
             <div v-for="file in fileList" :key="file.id">
               <a href="#" @click.prevent="download(file)">
                 <i :class="getThumbnail(file)"></i>
                 {{file.name}}
               </a>
-              <el-tooltip v-bind:content="getStateIco(file).content" placement="top" effect="light">
+              <el-tooltip
+                v-bind:content="getStateIco(file).content"
+                placement="top"
+                effect="light"
+              >
                 <i v-bind:class="getStateIco(file).ico"></i>
               </el-tooltip>
               <i class="el-icon-info" title="有重复的文件" v-if="file.dup"></i>
@@ -473,7 +477,7 @@ export default {
       $(files).each(function(idx, file) {
         if (!file.status) {
           file.percentage = 0; //上传进度百分比
-          file.status = "finished"; //上传状态标记，用于跟踪上传状态
+          file.status = ""; //上传状态标记，用于跟踪上传状态
           that.getDownloadUrl(file);
         }
       });
@@ -703,6 +707,8 @@ export default {
     getStateIco(row) {
       switch (row.status) {
         default:
+          return {};
+        case "finished":
           return { ico: "fa fa-check-circle", content: "上传完成" };
         case "error":
           return {
