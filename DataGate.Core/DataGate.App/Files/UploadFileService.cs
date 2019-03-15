@@ -53,11 +53,6 @@ namespace DataGate.App.Files
             return result;
         }
 
-        private string CreateId()
-        {
-            return Guid.NewGuid().ToString("N");
-        }
-
         /// <summary>秒传,需要客户端提供文件的MD5</summary>
         private async Task<UploadResult> HandleClientMD5Async(ServerUploadRequest request)
         {
@@ -70,7 +65,7 @@ namespace DataGate.App.Files
                 if (File.Exists(docFile))
                 {
                     //如果相同的文件已存在，则新增一条指向原有文件的记录
-                    existsDoc.Id = CreateId();
+                    existsDoc.Id = null;
                     existsDoc.Name = request.FileName;
                     existsDoc.Path = request.FilePath;
                     await _fileMan.InsertAsync(existsDoc);
@@ -176,7 +171,6 @@ namespace DataGate.App.Files
         {
             var doc = new SysFile
             {
-                Id = CreateId(),
                 Name = request.FileName,
                 CreateTime = DateTime.Now,
                 UserId = request.UserId
@@ -188,7 +182,7 @@ namespace DataGate.App.Files
             var level2Dir = doc.CreateTime.ToString("ddHH");
             var docPath = $@"{this._uploadPath}\{level1Dir}\{level2Dir}";
             if (!Directory.Exists(docPath)) Directory.CreateDirectory(docPath);
-            doc.RelativePath = $@"\{level1Dir}\{level2Dir}\{doc.Id}{ext}";
+            doc.RelativePath = $@"\{level1Dir}\{level2Dir}\{Guid.NewGuid().ToString("N")}{ext}";
             doc.ContentType = IOHelper.GetContentType(request.FileName);
             return doc;
         }

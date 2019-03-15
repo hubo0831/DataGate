@@ -7,7 +7,7 @@
         <el-row :id="id + 'dndArea'" class="placeholder" style="border:0;margin-top:0;padding:0">
           <el-col :span="24">
             <div v-for="file in fileList" :key="file.id">
-              <a href="#" @click.prevent="download(file)">
+              <a :href="file.url">
                 <i :class="getThumbnail(file)"></i>
                 {{file.name}}
               </a>
@@ -23,19 +23,19 @@
                 ></div>
               </div>
             </div>
-              <span :id="id +'_filePicker'"></span>
-            <el-button
-              type="primary"
-              size="small"
-              v-if="!options.auto && getCount('waiting') > 0 && !isInProgress"
-              v-on:click="startUpload"
-            >开始上传</el-button>
-            <el-button
-              type="primary"
-              size="small"
-              v-show="getCount('error') > 0 && !isInProgress"
-              v-on:click="retry"
-            >重试</el-button>
+                <span :id="id +'_filePicker'"></span>
+                <el-button
+                  type="primary"
+                  size="small"
+                  v-if="!options.auto && getCount('waiting') > 0 && !isInProgress"
+                  v-on:click="startUpload"
+                >开始上传</el-button>
+                <el-button  style="position:relative; height:40px; top:-16px"
+                  type="primary"
+                  size="small" 
+                  v-show="getCount('error') > 0 && !isInProgress"
+                  v-on:click="retry"
+                >重试</el-button>
           </el-col>
         </el-row>
       </div>
@@ -97,7 +97,7 @@
                 >
                   <i v-bind:class="getStateIco(scope.row).ico"></i>
                 </el-tooltip>
-                <a href="javascript;" @click="download(scope.row)">
+                <a :href="scope.row.url">
                   <i class="el-icon-download" title="下载文件"/>
                 </a>
                 <a href="javascript:;" v-on:click="removeFile(scope.row)">
@@ -154,7 +154,8 @@
 import WebUploader from "webuploader";
 import "webuploader/css/webuploader.css";
 import "../assets/styles/uploader.css";
-import { Util } from "../";
+import { Util, API, UserState } from "../";
+import userState from "../userState";
 export default {
   props: {
     //原始的文件列表和上传后的文件列表
@@ -481,13 +482,19 @@ export default {
       if (file.status == "waiting" && window.URL) {
         //IE9没有URL
         file.url = window.URL.createObjectURL(file.source.source);
-      } else if (file.status == "finished") {
-        if (file.source && file.source.source && window.URL) {
-          window.URL.revokeObjectURL(file.url);
-        }
-        file.url = "/api/dg/d/" + file.id + "/" + encodeURIComponent(file.name);
+        return file;
+      } else if (
+        file.status == "finished" &&
+        file.source &&
+        file.source.source &&
+        window.URL
+      ) {
+        window.URL.revokeObjectURL(file.url);
       }
+
+      return API.getDownloadUrl(file);
     },
+
     getCount(status) {
       var cnt = 0;
       for (var i in this.fileList) {
@@ -714,14 +721,6 @@ export default {
           return { ico: "fa fa-spinner fa-spin", content: "正在上传" };
         case "waiting":
           return { ico: "fa fa-hourglass-2", content: "等待上传" };
-      }
-    },
-    download(file) {
-      if (file.url.startsWith("/api/dg/d/")) {
-        var url = file.url + "?token=" + this.userState.token;
-        Util.download({ name: file.name, url });
-      } else {
-        Util.download(file);
       }
     }
   }

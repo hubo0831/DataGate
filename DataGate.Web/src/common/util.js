@@ -284,7 +284,6 @@ export default {
   }) {
     var a = document.createElement("a");
     a.href = url;
-    a.target = "_blank";
     name && (a.download = name);
     a.style.display = "none";
     document.body.appendChild(a);

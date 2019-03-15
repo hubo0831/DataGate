@@ -50,9 +50,11 @@ namespace DataGate.App.Files
             await _dg.UpdateAsync("UpdatePath", p);
         }
 
-        public async Task<string> InsertAsync(SysFile file)
+        public async Task<SysFile> InsertAsync(SysFile file)
         {
-            return await _dg.InsertOneAsync("SaveFile", file);
+            var id = await _dg.InsertOneAsync("SaveFile", file);
+            file.Id = id;
+            return file;
         }
     }
 }

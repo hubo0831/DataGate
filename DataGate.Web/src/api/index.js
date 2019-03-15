@@ -41,7 +41,7 @@ export const POST = (url, params) => {
       headers: {
         token: userState.token
       },
-      cache:false,
+      cache: false,
       data: params,
       url: url,
       crossDomain: true,
@@ -59,7 +59,7 @@ export const GET = (url, params) => {
       headers: {
         token: userState.token
       },
-      cache:false,
+      cache: false,
       data: params,
       url: url,
       crossDomain: true,
@@ -81,7 +81,7 @@ export const JPOST = (url, params) => {
       headers: {
         token: userState.token
       },
-      cache:false,
+      cache: false,
       data: JSON.stringify(params),
       url: url,
       crossDomain: true,
@@ -93,7 +93,7 @@ export const JPOST = (url, params) => {
 }
 
 function filterResult(result) {
-  if (!result || !result.$code ) return;
+  if (!result || !result.$code) return;
   if (result.$code == 1010) {
     bus.$emit("session-timeout", result);
     throw result;
@@ -125,8 +125,15 @@ export const META = key => {
 }
 
 //通用导出Excel, 生成一个文件下载链接并自动点击
-export const EXPORT = (key, params) =>{
+export const EXPORT = (key, params) => {
   params.token = userState.token;
-  var url = formatUrl('/api/dg/x/' + key +"?" + util.encodeParams(params));
-  util.download({url});
+  var url = formatUrl('/api/dg/x/' + key + "?" + util.encodeParams(params));
+  util.download({
+    url
+  });
+}
+
+export const getDownloadUrl = file => {
+  file.url = `${appConfig.apiUrl}/api/dg/d/${file.id}/${file.name}?token=${userState.token}`;
+  return file;
 }
