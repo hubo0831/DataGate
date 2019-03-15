@@ -21,7 +21,7 @@
       <el-option v-for="sel in meta.items" :key="sel.value" :label="sel.text" :value="sel.value">
       </el-option>
     </el-select>
-    <!-- 自定义输入组件 -->
+   <!-- 自定义输入组件 -->
     <component v-else :is="meta.uitype" v-model="obj[meta.name]" :meta="meta" :obj="obj" :in-edit="true" style="width:100%"></component>
   </div>
 </template>

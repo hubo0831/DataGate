@@ -39,16 +39,9 @@
           <template slot-scope="scope">
             <!-- 非当前编辑行或只读字段只显示 -->
             <template v-if="(scope.row != editingRow) || scope.row.readonly || editMode !='inline'">
-              <slot name="display-col" v-if="meta.uitype=='Custom'" :meta="meta" :obj="scope.row">
-                <!-- <span>自定义显示状态的数据列内容</span> -->
-              </slot>
-              <slot
-                name="display-op-col"
-                v-else-if="meta.uitype=='Operator'"
-                :meta="meta"
-                :obj="scope.row"
-              >
-                <!-- <span>自定义显示状态的操作列内容</span> -->
+              <slot :name="meta.name" :in-edit="false" v-if="meta.uitype=='Custom'" :meta="meta" :obj="scope.row">
+                <!-- 自定义显示状态的数据列内容 -->
+                {{scope.row[meta.name]}}
               </slot>
               <display-item
                 v-else
@@ -63,17 +56,8 @@
               <edit-item :obj="rowBuffer" :meta="getMeta(meta.linkto)"></edit-item>
             </el-form-item>
             <!-- 自定义编辑列的内容 -->
-            <slot name="edit-col" :obj="scope.row" :meta="meta" v-else-if="meta.uitype=='Custom'">
-              <span>没有自定义编辑列内容</span>
-            </slot>
-            <!-- 自定义操作列的内容 -->
-            <slot
-              name="edit-op-col"
-              :obj="scope.row"
-              :meta="meta"
-              v-else-if="meta.uitype=='Operator'"
-            >
-              <span>没有自定义编辑状态的操作列内容</span>
+            <slot :name="meta.name" :in-edit="true" :obj="scope.row" :meta="meta" v-else-if="meta.uitype=='Custom'">
+              {{scope.row[meta.name]}}
             </slot>
             <!-- 常规编辑 -->
             <el-form-item v-else :prop="meta.name">

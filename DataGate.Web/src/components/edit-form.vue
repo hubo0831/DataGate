@@ -131,9 +131,12 @@
           :placeholder="getPlaceholder(item)"
           style="width:100%"
         ></el-input>
+        <slot v-else-if="item.uitype=='Custom'" :task="task" :in-edit="true" :meta="item" :obj="task.editBuffer">
+          {{task.editBuffer[item.name]}}
+        </slot>
         <!-- 自定义输入组件 -->
         <component
-          v-else-if="item.uitype!='Custom'"
+          v-else
           :is="item.uitype"
           v-model="task.editBuffer[item.name]"
           :meta="item"

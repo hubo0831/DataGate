@@ -11,11 +11,7 @@
                 <i :class="getThumbnail(file)"></i>
                 {{file.name}}
               </a>
-              <el-tooltip
-                v-bind:content="getStateIco(file).content"
-                placement="top"
-                effect="light"
-              >
+              <el-tooltip v-bind:content="getStateIco(file).content" placement="top" effect="light">
                 <i v-bind:class="getStateIco(file).ico"></i>
               </el-tooltip>
               <i class="el-icon-info" title="有重复的文件" v-if="file.dup"></i>
@@ -27,7 +23,7 @@
                 ></div>
               </div>
             </div>
-            <span :id="id +'_filePicker'"></span>&nbsp;
+              <span :id="id +'_filePicker'"></span>
             <el-button
               type="primary"
               size="small"
@@ -209,7 +205,7 @@ export default {
   data() {
     return {
       //为区别不同的上传控件的ID
-      id: "UL_" + Util.guid(),
+      id: "",
       selection: [], //勾选的文件集合
       currentRow: null, //clicked row
       draging: false, //是否在拖动文件
@@ -220,13 +216,25 @@ export default {
       paused: false //在一次上传过程中暂停
     };
   },
-
+  watch: {
+    fileList(files) {
+      this.checkFileList(files);
+    }
+  },
+  computed: {
+    totalPercentage() {
+      return (this.totalFinishedSize * 1.0) / (this.totalSize || 1);
+    }
+  },
+  created() {
+    if (!this.id) this.id = "u" + Util.guid().substr(8, 8);
+    this.checkFileList(this.fileList);
+  },
   mounted() {
     // 实例化 http://fex.baidu.com/webuploader/demo.html#
     // just in case. Make sure it's not an other libaray.
     var that = this;
-    var $wrap = $("#" + that.id),
-      chunkSize = 3 * 1024 * 1024,
+    var chunkSize = 3 * 1024 * 1024,
       // WebUploader实例
       uploader;
 
@@ -455,19 +463,6 @@ export default {
       //vue注册上传完成后的事件
       that.$emit("upload-finished", error);
     });
-  },
-  watch: {
-    fileList(files) {
-      this.checkFileList(files);
-    }
-  },
-  computed: {
-    totalPercentage() {
-      return (this.totalFinishedSize * 1.0) / (this.totalSize || 1);
-    }
-  },
-  created() {
-    this.checkFileList(this.fileList);
   },
   methods: {
     checkFileList(files) {
