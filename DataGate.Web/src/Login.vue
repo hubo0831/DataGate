@@ -135,10 +135,14 @@ export default {
     };
   },
   created() {
-    //如果上次勾了记住我，则尝试用记住我的信息自动登录
-    API.rememberLogin().catch(remember => {
-      this.loginModel.remember = remember;
-    });
+    var args = { passed: false };
+    //如果有第三方登录,
+    bus.$emitPass("custom-login", args, null, () =>
+      //如果上次勾了记住我，则尝试用记住我的信息自动登录
+      API.rememberLogin().catch(remember => {
+        this.loginModel.remember = remember;
+      })
+    );
   },
   methods: {
     doLogin() {
