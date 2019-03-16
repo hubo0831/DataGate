@@ -16,7 +16,6 @@ function getUserInfo() {
     }
     API.GET('/api/Check/GetUser').then(user => {
       if (!user.$code) {
-        userState.currentUser = user;
         resolve(user);
       } else {
         reject(user);

@@ -152,6 +152,7 @@ export default {
     //Promise.all返回的是一个用户数组，其实每个用户都是一样的
     var getUserMenus = users => {
       var user = users[0];
+
       this.userPages = user.menus;
       routerObj.createRoutes(user.menus);
       var menuTree = util.buildNestData(user.menus.filter(m => m.showType));
@@ -159,6 +160,8 @@ export default {
       var home = this.userPages.find(m => m.url == "/");
       this.selfMenu = this.userPages.filter(m => m.parentId == home.id);
       this.restoreMenu();
+      //在最后将user加入到响应式的userState中
+      this.userState.currentUser = user;
       this.user = user;
       this.logined = true;
     };

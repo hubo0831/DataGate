@@ -47,7 +47,7 @@ namespace DataGate.Com
         {
             int i = 0;
             if (s == null || s == DBNull.Value) return 0;
-            if (s is int || s is short || s is byte || s is double || s.GetType().IsEnum) return Convert.ToInt32(s);
+            if (s is int || s is short || s is byte || s is double || s is decimal || s.GetType().IsEnum) return Convert.ToInt32(s);
             if (int.TryParse(s.ToString(), out i)) return i;
             else return 0;
         }
@@ -84,7 +84,7 @@ namespace DataGate.Com
         {
             int i = 0;
             if (s == null || s == DBNull.Value) return null;
-            if (s is int || s is short || s is byte || s is double || s.GetType().IsEnum) return Convert.ToInt32(s);
+            if (s is int || s is short || s is byte || s is double || s is decimal || s.GetType().IsEnum) return Convert.ToInt32(s);
             if (int.TryParse(s.ToString(), out i)) return i;
             return null;
         }
@@ -98,7 +98,7 @@ namespace DataGate.Com
         {
             long i = 0;
             if (s == null || s == DBNull.Value) return 0;
-            if (s is long || s is int || s is short || s is byte || s.GetType().IsEnum) return Convert.ToInt64(s);
+            if (s is long || s is int || s is short || s is byte || s is decimal || s.GetType().IsEnum) return Convert.ToInt64(s);
             if (long.TryParse(s.ToString(), out i)) return i;
             else return 0;
         }
@@ -112,7 +112,7 @@ namespace DataGate.Com
         {
             long i = 0;
             if (s == null || s == DBNull.Value) return null;
-            if (s is long || s is int || s is short || s is byte || s.GetType().IsEnum) return Convert.ToInt64(s);
+            if (s is long || s is int || s is short || s is decimal || s is byte || s.GetType().IsEnum) return Convert.ToInt64(s);
             if (long.TryParse(s.ToString(), out i)) return i;
             else return null;
         }
