@@ -19,34 +19,16 @@ namespace DataGate.Com.DB
         /// <returns>影响的行数</returns>
         public virtual async Task<int> ExecNonQueryAsync(string sql, params IDataParameter[] sp)
         {
-            using (DbConnection conn = DBComm.CreateConnection())
-            {
-                DbCommand sc = DBComm.CreateCommand(conn);
-                sc.CommandText = sql;
-                PrepareCommand(sc, sp);
-                int r = await sc.ExecuteNonQueryAsync();
-                conn.Close();
-                sc.Parameters.Clear();
-                return r;
-            }
-        }
-
-        /// <summary>
-        /// 执行事务中的非查询语句
-        /// </summary>
-        /// <param name="sql">非查询语句</param>
-        /// <param name="sp">可选参数数组</param>
-        /// <returns>影响的行数</returns>
-        public virtual async Task<int> TransNonQueryAsync(string sql, params IDataParameter[] sp)
-        {
-            DbCommand sc = DBComm.CreateCommand(_transConn);
+            var conn = StartConn();
+            DbCommand sc = DBComm.CreateCommand(conn);
             sc.CommandText = sql;
             PrepareCommand(sc, sp);
-            sc.Transaction = _trans;
-            int i = await sc.ExecuteNonQueryAsync();
+            int r = await sc.ExecuteNonQueryAsync();
             sc.Parameters.Clear();
-            return i;
+            EndConn(conn);
+            return r;
         }
+
 
         /// <summary>
         /// 根据指定Sql返回一个DataReader
@@ -56,7 +38,7 @@ namespace DataGate.Com.DB
         /// <returns>IDataReader</returns>
         public virtual async Task<IDataReader> ExecReaderAsync(string sql, params IDataParameter[] sp)
         {
-            DbConnection conn = DBComm.CreateConnection();
+            var conn = StartConn();
             DbCommand sc = DBComm.CreateCommand(conn);
             sc.CommandText = sql;
 
@@ -66,13 +48,13 @@ namespace DataGate.Com.DB
             try
             {
                 PrepareCommand(sc, sp);
-                IDataReader rdr = await sc.ExecuteReaderAsync(CommandBehavior.CloseConnection);
+                IDataReader rdr = await sc.ExecuteReaderAsync();
                 sc.Parameters.Clear();
                 return rdr;
             }
             catch (Exception ex)
             {
-                conn.Close();
+                EndConn(conn);
                 throw ex;
             }
         }
@@ -86,35 +68,15 @@ namespace DataGate.Com.DB
         public virtual async Task<object> ExecGetObjectAsync(String sql, params IDataParameter[] sp)
         {
             object o = 0;
-            using (DbConnection conn = DBComm.CreateConnection())
-            {
-                DbCommand sc = DBComm.CreateCommand(conn);
-                sc.CommandText = sql;
-                PrepareCommand(sc, sp);
-                o = await sc.ExecuteScalarAsync();
-                sc.Parameters.Clear();
-                return o;
-            }
-        }
-
-        /// <summary>
-        /// 在事务中获取单个对象
-        /// </summary>
-        /// <param name="sql">查询语句</param>
-        /// <param name="sp">可选参数数组</param>
-        /// <returns>返回的单个值</returns>
-        public virtual async Task<object> TransGetObjectAsync(string sql, params IDataParameter[] sp)
-        {
-            object o = null;
-            DbCommand sc = DBComm.CreateCommand(_transConn);
+            var conn = StartConn();
+            DbCommand sc = DBComm.CreateCommand(conn);
             sc.CommandText = sql;
             PrepareCommand(sc, sp);
-            sc.Transaction = _trans;
             o = await sc.ExecuteScalarAsync();
             sc.Parameters.Clear();
+            EndConn(conn);
             return o;
         }
-
 
         /// <summary>
         /// 执行存储过程修改数据
@@ -124,16 +86,15 @@ namespace DataGate.Com.DB
         /// <returns>影响的行数</returns>
         public virtual async Task<int> RunProcedureAsync(string procname, params IDataParameter[] sp)
         {
-            using (DbConnection conn = DBComm.CreateConnection())
-            {
-                DbCommand sc = DBComm.CreateCommand(conn);
-                sc.CommandText = procname;
-                sc.CommandType = CommandType.StoredProcedure;
-                PrepareCommand(sc, sp);
-                int r = await sc.ExecuteNonQueryAsync();
-                sc.Parameters.Clear();
-                return r;
-            }
+            var conn = StartConn();
+            DbCommand sc = DBComm.CreateCommand(conn);
+            sc.CommandText = procname;
+            sc.CommandType = CommandType.StoredProcedure;
+            PrepareCommand(sc, sp);
+            int r = await sc.ExecuteNonQueryAsync();
+            sc.Parameters.Clear();
+            EndConn(conn);
+            return r;
         }
 
         /// <summary>

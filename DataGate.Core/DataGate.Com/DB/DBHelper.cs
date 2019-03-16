@@ -175,6 +175,20 @@ namespace DataGate.Com.DB
             }
         }
 
+        //创建一个连接，如果在事务中，则使用事务的连接
+        private DbConnection StartConn()
+        {
+            if (_transConn != null) return _transConn;
+            return DBComm.CreateConnection();
+        }
+
+        //关闭连接，如果在事务中则不关闭
+        private void EndConn(DbConnection conn)
+        {
+            if (_transConn != conn)
+                conn.Dispose();
+        }
+
         /// <summary>
         /// 判断是否在事务中
         /// </summary>
@@ -191,16 +205,14 @@ namespace DataGate.Com.DB
         /// <returns>影响的行数</returns>
         public virtual int ExecNonQuery(string sql, params IDataParameter[] sp)
         {
-            using (DbConnection conn = DBComm.CreateConnection())
-            {
-                DbCommand sc = DBComm.CreateCommand(conn);
-                sc.CommandText = sql;
-                PrepareCommand(sc, sp);
-                int r = sc.ExecuteNonQuery();
-                conn.Close();
-                sc.Parameters.Clear();
-                return r;
-            }
+            DbConnection conn = StartConn();
+            DbCommand sc = DBComm.CreateCommand(conn);
+            sc.CommandText = sql;
+            PrepareCommand(sc, sp);
+            int r = sc.ExecuteNonQuery();
+            sc.Parameters.Clear();
+            EndConn(conn);
+            return r;
         }
 
         /// <summary>
@@ -211,16 +223,15 @@ namespace DataGate.Com.DB
         /// <returns>影响的行数</returns>
         public virtual int RunProcedure(string procname, params IDataParameter[] sp)
         {
-            using (DbConnection conn = DBComm.CreateConnection())
-            {
-                DbCommand sc = DBComm.CreateCommand(conn);
-                sc.CommandText = procname;
-                sc.CommandType = CommandType.StoredProcedure;
-                PrepareCommand(sc, sp);
-                int r = sc.ExecuteNonQuery();
-                sc.Parameters.Clear();
-                return r;
-            }
+            DbConnection conn = StartConn();
+            DbCommand sc = DBComm.CreateCommand(conn);
+            sc.CommandText = procname;
+            sc.CommandType = CommandType.StoredProcedure;
+            PrepareCommand(sc, sp);
+            int r = sc.ExecuteNonQuery();
+            sc.Parameters.Clear();
+            EndConn(conn);
+            return r;
         }
 
         /// <summary>
@@ -231,56 +242,19 @@ namespace DataGate.Com.DB
         /// <returns>DataSet</returns>
         public virtual DataSet RunProcedureDs(string procname, params IDataParameter[] sp)
         {
-            using (DbConnection conn = DBComm.CreateConnection())
-            {
-                DbCommand sc = DBComm.CreateCommand(conn);
-                sc.CommandText = procname;
-                sc.CommandType = CommandType.StoredProcedure;
-                PrepareCommand(sc, sp);
-
-                DbDataAdapter da = DBComm.CreateDataAdapter(sc);
-                DataSet ds = new DataSet();
-                da.Fill(ds);
-                sc.Parameters.Clear();
-                return ds;
-            }
-        }
-
-        /// <summary>
-        /// 执行事务中的非查询语句
-        /// </summary>
-        /// <param name="sql">非查询语句</param>
-        /// <param name="sp">可选参数数组</param>
-        /// <returns>影响的行数</returns>
-        public virtual int TransNonQuery(string sql, params IDataParameter[] sp)
-        {
-            DbCommand sc = DBComm.CreateCommand(_transConn);
-            sc.CommandText = sql;
+            DbConnection conn = StartConn();
+            DbCommand sc = DBComm.CreateCommand(conn);
+            sc.CommandText = procname;
+            sc.CommandType = CommandType.StoredProcedure;
             PrepareCommand(sc, sp);
-            sc.Transaction = _trans;
-            int i = sc.ExecuteNonQuery();
-            sc.Parameters.Clear();
-            return i;
-        }
 
-        /// <summary>
-        /// 在事务中获取单个对象
-        /// </summary>
-        /// <param name="sql">查询语句</param>
-        /// <param name="sp">可选参数数组</param>
-        /// <returns>返回的单个值</returns>
-        public virtual object TransGetObject(string sql, params IDataParameter[] sp)
-        {
-            object o = null;
-            DbCommand sc = DBComm.CreateCommand(_transConn);
-            sc.CommandText = sql;
-            PrepareCommand(sc, sp);
-            sc.Transaction = _trans;
-            o = sc.ExecuteScalar();
+            DbDataAdapter da = DBComm.CreateDataAdapter(sc);
+            DataSet ds = new DataSet();
+            da.Fill(ds);
             sc.Parameters.Clear();
-            return o;
+            EndConn(conn);
+            return ds;
         }
-
 
         /// <summary>
         /// 得到单一对象
@@ -291,15 +265,14 @@ namespace DataGate.Com.DB
         public virtual object ExecGetObject(String sql, params IDataParameter[] sp)
         {
             object o = 0;
-            using (DbConnection conn = DBComm.CreateConnection())
-            {
-                DbCommand sc = DBComm.CreateCommand(conn);
-                sc.CommandText = sql;
-                PrepareCommand(sc, sp);
-                o = sc.ExecuteScalar();
-                sc.Parameters.Clear();
-                return o;
-            }
+            DbConnection conn = StartConn();
+            DbCommand sc = DBComm.CreateCommand(conn);
+            sc.CommandText = sql;
+            PrepareCommand(sc, sp);
+            o = sc.ExecuteScalar();
+            sc.Parameters.Clear();
+            EndConn(conn);
+            return o;
         }
 
         private void PrepareCommand(DbCommand sc, IDataParameter[] sp)
@@ -351,6 +324,10 @@ namespace DataGate.Com.DB
                 Log?.Invoke(sc.CommandText, sp);
             }
             sc.CommandTimeout = Timeout;
+            if (_trans != null)
+            {
+                sc.Transaction = _trans;
+            }
             if (sc.Connection.State != ConnectionState.Open)
                 sc.Connection.Open();
         }
@@ -363,7 +340,7 @@ namespace DataGate.Com.DB
         /// <returns>IDataReader</returns>
         public virtual IDataReader ExecReader(string sql, params IDataParameter[] sp)
         {
-            DbConnection conn = DBComm.CreateConnection();
+            DbConnection conn = StartConn();
             DbCommand sc = DBComm.CreateCommand(conn);
             sc.CommandText = sql;
 
@@ -373,13 +350,13 @@ namespace DataGate.Com.DB
             try
             {
                 PrepareCommand(sc, sp);
-                IDataReader rdr = sc.ExecuteReader(CommandBehavior.CloseConnection);
+                IDataReader rdr = sc.ExecuteReader();
                 sc.Parameters.Clear();
                 return rdr;
             }
             catch
             {
-                conn.Close();
+                EndConn(conn);
                 throw;
             }
         }
@@ -392,18 +369,17 @@ namespace DataGate.Com.DB
         /// <returns>DataTable</returns>
         public virtual DataTable ExecDataTable(string sql, params IDataParameter[] sp)
         {
-            using (DbConnection conn = DBComm.CreateConnection())
-            {
-                DbCommand sc = DBComm.CreateCommand(conn);
-                sc.CommandText = sql;
-                PrepareCommand(sc, sp);
-                DbDataAdapter da = DBComm.CreateDataAdapter(sc);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
+            DbConnection conn = StartConn();
+            DbCommand sc = DBComm.CreateCommand(conn);
+            sc.CommandText = sql;
+            PrepareCommand(sc, sp);
+            DbDataAdapter da = DBComm.CreateDataAdapter(sc);
+            DataTable dt = new DataTable();
+            da.Fill(dt);
 
-                sc.Parameters.Clear();
-                return dt;
-            }
+            sc.Parameters.Clear();
+            EndConn(conn);
+            return dt;
         }
 
         /// <summary>
@@ -414,17 +390,16 @@ namespace DataGate.Com.DB
         /// <returns>DataSet</returns>
         public virtual DataSet ExecDataSet(string sql, params IDataParameter[] sp)
         {
-            using (DbConnection conn = DBComm.CreateConnection())
-            {
-                DbCommand sc = DBComm.CreateCommand(conn);
-                sc.CommandText = sql;
-                PrepareCommand(sc, sp);
-                DbDataAdapter da = DBComm.CreateDataAdapter(sc);
-                DataSet ds = new DataSet();
-                da.Fill(ds);
-                sc.Parameters.Clear();
-                return ds;
-            }
+            DbConnection conn = StartConn();
+            DbCommand sc = DBComm.CreateCommand(conn);
+            sc.CommandText = sql;
+            PrepareCommand(sc, sp);
+            DbDataAdapter da = DBComm.CreateDataAdapter(sc);
+            DataSet ds = new DataSet();
+            da.Fill(ds);
+            sc.Parameters.Clear();
+            EndConn(conn);
+            return ds;
         }
 
         /// <summary>
@@ -527,7 +502,7 @@ namespace DataGate.Com.DB
                     string sql = String.Format("INSERT INTO {3}{0}{4}({1}) VALUES({2})", tableName, sqlFields, sqlValues, DBComm.FieldPrefix, DBComm.FieldSuffix);
                     try
                     {
-                        TransNonQuery(sql, sp);
+                        ExecNonQuery(sql, sp);
                     }
                     catch (Exception ex)
                     {
