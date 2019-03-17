@@ -111,14 +111,19 @@ namespace DataGate.App.DataService
         /// 定义所在的文件名
         /// </summary>
         [JsonIgnore]
-        public string Source { get;  set; }
+        public string Source { get; set; }
 
         /// <summary>
         /// 动态的其他属性
         /// </summary>
         public Dictionary<string, object> Attr { get; set; } = new Dictionary<string, object>();
 
+        public override string ToString()
+        {
+            return $"Key={Key}, Model={Model}";
+        }
     }
+
 
     internal class JoinInfo
     {
@@ -130,6 +135,7 @@ namespace DataGate.App.DataService
 
         public string Name { get; set; }
     }
+
 
     public enum DataOpType
     {

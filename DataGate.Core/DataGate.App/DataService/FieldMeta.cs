@@ -157,5 +157,10 @@ namespace DataGate.App.DataService
         /// </summary>
         [JsonProperty("remark")]
         public string Remark { get; set; }
+
+        public override string ToString()
+        {
+            return $"Name={Name}, Title={Title}";
+        }
     }
 }

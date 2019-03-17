@@ -253,10 +253,10 @@ namespace DataGate.App.DataService
                     }
                 }
             }
-            catch (DbException ex)
+            catch (DbException)
             {
                 DB.RollbackTrans();
-                throw ex;
+                throw;
             }
             if (isStartCall) DB.EndTrans();
             return ids;

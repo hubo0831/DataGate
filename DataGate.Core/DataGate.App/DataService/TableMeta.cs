@@ -13,6 +13,9 @@ namespace DataGate.App.DataService
     /// </summary>
     public class TableMeta
     {
+        /// <summary>
+        /// 表的模型名，通过表名转换成camel或pascal格式
+        /// </summary>
         public string Name { get; set; }
 
         /// <summary>
@@ -108,5 +111,10 @@ namespace DataGate.App.DataService
         /// </summary>
         [JsonIgnore]
         public string Source { get; set; }
+
+        public override string ToString()
+        {
+            return $"Name={Name}, Fields={Fields.Count}";
+        }
     }
 }
