@@ -19,9 +19,6 @@
         </el-form-item>
       </el-form>
     </el-col>
-    <el-col :span="24">
-      <file-upload></file-upload>
-    </el-col>
   </el-row>
 </template>
 

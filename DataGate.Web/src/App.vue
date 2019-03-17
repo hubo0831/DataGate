@@ -188,24 +188,18 @@ export default {
 
     //导航进入时生成面包屑,面包屑的层次取决于原始的菜单层次
     routerObj.router.afterEach((to, from) => {
-      var found = false;
-      for (var i in this.userPages) {
-        var menu = this.userPages[i];
-        //根据到达的路由信息找到原始菜单中对应的菜单项
-        if (to.matched.some(record => record.meta.id == menu.id)) {
-          this.createBreadCrumb({
-            id: menu.id,
-            name: menu.name,
-            parentId: menu.parentId,
-            url: to.fullPath
-          });
-          found = true;
-          break;
-        }
+      var menu = this.userPages.find(p => p.url == to.path && to.path !='/');
+      if(!menu){
+        menu = this.userPages.find(p => p.id == to.meta.id);
       }
-      if (!found) {
-        this.breadCrumbMenu = [];
-      }
+      if (menu) {
+        this.createBreadCrumb({
+          id: menu.id,
+          name: menu.name,
+          parentId: menu.parentId,
+          url: to.fullPath
+        });
+      } else this.breadCrumbMenu = [];
     });
 
     bus.$on("update-title", this.updateTitle);

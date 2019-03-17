@@ -169,6 +169,7 @@ namespace DataGate.Com.DB
             }
             finally
             {
+                _transConn.Close();
                 _trans.Dispose();
                 _transConn = null;
                 _trans = null;
@@ -186,7 +187,7 @@ namespace DataGate.Com.DB
         private void EndConn(DbConnection conn)
         {
             if (_transConn != conn)
-                conn.Dispose();
+                conn.Close();
         }
 
         /// <summary>

@@ -210,8 +210,9 @@ namespace DataGate.App.DataService
             }
 
             IEnumerable<string> ids = new string[0];
+            bool isStartCall = !DB.InTrans;
 
-            DB.BeginTrans();
+            if (isStartCall) DB.BeginTrans();
 
             try
             {
@@ -257,7 +258,7 @@ namespace DataGate.App.DataService
                 DB.RollbackTrans();
                 throw ex;
             }
-            DB.EndTrans();
+            if (isStartCall) DB.EndTrans();
             return ids;
         }
 
@@ -853,7 +854,7 @@ namespace DataGate.App.DataService
                 gkey.OrderBy = orderby;
             }
         }
-        
+
         /// <summary>
         /// 获取order by子句的字段序号
         /// </summary>
