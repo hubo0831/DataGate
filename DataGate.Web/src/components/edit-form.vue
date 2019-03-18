@@ -132,7 +132,13 @@
           style="width:100%"
         ></el-input>
         <slot v-else-if="item.uitype=='Custom'" :task="task" :in-edit="true" :meta="item" :obj="task.editBuffer">
-          {{task.editBuffer[item.name]}}
+          <!-- Custom类型，用插槽定义输入组件，如果没有定义，则当成普通文本输入框 -->
+          <el-input
+            v-model="task.editBuffer[item.name]"
+            v-on:change="handleChange(item)"
+            :placeholder="getPlaceholder(item)"
+            style="width:100%"
+          ></el-input>
         </slot>
         <!-- 自定义输入组件 -->
         <component
@@ -178,6 +184,7 @@ export default {
       type: Number,
       default: 0
     },
+    //label显示宽度
     labelWidth: {
       type: Number,
       default: 120

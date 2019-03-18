@@ -91,9 +91,10 @@
             type="primary"
             icon="fa fa-search"
             title="搜索"
-            v-on:click.native.prevent="search"
+            native-type="submit"
+            @click.prevent="search"
           ></el-button>
-          <el-button icon="fa fa-rotate-right" title="重置" v-on:click="reset"></el-button>
+          <el-button icon="fa fa-rotate-right" title="重置" @click="reset"></el-button>
         </el-button-group>
         <slot></slot>
       </el-form-item>

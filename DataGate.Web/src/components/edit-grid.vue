@@ -39,7 +39,13 @@
           <template slot-scope="scope">
             <!-- 非当前编辑行或只读字段只显示 -->
             <template v-if="(scope.row != editingRow) || scope.row.readonly || editMode !='inline'">
-              <slot :name="meta.name" :in-edit="false" v-if="meta.uitype=='Custom'" :meta="meta" :obj="scope.row">
+              <slot
+                :name="meta.name"
+                :in-edit="false"
+                v-if="meta.uitype=='Custom'"
+                :meta="meta"
+                :obj="scope.row"
+              >
                 <!-- 自定义显示状态的数据列内容 -->
                 {{scope.row[meta.name]}}
               </slot>
@@ -56,9 +62,13 @@
               <edit-item :obj="rowBuffer" :meta="getMeta(meta.linkto)"></edit-item>
             </el-form-item>
             <!-- 自定义编辑列的内容 -->
-            <slot :name="meta.name" :in-edit="true" :obj="scope.row" :meta="meta" v-else-if="meta.uitype=='Custom'">
-              {{scope.row[meta.name]}}
-            </slot>
+            <slot
+              :name="meta.name"
+              :in-edit="true"
+              :obj="scope.row"
+              :meta="meta"
+              v-else-if="meta.uitype=='Custom'"
+            >{{scope.row[meta.name]}}</slot>
             <!-- 常规编辑 -->
             <el-form-item v-else :prop="meta.name">
               <edit-item :obj="rowBuffer" :meta="meta"></edit-item>
@@ -80,7 +90,11 @@
           </slot>
         </template>
         <slot name="editer-header"></slot>
-        <edit-form ref="editorForm" :task="task" :height="height?height - 90:0"></edit-form>
+        <edit-form ref="editorForm" :task="task" :height="height?height - 90:0">
+          <slot name="edit-form-item">
+            <!-- UIType='Custome'的组件在edit-from内的插槽 -->
+          </slot>
+        </edit-form>
         <span slot="footer" class="dialog-footer">
           <el-button type="primary" @click="doSave">保存</el-button>
           <el-button @click="cancelEdit">取消</el-button>
