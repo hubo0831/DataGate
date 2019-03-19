@@ -90,7 +90,8 @@
           </slot>
         </template>
         <slot name="editer-header"></slot>
-        <edit-form ref="editorForm" :task="task" :height="height?height - 90:0">
+        <edit-form ref="editorForm" :task="task" :height="height?height - 90:0" 
+        :label-width="labelWidth">
           <slot name="edit-form-item">
             <!-- UIType='Custome'的组件在edit-from内的插槽 -->
           </slot>
@@ -136,6 +137,10 @@ export default {
       //如果有其他自定义模式，响应事件 show-edit 来自定义编辑行为，在事件中，通过task.editBuffer来得到当前要编辑的行信息
       type: String,
       default: "inline"
+    },
+    labelWidth:{
+      type:Number,
+      default :120
     }
   },
   data: function() {
