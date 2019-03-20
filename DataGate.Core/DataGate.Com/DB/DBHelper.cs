@@ -147,6 +147,10 @@ namespace DataGate.Com.DB
         public virtual void RollbackTrans()
         {
             _trans.Rollback();
+            if (_transConn.State != ConnectionState.Closed)
+            {
+                _transConn.Close();
+            }
             _trans.Dispose();
             _transConn = null;
             _trans = null;
@@ -351,7 +355,8 @@ namespace DataGate.Com.DB
             try
             {
                 PrepareCommand(sc, sp);
-                IDataReader rdr = sc.ExecuteReader();
+                IDataReader rdr = sc.ExecuteReader(InTrans? CommandBehavior.Default:
+                    CommandBehavior.CloseConnection);
                 sc.Parameters.Clear();
                 return rdr;
             }

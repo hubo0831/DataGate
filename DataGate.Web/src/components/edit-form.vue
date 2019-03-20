@@ -131,7 +131,13 @@
           :placeholder="getPlaceholder(item)"
           style="width:100%"
         ></el-input>
-        <slot v-else-if="item.uitype=='Custom'" :task="task" :in-edit="true" :meta="item" :obj="task.editBuffer">
+        <slot
+          v-else-if="item.uitype=='Custom'"
+          :task="task"
+          :in-edit="true"
+          :meta="item"
+          :obj="task.editBuffer"
+        >
           <!-- Custom类型，用插槽定义输入组件，如果没有定义，则当成普通文本输入框 -->
           <el-input
             v-model="task.editBuffer[item.name]"
@@ -151,6 +157,7 @@
           :task="task"
           v-on:change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
+          v-bind="item.attr"
           style="width:100%"
         ></component>
         <!-- 控件结束区内容插槽 -->
@@ -231,6 +238,7 @@ export default {
     },
     getPlaceholder(item) {
       if (item.multiValue) return "<<多个>>";
+      if (item.attr && item.attr.placeholder) return item.attr.placeholder;
       return item.title || item.name;
     },
     handleChange(item) {

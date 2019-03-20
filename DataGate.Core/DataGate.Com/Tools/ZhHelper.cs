@@ -3,12 +3,18 @@ using System.Text;
 
 namespace DataGate.Com
 {
-    
+
     /// <summary>
     /// 全、简拼处理类
     /// </summary>
     public static class ZhHelper
     {
+        static ZhHelper()
+        {
+            //https://www.cnblogs.com/chr-wonder/p/8464204.html
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+        }
+
         #region GB2312中的汉字编码
         /// <summary>
         /// 01-09区为特殊符号。 

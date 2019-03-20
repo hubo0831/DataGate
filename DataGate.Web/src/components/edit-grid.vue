@@ -190,7 +190,7 @@ export default {
     },
     metaFilter() {
       var metas = this.metadata || this.task.metadata;
-      return metas.filter(m => m.order >= 0);
+      return Util.sort(metas.filter(m => m.order >= 0), m => m.order);
     }
   },
   methods: {

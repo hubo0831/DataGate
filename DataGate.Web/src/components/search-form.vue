@@ -6,22 +6,41 @@
         <template v-if="meta.uitype=='Date'|| meta.uitype=='DateTime'">
           <div v-if="meta.operator=='bt'">
             <span>
-              <el-date-picker v-model="meta.value" type="date" clearable placeholder="起始日期"></el-date-picker>
+              <el-date-picker
+                v-model="meta.value"
+                type="date"
+                @change="onChange"
+                clearable
+                placeholder="起始日期"
+              ></el-date-picker>
             </span> ~
             <span>
-              <el-date-picker v-model="meta.value1" type="date" clearable placeholder="结束日期"></el-date-picker>
+              <el-date-picker
+                v-model="meta.value1"
+                type="date"
+                @change="onChange"
+                clearable
+                placeholder="结束日期"
+              ></el-date-picker>
             </span>
           </div>
           <span v-else>
-            <el-date-picker v-model="meta.value" type="date" clearable :placeholder="meta.title"></el-date-picker>
+            <el-date-picker
+              v-model="meta.value"
+              type="date"
+              @change="onChange"
+              clearable
+              :placeholder="meta.title"
+            ></el-date-picker>
           </span>
         </template>
-        <div class="search-input" v-else>
+        <div :style="{width:itemWidth+'px'}" v-else>
           <template v-if="meta.uitype=='List'">
             <el-select
               v-model="meta.value"
               multiple
               filterable
+              @change="onChange"
               allow-create
               default-first-option
               style="width:100%"
@@ -38,9 +57,11 @@
           <template v-else-if="meta.uitype=='DropdownList'">
             <el-select
               v-model="meta.value"
+              style="width:100%"
               clearable
               filterable
               allow-create
+              @change="onChange"
               default-first-option
               :placeholder="meta.title"
             >
@@ -56,18 +77,37 @@
             v-else-if="meta.uitype=='CheckBox'"
             v-model="meta.value"
             :true-label="'1'"
+            @change="onChange"
             :indeterminate="meta.value !=1 && meta.value!=0"
             :false-label="'0'"
           ></el-checkbox>
           <template v-else-if="meta.uitype=='TextBox'">
-            <el-input v-model="meta.value" clearable :placeholder="meta.title"></el-input>
+            <el-input
+              v-model="meta.value"
+              style="width:100%"
+              clearable
+              :placeholder="meta.title"
+              @change="onChange"
+            ></el-input>
           </template>
           <template v-else-if="meta.uitype=='TextArea'">
-            <el-input v-model="meta.value" clearable :placeholder="meta.title"></el-input>
+            <el-input
+              v-model="meta.value"
+              style="width:100%"
+              clearable
+              :placeholder="meta.title"
+              @change="onChange"
+            ></el-input>
           </template>
           <!-- Custom自定义组件暂时用文本框 -->
           <template v-else-if="meta.uitype=='Custom'">
-            <el-input v-model="meta.value" clearable :placeholder="meta.title"></el-input>
+            <el-input
+              @change="onChange"
+              style="width:100%"
+              v-model="meta.value"
+              clearable
+              :placeholder="meta.title"
+            ></el-input>
           </template>
           <!-- 自定义输入组件 -->
           <component
@@ -77,11 +117,13 @@
             :meta="meta"
             :obj="meta"
             :in-edit="true"
-            :placeholder="meta.title"
+            @change="onChange"
+            :placeholder="getPlaceholder(meta)"
+            v-bind="meta.attr"
           ></component>
           <!-- 没有明确定义的组件 -->
           <template v-else>
-            <el-input v-model="meta.value" clearable :placeholder="meta.title"></el-input>
+            <el-input v-model="meta.value" clearable :placeholder="meta.title" @change="onChange"></el-input>
           </template>
         </div>
       </el-form-item>
@@ -91,6 +133,7 @@
             type="primary"
             icon="fa fa-search"
             title="搜索"
+            v-if="metaFilter.length>1"
             native-type="submit"
             @click.prevent="search"
           ></el-button>
@@ -113,6 +156,10 @@ export default {
       default: function() {
         return [];
       }
+    },
+    itemWidth: {
+      type: Number,
+      default: 150
     }
   },
   inject: ["urlQuery"],
@@ -137,6 +184,12 @@ export default {
   },
 
   methods: {
+    onChange(val) {
+      //如果只有一个框就立即搜
+      if (this.metaFilter.length == 1) {
+        this.search();
+      }
+    },
     restoreFormValue() {
       var query = this.urlQuery._filter;
       if (query) query = JSON.parse(query);
@@ -211,6 +264,10 @@ export default {
     validate: function(callback) {
       return callback(true);
     },
+    getPlaceholder(meta) {
+      if (meta.attr && meta.attr.placeholder) return meta.attr.placeholder;
+      return meta.title || meta.name;
+    },
     search: function() {
       var filter = [];
       this.metadata.forEach(meta => {
@@ -262,10 +319,6 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-.el-date-editor.el-input,
-.el-date-editor.el-input__inner {
-  width: 140px;
-}
 .el-form-item {
   margin-bottom: 10px;
 }

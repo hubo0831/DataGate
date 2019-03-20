@@ -48,7 +48,9 @@ namespace DataGate.Com.DB
             try
             {
                 PrepareCommand(sc, sp);
-                IDataReader rdr = await sc.ExecuteReaderAsync();
+                IDataReader rdr = await sc.ExecuteReaderAsync(
+                    InTrans ? CommandBehavior.Default :
+                    CommandBehavior.CloseConnection);
                 sc.Parameters.Clear();
                 return rdr;
             }
