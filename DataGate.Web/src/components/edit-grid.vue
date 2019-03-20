@@ -15,7 +15,6 @@
         border
         fit
         highlight-current-row
-        @current-change="doCurrentChange"
         @sort-change="doSortChange"
         :stripe="stripe"
         :height="height"
@@ -90,8 +89,12 @@
           </slot>
         </template>
         <slot name="editer-header"></slot>
-        <edit-form ref="editorForm" :task="task" :height="height?height - 90:0" 
-        :label-width="labelWidth">
+        <edit-form
+          ref="editorForm"
+          :task="task"
+          :height="height?height - 90:0"
+          :label-width="labelWidth"
+        >
           <slot name="edit-form-item">
             <!-- UIType='Custome'的组件在edit-from内的插槽 -->
           </slot>
@@ -138,9 +141,9 @@ export default {
       type: String,
       default: "inline"
     },
-    labelWidth:{
-      type:Number,
-      default :120
+    labelWidth: {
+      type: Number,
+      default: 120
     }
   },
   data: function() {
@@ -222,20 +225,18 @@ export default {
     //勾选事件
     doSelectionChange(items) {
       this.submitRow(true);
-      if (this.multiSelect) this.task.setSelection(items);
+      this.task.setSelection(items);
       if (items.length == 1) {
         //刚开始时，鼠标如果正好点到复选框，将不会有当前行， 在此处强行指定
-        this.$refs.dataGrid.setCurrentRow(items[0]);
-        this.doCurrentChange(items[0]);
-      } else {
-        this.doCurrentChange(null);
+        this.changeCurrentRow(items[0]);
+      } else if (items.length == 0) {
+        this.changeCurrentRow(null);
       }
     },
-    doCurrentChange(item) {
-      this.submitRow(true);
+    //为免与selectionChange和rowclick事件冲突，不触发，只调用此方法
+    changeCurrentRow(item) {
+      this.$refs.dataGrid.setCurrentRow(item);
       this.current = item;
-      if (!this.multiSelect)
-        this.task.setSelection(this.current ? [this.current] : []);
       this.$emit("current-change", item);
     },
     //统一处理table的行点击事件，当行点击时自动选择
