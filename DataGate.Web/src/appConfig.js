@@ -12,7 +12,7 @@ let appConfig = {
   logo:require("./assets/images/logo.png"),
   copyright:"&copy;Copyright Jurassic Software 2018 <small>datagate.web v0.1.9</small>",
   systemName:"DataGate Management System",
-  titleHtml:"",
+  titleHtml:"",//一串HTML， 不为空则表示用这一串html代替所有要显示系统图标和名称的地方
   defaultValueFunc:{}, //默认值的定义
   appSecret: 'somesecrettodefinebyserver' //这个后面应该放服务端
 };
