@@ -14,7 +14,11 @@
     <template v-else-if="(meta.datatype||'').startsWith('[')">
       <slot :meta="meta" :value="value"></slot>
     </template>
-    <!-- 自定义显示组件 -->
+    <!-- 自定义显示方式 -->
+    <template v-else-if="meta.uitype=='Custom'">
+      {{value}}
+    </template>
+    <!-- 定制的显示组件 -->
     <component
       v-else-if="meta.uitype"
       :in-edit="false"
@@ -22,7 +26,6 @@
       v-model="value"
       :meta="meta"
       :obj="obj"
-      :placeholder="meta.title"
     ></component>
     <template v-else>{{ value }}</template>
   </div>
