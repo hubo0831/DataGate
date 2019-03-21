@@ -30,7 +30,7 @@
               type="date"
               @change="onChange"
               clearable
-              :placeholder="meta.title"
+              :placeholder="getPlaceholder(meta)"
             ></el-date-picker>
           </span>
         </template>
@@ -44,7 +44,7 @@
               allow-create
               default-first-option
               style="width:100%"
-              :placeholder="meta.title"
+              :placeholder="getPlaceholder(meta)"
             >
               <el-option
                 v-for="sel in meta.options"
@@ -63,7 +63,7 @@
               allow-create
               @change="onChange"
               default-first-option
-              :placeholder="meta.title"
+              :placeholder="getPlaceholder(meta)"
             >
               <el-option
                 v-for="sel in meta.options"
@@ -86,8 +86,8 @@
               v-model="meta.value"
               style="width:100%"
               clearable
-              :placeholder="meta.title"
-              @change="onChange"
+              :placeholder="getPlaceholder(meta)"
+              @input="onInput"
             ></el-input>
           </template>
           <template v-else-if="meta.uitype=='TextArea'">
@@ -95,7 +95,7 @@
               v-model="meta.value"
               style="width:100%"
               clearable
-              :placeholder="meta.title"
+              :placeholder="getPlaceholder(meta)"
               @change="onChange"
             ></el-input>
           </template>
@@ -106,7 +106,7 @@
               style="width:100%"
               v-model="meta.value"
               clearable
-              :placeholder="meta.title"
+              :placeholder="getPlaceholder(meta)"
             ></el-input>
           </template>
           <!-- 自定义输入组件 -->
@@ -123,7 +123,7 @@
           ></component>
           <!-- 没有明确定义的组件 -->
           <template v-else>
-            <el-input v-model="meta.value" clearable :placeholder="meta.title" @change="onChange"></el-input>
+            <el-input v-model="meta.value" clearable :placeholder="meta.title" @input="onInput"></el-input>
           </template>
         </div>
       </el-form-item>
@@ -148,6 +148,7 @@
 import util from "../common/util.js";
 import editTask from "../common/editTask.js";
 var task = new editTask();
+var timeOut = 0;
 export default {
   props: {
     //传入的待搜索的元数据定义
@@ -176,9 +177,9 @@ export default {
         if (!meta.operator) {
           meta.operator = this.getOperators(meta)[0].value;
         }
-        if ((meta.uitype || "").indexOf("List") >= 0) task.updateOptions(meta);
         this.$set(meta, "value1", null);
       });
+      task.updateAllOptions(val);
       this.restoreFormValue();
     }
   },
@@ -188,6 +189,13 @@ export default {
       //如果只有一个框就立即搜
       if (this.metaFilter.length == 1) {
         this.search();
+      }
+    },
+    onInput(val) {
+      //如果只有一个框，文本框，值输入就开始搜
+      if (this.metaFilter.length == 1) {
+        clearTimeout(timeOut);
+        timeOut = setTimeout(this.search, 500);
       }
     },
     restoreFormValue() {

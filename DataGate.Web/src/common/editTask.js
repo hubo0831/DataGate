@@ -98,6 +98,9 @@ export default function editTask() {
         else if (m.datatype == "Date") m.column.align = "center";
         else if (m.datatype == "Boolean") m.column.align = "center";
       }
+
+      //value默认值加入响应式
+      if (!m.value) m.value = null;
     });
 
     this.metadata = mtemp;
@@ -299,9 +302,9 @@ export default function editTask() {
       }
     } else if (options) {
       item.options = createOptions(options);
-    }    
+    }
     //在拥有linkto属性的meta没有options的情况下，直接用linkto指向的meta中的options.text赋值
-    else if (item.linkto){
+    else if (item.linkto) {
       this.editBuffer[item.name] = this.getMeta(item.linkto)
         .options.find(opt => opt.value == this.editBuffer[item.linkto])
         .text;
@@ -355,10 +358,11 @@ export default function editTask() {
     return obj;
   };
 
-  this.updateAllOptions = function () {
+  this.updateAllOptions = function (metas) {
+    metas = metas || this.metadata;
     //准备下拉列表框的选项,这里大致假定一下uitype中有List的就是带下拉列表的元数据
     // 如DropdownList, List, CheckboxList
-    this.metadata.filter(meta => meta.uitype =="DropdownList" || meta.uitype=="List" || meta.uitype == "CheckboxList")
+    this.metadata.filter(meta => meta.uitype == "DropdownList" || meta.uitype == "List" || meta.uitype == "CheckboxList")
       .forEach(meta => this.updateOptions(meta));
   };
 
