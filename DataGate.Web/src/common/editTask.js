@@ -100,7 +100,7 @@ export default function editTask() {
       }
 
       //value默认值加入响应式
-      if (!m.value) m.value = null;
+      if (!('value' in m)) m.value = null;
     });
 
     this.metadata = mtemp;

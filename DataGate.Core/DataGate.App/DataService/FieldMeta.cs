@@ -147,6 +147,12 @@ namespace DataGate.App.DataService
         public Dictionary<string, object> Column { get; set; }
 
         /// <summary>
+        /// 动态的前端控件属性，主要用于整体绑定到输入控件中
+        /// </summary>
+        [JsonProperty("attr")]
+        public Dictionary<string, object> Attr { get; set; }
+
+        /// <summary>
         /// 联动的字段
         /// </summary>
         [JsonProperty("linkto")]
