@@ -25,7 +25,7 @@
         <el-col :span="12">
           <div class="card">
             <div class="card-header">
-              <i class="fa fa-check-square-o" aria-hidden="true"></i> 功能列表
+              <i class="fa fa-check-square-o" aria-hidden="true"></i> 功能列表 - {{current? current.name :'请先选择一个角色'}}
             </div>
             <div class="card-content dg-fit dg-scr" id="menuDiv">
               <el-tree
@@ -34,7 +34,6 @@
                 default-expand-all
                 node-key="id"
                 ref="tree"
-                @check-change="doCheckChange"
                 highlight-current
                 :props="defaultProps"
               ></el-tree>
@@ -57,7 +56,8 @@ export default {
       defaultProps: {
         children: "children",
         label: "name"
-      }
+      },
+      current: null
     };
   },
   created() {
@@ -70,7 +70,6 @@ export default {
     );
     this.loadData();
   },
-  computed: {},
   methods: {
     loadData() {
       API.QUERY("getallrolemenus").done(result => {
@@ -83,14 +82,20 @@ export default {
       this.$refs.dataGrid[cmd]();
     },
     //勾选右侧功能树结点后给角色授权
-    doCheckChange() {
-      if (!this.task.editBuffer) return;
-      this.task.editBuffer.menus = this.$refs.tree.getCheckedKeys().map(id => ({
-        roleId: this.task.editBuffer.id,
-        menuId: id
-      }));
+    setRoleMenus() {
+      if (this.current) {
+        this.task.editBuffer.menus = this.$refs.tree
+          .getCheckedKeys()
+          .map(id => ({
+            roleId: this.current.id,
+            menuId: id
+          }));
+        this.task.acceptChanges();
+      }
     },
     doCurrentChange(item) {
+      this.setRoleMenus();
+      this.current = item;
       if (item) this.$refs.tree.setCheckedKeys(item.menus.map(m => m.menuId));
     },
     doSave() {

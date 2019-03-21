@@ -432,7 +432,7 @@ namespace DataGate.App.DataService
                     f = ff.FixDbName,
                     p = DB.CreateParameter(ff.DbName, psin[psKey]),
                 };
-            }).Where(p => p != null);
+            }).Where(p => p.f != null);
             string strFields = String.Join(",", ps.Select(p => p.f));
             string strValues = String.Join(",", ps.Select(p => '@' + p.p.ParameterName));
             string sql = $"insert into {tableMeta.FixDbName} ({strFields}) values({strValues})";
@@ -525,7 +525,7 @@ namespace DataGate.App.DataService
         private string CreateKeyFilter(TableMeta tableMeta)
         {
             var r = String.Join(" AND ", tableMeta.Fields.Where(t => t.PrimaryKey)
-                .Select(t => $"{t.FixDbName}=@{t.Name}"));
+                .Select(t => $"{t.FixDbName}=@{t.DbName}"));
             if (r.IsEmpty())
             {
                 throw new Exception($"PrimaryKey(s) not defined in {tableMeta.Name}");

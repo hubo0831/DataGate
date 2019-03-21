@@ -31,6 +31,10 @@ namespace DataGate.App.DataService
         public string FixDbName { get; set; }
 
         private IList<FieldMeta> _fields;
+
+        /// <summary>
+        /// 字段列表
+        /// </summary>
         public IList<FieldMeta> Fields
         {
             get { return _fields; }

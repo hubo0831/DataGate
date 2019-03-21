@@ -164,6 +164,11 @@ namespace DataGate.App.DataService
         [JsonProperty("remark")]
         public string Remark { get; set; }
 
+        /// <summary>
+        /// 只在服务端使用，不传到客户端
+        /// </summary>
+        public bool ServerOnly { get; set; }
+
         public override string ToString()
         {
             return $"Name={Name}, Title={Title}";

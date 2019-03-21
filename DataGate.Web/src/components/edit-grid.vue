@@ -225,13 +225,13 @@ export default {
     //勾选事件
     doSelectionChange(items) {
       this.submitRow(true);
-      this.task.setSelection(items);
       if (items.length == 1) {
         //刚开始时，鼠标如果正好点到复选框，将不会有当前行， 在此处强行指定
         this.changeCurrentRow(items[0]);
       } else if (items.length == 0) {
         this.changeCurrentRow(null);
       }
+      this.task.setSelection(items);
     },
     //为免与selectionChange和rowclick事件冲突，不触发，只调用此方法
     changeCurrentRow(item) {

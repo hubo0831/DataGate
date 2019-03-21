@@ -6,52 +6,58 @@ using System.Linq;
 
 namespace DataGate.App.DataService
 {
-    public class UsersGate : ISubmitDataGate
+    public class UsersGate : ISubmitedDataGate
     {
         string GetLUKey(IDictionary<string, object> ps, string key)
         {
             return ps.Keys.FirstOrDefault(k => k.Equals(key, StringComparison.OrdinalIgnoreCase));
         }
 
-        public void OnAdd(DataGateKey gkey, IDictionary<string, object> ps)
+        public void OnAdded(DataGateKey gkey, IDictionary<string, object> ps)
         {
-            string passKey = GetLUKey(ps, "Password");
-            string pwd = null;
-            if (passKey != null)
+            string pwdKey = GetLUKey(ps, "password");
+            string pwd = "123456";
+            if (!pwdKey.IsEmpty())
             {
-                pwd = (string)ps[passKey];
+                pwd = (string)ps[pwdKey];
             }
-            else
-            {
-                passKey = "Password";
-            }
-            if (pwd.IsEmpty())
-            {
-                pwd = "123456";
-            }
-            gkey.MainTable.Fields.Add(new FieldMeta { Name = "Password" });
-            gkey.MainTable.Fields.Add(new FieldMeta { Name = "PasswordSalt" });
-            ps["PasswordSalt"] = CommOp.NewId();
 
-            ps[passKey] = Encryption.MD5(pwd + (string)ps["PasswordSalt"]);
-            ps["createDate"] = DateTime.Now;
+            string passwordSalt = CommOp.NewId();
+            string password = Encryption.MD5(pwd + passwordSalt);
+            DateTime createDate = DateTime.Now;
+            string id = (string)ps["id"];
+            gkey.DataService.DB.ExecNonQuery(@"UPDATE APP_USER SET PASSWORD=@password,
+CREATE_DATE=@createDate,PASSWORD_SALT=@passwordSalt WHERE ID=@id", gkey.DataService.DB.GetParameter(new
+            {
+                password,
+                createDate,
+                passwordSalt,
+                id
+            }).ToArray());
         }
 
-        public void OnChange(DataGateKey gkey, IDictionary<string, object> ps)
+        public void OnChanged(DataGateKey gkey, IDictionary<string, object> ps)
         {
-            string passKey = GetLUKey(ps, "Password");
-            if (passKey == null)
+            string pwdKey = GetLUKey(ps, "password");
+            if (pwdKey.IsEmpty())
             {
                 return;
             }
-            string pwd = (string)ps[passKey];
-            ps["PasswordSalt"] = CommOp.NewId();
-            ps[passKey] = Encryption.MD5(pwd + (string)ps["PasswordSalt"]);
-            gkey.MainTable.Fields.Add(new FieldMeta { Name = "Password" });
-            gkey.MainTable.Fields.Add(new FieldMeta { Name = "PasswordSalt" });
+
+            string pwd = (string)ps[pwdKey];
+            string passwordSalt = CommOp.NewId();
+            string password = Encryption.MD5(pwd + passwordSalt);
+            DateTime createDate = DateTime.Now;
+            string id = (string)ps["id"];
+            gkey.DataService.DB.ExecNonQuery(@"UPDATE APP_USER SET PASSWORD=@password, PASSWORD_SALT=@passwordSalt WHERE ID=@id", gkey.DataService.DB.GetParameter(new
+            {
+                password,
+                passwordSalt,
+                id
+            }).ToArray());
         }
 
-        public void OnRemove(DataGateKey gkey, IDictionary<string, object> ps)
+        public void OnRemoved(DataGateKey gkey, IDictionary<string, object> ps)
         {
         }
     }
