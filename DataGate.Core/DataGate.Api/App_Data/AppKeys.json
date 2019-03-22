@@ -16,6 +16,14 @@
     "OrderBy": "account"
   },
   {
+    "Key": "GetUser",
+    "Name": "获取当前用户信息,在用户登录后使用",
+    "Model": "AppUser",
+    "Filter": "id=@id",
+    "OpType": "GetObject",
+    "OrderBy": "account"
+  },
+  {
     "Key": "SaveUser",
     "Name": "保存用户信息",
     "Model": "AppUser",
