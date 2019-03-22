@@ -122,31 +122,26 @@ namespace DataGate.App
         }
 
         /// <summary>
-        /// 根据token获取用户信息
+        /// 根据token获取用户信息,将用户表所有字段（除密码等信息外）返回给客户端
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        public async Task<UserInfoResult> GetUserAsync(string token)
+        public async Task<object> GetUserAsync(string token)
         {
             var userSession = Get(token);
             if (userSession == null)
             {
                 return MSG.SessionExpired;
             }
-            var user = await _user.GetAsync(userSession.Account);
+            DataGateService ds = Consts.Get<DataGateService>();
+            var user = await ds.QueryAsync("GetUser", new { userSession.Id }) as Dictionary<string, object>;
             if (user == null)
             {
-                return new UserInfoResult(MSG.UserNotExists);
+                return MSG.UserNotExists;
             }
-            return new UserInfoResult
-            {
-                Id = user.Id,
-                Account = user.Account,
-                Name = user.Name,
-                Email = user.Email,
-                Tel = user.Tel,
-                Menus = await GetUserMenus(user.Id)
-            };
+
+            user["menus"] = await GetUserMenus(userSession.Id);
+            return user;
         }
 
         //在角色管理里自动勾选的父级菜单不会保存到AppRoleMenu表，所以这里

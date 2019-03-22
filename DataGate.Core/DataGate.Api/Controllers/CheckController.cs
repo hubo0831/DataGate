@@ -35,7 +35,7 @@ namespace DataGate.Api.Controllers
         /// </summary>
         /// <param name="token"></param>
         [HttpGet]
-        public async Task<UserInfoResult> GetUser()
+        public async Task<object> GetUser()
         {
             return await _session.GetUserAsync(Token);
         }

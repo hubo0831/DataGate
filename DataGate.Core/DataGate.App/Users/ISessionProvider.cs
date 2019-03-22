@@ -9,7 +9,7 @@ namespace DataGate.App
     {
         UserSession Get(string token);
 
-        Task<UserInfoResult> GetUserAsync(string token);
+        Task<object> GetUserAsync(string token);
 
         Task<LoginResult> Login(LoginRequest request, bool validate);
 

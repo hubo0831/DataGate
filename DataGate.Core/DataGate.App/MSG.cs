@@ -51,7 +51,7 @@ namespace DataGate.App
         /// <summary>
         /// Token已过期
         /// </summary>
-        public static UserInfoResult SessionExpired = new UserInfoResult
+        public static LoginResult SessionExpired = new LoginResult
         {
             Code = 1010,
             Message = "Token已过期"
