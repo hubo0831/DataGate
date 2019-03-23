@@ -7,7 +7,7 @@
         <el-row :id="id + 'dndArea'" class="placeholder" style="border:0;margin-top:0;padding:0">
           <el-col :span="24">
             <div v-for="file in fileList" :key="file.id">
-              <a :href="file.url">
+              <a href="javascript:;" @click="download(file)">
                 <i :class="getThumbnail(file)"></i>
                 {{file.name}}
               </a>
@@ -23,19 +23,20 @@
                 ></div>
               </div>
             </div>
-                <span :id="id +'_filePicker'"></span>
-                <el-button
-                  type="primary"
-                  size="small"
-                  v-if="!options.auto && getCount('waiting') > 0 && !isInProgress"
-                  v-on:click="startUpload"
-                >开始上传</el-button>
-                <el-button  style="position:relative; height:40px; top:-16px"
-                  type="primary"
-                  size="small" 
-                  v-show="getCount('error') > 0 && !isInProgress"
-                  v-on:click="retry"
-                >重试</el-button>
+            <span :id="id +'_filePicker'"></span>
+            <el-button
+              type="primary"
+              size="small"
+              v-if="!options.auto && getCount('waiting') > 0 && !isInProgress"
+              v-on:click="startUpload"
+            >开始上传</el-button>
+            <el-button
+              style="position:relative; height:40px; top:-16px"
+              type="primary"
+              size="small"
+              v-show="getCount('error') > 0 && !isInProgress"
+              v-on:click="retry"
+            >重试</el-button>
           </el-col>
         </el-row>
       </div>
@@ -97,7 +98,7 @@
                 >
                   <i v-bind:class="getStateIco(scope.row).ico"></i>
                 </el-tooltip>
-                <a :href="scope.row.url">
+                <a href="javascript:;" @click="download(file)">
                   <i class="el-icon-download" title="下载文件"/>
                 </a>
                 <a href="javascript:;" v-on:click="removeFile(scope.row)">
@@ -154,8 +155,7 @@
 import WebUploader from "webuploader";
 import "webuploader/css/webuploader.css";
 import "../assets/styles/uploader.css";
-import { Util, API, UserState } from "../";
-import userState from "../userState";
+import { Util, API } from "../";
 export default {
   props: {
     //原始的文件列表和上传后的文件列表
@@ -479,6 +479,7 @@ export default {
       });
     },
     getDownloadUrl(file) {
+      //对于没有上传的文件，生成本地url
       if (file.status == "waiting" && window.URL) {
         //IE9没有URL
         file.url = window.URL.createObjectURL(file.source.source);
@@ -489,10 +490,15 @@ export default {
         file.source.source &&
         window.URL
       ) {
+        //本次上传完的文件，释放生成的本地文件url
         window.URL.revokeObjectURL(file.url);
+        return API.getDownloadUrl(file);
       }
-
-      return API.getDownloadUrl(file);
+      //没有在外部提前生成下载url,则生成本系统的
+      else if (!file.url){
+        return API.getDownloadUrl(file);
+      }
+      return file;
     },
 
     getCount(status) {
@@ -650,6 +656,9 @@ export default {
       this.uploader.reset();
       startProgress();
       testStatus();
+    },
+    download(file) {
+      Util.download(file);
     },
     //转义上传文件类型
     getThumbnail(file) {

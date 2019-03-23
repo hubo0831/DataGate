@@ -94,8 +94,16 @@ namespace DataGate.App.DataService
             List<DataGateKey> allKeys = new List<DataGateKey>();
             foreach (var keyFile in Directory.GetFiles(_appDataDir, "*Keys.json"))
             {
-                string json = File.ReadAllText(keyFile);
-                List<DataGateKey> keys = JsonConvert.DeserializeObject<List<DataGateKey>>(json);
+                List<DataGateKey> keys;
+                try
+                {
+                    string json = File.ReadAllText(keyFile);
+                    keys = JsonConvert.DeserializeObject<List<DataGateKey>>(json);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"解析{new FileInfo(keyFile).Name}文件出现错误：{ex.Message}", ex);
+                }
                 keys.ForEach(key =>
                 {
                     key.Source = new FileInfo(keyFile).Name;
@@ -138,9 +146,16 @@ namespace DataGate.App.DataService
             var allTableMetas = new List<TableMeta>();
             foreach (var modelFile in Directory.GetFiles(_appDataDir, "*Models.json"))
             {
-                var json = File.ReadAllText(modelFile);
-                var tableJson = JToken.Parse(json);
-
+                JToken tableJson;
+                try
+                {
+                    var json = File.ReadAllText(modelFile);
+                    tableJson = JToken.Parse(json);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"解析{new FileInfo(modelFile).Name}文件出现错误：{ex.Message}", ex);
+                }
                 JArray tableJArr = tableJson as JArray;
                 IEnumerable<TableMeta> tableMetas = null;
                 if (tableJArr == null) //json文件是字典对象

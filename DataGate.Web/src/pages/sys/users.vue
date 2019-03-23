@@ -6,7 +6,7 @@
         <el-button-group>
           <el-button type="primary" icon="fa fa-file-text-o" v-on:click='doCmd("doAdd")'>新增</el-button>
           <el-button type="primary" icon="fa fa-edit" v-on:click='doCmd("doEdit")'>修改</el-button>
-          <el-button type="primary" icon="fa fa-edit" v-on:click='disable()'>禁用</el-button>
+          <!-- <el-button type="primary" icon="fa fa-edit" v-on:click='disable()'>禁用</el-button> -->
           <el-button type="primary" icon="fa fa-trash-o" v-on:click='doCmd("doDel")'>删除</el-button>
         </el-button-group>
       </div>
