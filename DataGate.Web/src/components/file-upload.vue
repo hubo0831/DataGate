@@ -16,12 +16,11 @@
               </el-tooltip>
               <i class="el-icon-info" title="有重复的文件" v-if="file.dup"></i>
               <i class="fa fa-trash-o" style="cursor:pointer" title="删除" @click="removeFile(file)"></i>
-              <div style="position:relative;margin-top:2px">
-                <div
-                  v-if="file.percentage>0 && file.percentage<1"
-                  :style="{background:'#409eff',width:file.percentage * 100 + '%',height:'2px',position:'absolute',left:0,bottom:0}"
-                ></div>
-              </div>
+              <div
+                style="margin:2px 0; background:#409eff; height:2px"
+                v-if="file.percentage>0 && file.percentage<1"
+                :style="{width:file.percentage * 100 + '%'}"
+              ></div>
             </div>
             <span :id="id +'_filePicker'"></span>
             <el-button
@@ -156,6 +155,7 @@ import WebUploader from "webuploader";
 import "webuploader/css/webuploader.css";
 import "../assets/styles/uploader.css";
 import { Util, API } from "../";
+import userState from "../userState";
 export default {
   props: {
     //原始的文件列表和上传后的文件列表
@@ -380,6 +380,35 @@ export default {
       that.testStatus();
     });
 
+    //所有文件上传完成,不能调用webuploader自带的uploadFinished事件
+    //因为大文件还有一个单独的POST请求，不在它的考虑范围
+    function testFinished() {
+      //console.log('uploadFinished');
+      //判断是否存在未上传成功的文件 true是  false否(全部成果)
+      var error = 0;
+      var uploading = 0;
+      var finished = 0;
+      that.fileList.forEach(function(item, index) {
+        if (item.status == "error") {
+          error++;
+        }
+        if (item.status == "waiting" || item.status == "uploading") {
+          uploading++;
+        }
+        if (item.status == "finished") {
+          finished++;
+        }
+      });
+      if (!error && that.options.fileNumLimit > 1) {
+        // that.uploader.reset();
+      }
+      that.testStatus();
+      //vue注册上传完成后的事件
+      if (uploading == 0) {
+        that.$emit("upload-finished", error);
+      }
+    }
+
     //单个文件上传成功 BankService/Upload
     uploader.on("uploadSuccess", function(file, response) {
       function afterSuccess(data) {
@@ -388,6 +417,7 @@ export default {
         file.status = "finished";
         that.getDownloadUrl(file);
         that.$emit("upload-success", file);
+        testFinished();
       }
 
       function afterFail(r) {
@@ -397,19 +427,14 @@ export default {
 
       var chunksTotal = Math.ceil(file.size / chunkSize);
       if (chunksTotal > 1) {
-        $.ajax({
-          type: "post",
-          url: that.uploader.option("server"),
-          data: {
-            fileName: file.name,
-            filePath: file.path, //v0.2.4
-            guid: file.guid,
-            chunk: chunksTotal,
-            chunks: chunksTotal
-          },
-          headers: that.getAuthorization()
-          //分片合并后返回值
+        API.POST(that.uploader.option("server"), {
+          fileName: file.name,
+          filePath: file.path, //v0.2.4
+          guid: file.guid,
+          chunk: chunksTotal,
+          chunks: chunksTotal
         })
+          //分片合并后返回值
           .done(afterSuccess)
           .fail(afterFail);
       } else {
@@ -447,23 +472,6 @@ export default {
         this.$message.error("上传出错！请检查后重新上传！错误代码" + type);
       }
     });
-    //所有文件上传完成
-    uploader.on("uploadFinished", function() {
-      //console.log('uploadFinished');
-      //判断是否存在未上传成功的文件 true是  false否(全部成果)
-      var error = 0;
-      var hasError = that.fileList.forEach(function(item, index) {
-        if (item.status == "error") {
-          error++;
-        }
-      });
-      if (!error && that.options.fileNumLimit > 1) {
-        // that.uploader.reset();
-      }
-      that.testStatus();
-      //vue注册上传完成后的事件
-      that.$emit("upload-finished", error);
-    });
   },
   methods: {
     checkFileList(files) {
@@ -495,7 +503,7 @@ export default {
         return API.getDownloadUrl(file);
       }
       //没有在外部提前生成下载url,则生成本系统的
-      else if (!file.url){
+      else if (!file.url) {
         return API.getDownloadUrl(file);
       }
       return file;
@@ -629,11 +637,6 @@ export default {
       this.uploader.retry();
       this.startProgress();
       this.testStatus();
-    },
-    //添加授权token
-    getAuthorization() {
-      var authorization = { Authorization: "Bear " + "@ViewBag.Token" };
-      return authorization;
     },
     //编程方式选择一个文件
     selectFile(file) {
