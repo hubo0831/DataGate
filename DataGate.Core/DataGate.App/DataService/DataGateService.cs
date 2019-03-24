@@ -89,6 +89,7 @@ namespace DataGate.App.DataService
         public async Task<object> QueryAsync(string key, object paramObj)
         {
             DataGateKey gkey = GetDataGate(key);
+           
             if (!(paramObj is IDictionary<string, object> param))
             {
                 param = CommOp.ToStrObjDict(paramObj);

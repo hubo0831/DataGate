@@ -49,6 +49,9 @@ export default {
     },
     //根据url的参数进行查询， 通常用于子类的loadData方法中加载数据
     apiUrlPageQuery(key) {
+      if (!this.urlQuery.pageSize){
+        this.urlQuery.pagesize = util.getCookie("pageSize");
+      }
       return API.QUERY(key, this.urlQuery)
         .then(result => this.apiDataFilter(key, result))
         .done(result => {

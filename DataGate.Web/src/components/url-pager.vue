@@ -31,12 +31,12 @@ export default {
   },
   watch: {
     total() {
-      this.pageIndex = parseInt(this.urlQuery["pageindex"]) || 1;
+      this.pageIndex = parseInt(this.urlQuery.pageindex) || 1;
     }
   },
   methods: {
     handleSizeChange(val) {
-      this.urlQuery["pagesize"] = val;
+      this.urlQuery.pagesize = val;
       Util.setCookie("pageSize", val, 24 * 60 * 14);
       //如果不想url分页，则调用此事件,并args.passed=false
       if (
@@ -50,7 +50,7 @@ export default {
       }
     },
     handleCurrentChange(val) {
-      this.urlQuery["pageindex"] = val;
+      this.urlQuery.pageindex = val;
       //如果不想url分页，则调用此事件,并args.passed=false
       if (
         this.$emitPass("page-change", {

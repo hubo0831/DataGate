@@ -58,6 +58,7 @@ namespace DataGate.Api.Controllers
             var key = (string)this.ControllerContext.RouteData.Values["key"];
             Log.ObjectId = key;
             var dict = Request.Query.ToDictionary(kv => kv.Key, kv => (object)kv.Value.FirstOrDefault());
+            dict.Remove("_"); //排除jQuery的随机数
             var result = await _dg.QueryAsync(key, dict);
             //throw new ArgumentException("手动引发的异常");
             return result;
@@ -88,9 +89,11 @@ namespace DataGate.Api.Controllers
             var key = (string)this.ControllerContext.RouteData.Values["key"];
             Log.ObjectId = key;
             var dict = Request.Query.ToDictionary(kv => kv.Key, kv => (object)kv.Value.FirstOrDefault());
+            dict.Remove("_"); //排除jQuery的随机数
             var result = await _dg.NonQueryAsync(key, dict);
             return result;
         }
+
         /// <summary>
         /// 通过指定的key配置执行数据增删改操作 v0.2.0+
         /// </summary>
