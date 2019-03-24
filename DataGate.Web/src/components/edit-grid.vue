@@ -78,7 +78,12 @@
     </el-form>
     <template v-if="editMode=='popup'">
       <!-- 不能用v-show -->
-      <el-dialog :visible.sync="showEdit" :close-on-click-modal="false" top="10vh">
+      <el-dialog
+        :visible.sync="showEdit"
+        :close-on-click-modal="false"
+        top="10vh"
+        @closed="cancelEdit"
+      >
         <template slot="title">
           <slot name="editer-title" :new-item="newItem">
             <template v-if="newItem">
