@@ -1,6 +1,6 @@
 <template>
   <!-- 用于表单编辑 -->
-  <div :id="id" :style="height?{height:height + 'px'}:{}">
+  <div :id="id" :style="getStyle()">
     <el-form
       size="mini"
       class="meta-form"
@@ -191,6 +191,12 @@ export default {
       type: Number,
       default: 0
     },
+    style: {
+    },
+    width: {
+      type: Number,
+      default: 0
+    },
     //label显示宽度
     labelWidth: {
       type: Number,
@@ -206,7 +212,7 @@ export default {
     };
   },
   mounted() {
-    $("#" + this.id).slimScroll();
+    if (this.getStyle().height) $("#" + this.id).slimScroll({});
   },
   watch: {
     "task.editBuffer": function() {
@@ -226,6 +232,16 @@ export default {
     }
   },
   methods: {
+    getStyle() {
+      var style = this.style || {};
+      if (this.height) {
+        style.height = this.height + "px";
+      }
+      if (this.width) {
+        style.width = this.width + "px";
+      }
+      return style;
+    },
     validate(callback) {
       this.$refs.editForm.validate(valid => {
         if (valid && callback) {
