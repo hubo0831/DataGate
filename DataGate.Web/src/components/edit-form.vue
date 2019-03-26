@@ -36,6 +36,7 @@
           v-on:change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
           style="width:100%"
+          v-bind="item.attr"
         ></el-input>
         <!-- 多行文本 -->
         <el-input
@@ -46,6 +47,7 @@
           v-on:change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
           style="width:100%"
+          v-bind="item.attr"
         ></el-input>
         <!-- 单项选择 -->
         <el-select
@@ -55,6 +57,7 @@
           v-on:change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
           style="width:100%"
+          v-bind="item.attr"
         >
           <el-option
             v-for="sel in item.options"
@@ -73,6 +76,7 @@
           v-on:change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
           style="width:100%"
+          v-bind="item.attr"
         >
           <el-option
             v-for="sel in item.options"
@@ -88,6 +92,7 @@
           v-on:change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
           style="width:100%"
+          v-bind="item.attr"
         >
           <el-checkbox v-for="sel in item.options" :key="sel.value" :label="sel.text"></el-checkbox>
         </el-checkbox-group>
@@ -98,6 +103,7 @@
           v-on:change="handleChange(item)"
           :active-value="1"
           :inactive-value="0"
+          v-bind="item.attr"
         ></el-switch>
         <input
           type="checkbox"
@@ -106,6 +112,7 @@
           true-value="1"
           false-value="0"
           @change="handleChange(item)"
+          v-bind="item.attr"
         >
         <!-- 日期选择 -->
         <el-date-picker
@@ -114,6 +121,7 @@
           v-on:change="handleChange(item)"
           type="date"
           :placeholder="getPlaceholder(item)"
+          v-bind="item.attr"
         ></el-date-picker>
         <!-- 日期和时间选择 -->
         <el-date-picker
@@ -122,6 +130,7 @@
           v-on:change="handleChange(item)"
           type="datetime"
           :placeholder="getPlaceholder(item)"
+          v-bind="item.attr"
         ></el-date-picker>
         <!-- 普通文本 -->
         <el-input
@@ -130,6 +139,7 @@
           v-on:change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
           style="width:100%"
+          v-bind="item.attr"
         ></el-input>
         <slot
           v-else-if="item.uitype=='Custom'"
@@ -137,6 +147,7 @@
           :in-edit="true"
           :meta="item"
           :obj="task.editBuffer"
+          v-bind="item.attr"
         >
           <!-- Custom类型，用插槽定义输入组件，如果没有定义，则当成普通文本输入框 -->
           <el-input
@@ -144,6 +155,7 @@
             v-on:change="handleChange(item)"
             :placeholder="getPlaceholder(item)"
             style="width:100%"
+            v-bind="item.attr"
           ></el-input>
         </slot>
         <!-- 自定义输入组件 -->
@@ -157,8 +169,6 @@
           :task="task"
           v-on:change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
-          v-bind="item.attr"
-          style="width:100%"
         ></component>
         <!-- 控件结束区内容插槽 -->
         <slot :meta="item" :obj="task.editBuffer" name="item-footer"></slot>
@@ -190,8 +200,6 @@ export default {
     height: {
       type: Number,
       default: 0
-    },
-    style: {
     },
     width: {
       type: Number,
@@ -233,7 +241,7 @@ export default {
   },
   methods: {
     getStyle() {
-      var style = this.style || {};
+      var style = this.styles || {};
       if (this.height) {
         style.height = this.height + "px";
       }

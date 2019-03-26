@@ -353,7 +353,7 @@
 
           // stop window scroll
           if (e.preventDefault && !releaseScroll) {
-            e.preventDefault();
+        //    e.preventDefault();
           }
           if (!releaseScroll) {
             e.returnValue = false;
