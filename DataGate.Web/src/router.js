@@ -135,8 +135,9 @@ function createRoutes(menus) {
   if (routeCreated) return;
   routeCreated = true;
   router.addRoutes([{
-      path: '/unauth',
+      path: '/unauth/:path?',
       name: '没有权限',
+      props: true, //能通过URL传参给组件的props
       component: UnAuth
     },
     //notfound应该加在最后面，否则个个页面都会notfound
@@ -153,7 +154,7 @@ router.beforeEach((to, from, next) => {
     from.meta.scrollTop = $('.content-container').scrollTop(); //记录滚动位置
     next();
   } else {
-    next('/unauth');
+    next('/unauth/' + encodeURIComponent(to.fullPath));
   }
 });
 
