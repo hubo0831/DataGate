@@ -34,7 +34,6 @@ Vue.use((Vue, options) => {
 // update-title (更新导航条)
 // session-timeout （登录过期）
 // logout 退出登录
-// app-start App应用程序开始运行
 // login 登录
 
 // register 注册新组件  两个参数(name, component) 相当于Vue.component(name, component)

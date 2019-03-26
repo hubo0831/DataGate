@@ -336,6 +336,8 @@ export default {
         (displayName ? displayName + " - " : "") + appConfig.systemName;
     },
     logout() {
+      this.mainMenu = [];
+      this.currentMenu = {};
       UserAPI.logout();
     },
     pop() {

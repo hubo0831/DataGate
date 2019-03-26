@@ -2,8 +2,8 @@
 // 此对象将在与appConfig合并时消除
 // 所有属性定义转到appConfig下
 window.globalConfig = {
-  apiUrl: 'http://192.168.1.249:31300',
-  //    apiUrl: 'http://localhost:60743',
+   //  apiUrl: 'http://192.168.1.249:31300',
+   apiUrl: 'http://localhost:60743',
   systemName: 'XXX管理系统',
   elSize: 2, //控件和字体默认大小 1代表小 2代表中 3代表大
   //上传控件的初始配置值
@@ -12,7 +12,7 @@ window.globalConfig = {
     fileSizeLimit: 1000 * 1024 * 1024, // 最多一次上传量 1000 M
     fileSingleSizeLimit: 100 * 1024 * 1024 //单个文件最大值 100 M
   },
-  //追加或改写原有的元数据定义
+  //追加或改写原有的元数据定义 
   defaultMetadata: [
     //此处重新定义油藏(res)元数据，除name外，只需要定义与基础元数据定义不同的属性，相同的属性可省略
     //如果元数据定义中已经是下拉列表则不需要此对象
