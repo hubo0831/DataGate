@@ -25,10 +25,28 @@
         <label slot="label" :meta="item">
           <slot name="item-label" :meta="item">{{item.title}}</slot>
         </label>
+        <!-- Custom类型，用插槽定义输入组件，如果没有定义，则当成普通文本输入框 -->
+        <slot :name="item.name"
+          v-if="item.uitype=='Custom'"
+          :task="task"
+          :in-edit="readonly || item.readonly"
+          :meta="item"
+          :obj="task.editBuffer"
+        >
+          <el-input
+            v-model="task.editBuffer[item.name]"
+            @change="handleChange(item)"
+            clearable
+            :placeholder="getPlaceholder(item)"
+            v-bind="item.attr"
+          ></el-input>
+        </slot>
         <!-- 不能编辑 -->
-        <template v-if="readonly || item.readonly">
-          <display-item :meta="item" v-model="task.editBuffer[item.name]"></display-item>
-        </template>
+        <display-item
+          v-else-if="readonly || item.readonly"
+          :meta="item"
+          v-model="task.editBuffer[item.name]"
+        ></display-item>
         <!-- 数字输入框 -->
         <el-input
           v-else-if="item.uitype=='TextBox' && item.datatype=='Number'"
@@ -47,15 +65,15 @@
           @change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
           :maxlength="item.maxlength"
-         clearable
-        v-bind="item.attr"
+          clearable
+          v-bind="item.attr"
         ></el-input>
         <!-- 多行文本 -->
         <el-input
           v-else-if="item.uitype=='TextArea'"
           type="textarea"
           :rows="3"
-         clearable
+          clearable
           v-model="task.editBuffer[item.name]"
           @change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
@@ -66,8 +84,8 @@
         <el-select
           v-else-if="item.uitype=='DropdownList'"
           v-model="task.editBuffer[item.name]"
-             clearable
-        filterable
+          clearable
+          filterable
           @change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
           v-bind="item.attr"
@@ -85,8 +103,8 @@
           v-model="task.editBuffer[item.name]"
           multiple
           filterable
-              clearable
-       :value-key="item.valuekey"
+          clearable
+          :value-key="item.valuekey"
           @change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
           v-bind="item.attr"
@@ -132,7 +150,7 @@
           v-model="task.editBuffer[item.name]"
           @change="handleChange(item)"
           type="date"
-               clearable
+          clearable
           :placeholder="getPlaceholder(item)"
           v-bind="item.attr"
         ></el-date-picker>
@@ -142,7 +160,7 @@
           v-model="task.editBuffer[item.name]"
           @change="handleChange(item)"
           type="datetime"
-                 clearable
+          clearable
           :placeholder="getPlaceholder(item)"
           v-bind="item.attr"
         ></el-date-picker>
@@ -151,27 +169,11 @@
           v-else-if="item.uitype=='TextBox' || !item.uitype"
           v-model="task.editBuffer[item.name]"
           @change="handleChange(item)"
-                clearable
-           :placeholder="getPlaceholder(item)"
+          clearable
+          :placeholder="getPlaceholder(item)"
           v-bind="item.attr"
         ></el-input>
-        <slot
-          v-else-if="item.uitype=='Custom'"
-          :task="task"
-          :in-edit="true"
-          :meta="item"
-          :obj="task.editBuffer"
-          v-bind="item.attr"
-        >
-          <!-- Custom类型，用插槽定义输入组件，如果没有定义，则当成普通文本输入框 -->
-          <el-input
-            v-model="task.editBuffer[item.name]"
-            @change="handleChange(item)"
-                clearable
-             :placeholder="getPlaceholder(item)"
-            v-bind="item.attr"
-          ></el-input>
-        </slot>
+
         <!-- 自定义输入组件 -->
         <component
           v-else
@@ -281,8 +283,8 @@ export default {
     },
     handleChange(item) {
       var val = this.task.editBuffer[item.name];
-      if (item.maxlength && val.length>item.maxlength){
-          this.task.editBuffer[item.name] = val.slice(0, item.maxlength);
+      if (item.maxlength && val.length > item.maxlength) {
+        this.task.editBuffer[item.name] = val.slice(0, item.maxlength);
       }
       for (var i in this.task.metadata) {
         var targetItem = this.task.metadata[i];

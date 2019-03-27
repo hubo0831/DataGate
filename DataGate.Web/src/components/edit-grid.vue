@@ -33,6 +33,7 @@
           v-for="meta in metaFilter"
           :key="meta.name"
           header-align="center"
+          :class-name="getColumnClass(meta)"
           v-bind="meta.column"
         >
           <template slot-scope="scope">
@@ -199,6 +200,11 @@ export default {
     }
   },
   methods: {
+    getColumnClass(meta) {
+      var args = { meta, passed: true, className: "" };
+      this.$emitPass("get-column-class", args);
+      return args.className;
+    },
     getMeta(name) {
       var metas = this.metadata || this.task.metadata;
       var meta = metas.find(m => m.name == name);

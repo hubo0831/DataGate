@@ -10,13 +10,10 @@
     <template v-else-if="meta.uitype=='List'">{{dropDownMultiValue(value)}}</template>
     <template v-else-if="meta.uitype=='Date'">{{value | formatDate}}</template>
     <template v-else-if="meta.uitype=='DateTime'">{{value | formatDateTime2}}</template>
+    <template v-else-if="meta.uitype=='Custom'"><slot :meta="meta" :value="value" :obj="obj">{{value}}</slot></template>
     <!-- 数组类型 -->
     <template v-else-if="(meta.datatype||'').startsWith('[')">
       <slot :meta="meta" :value="value"></slot>
-    </template>
-    <!-- 自定义显示方式 -->
-    <template v-else-if="meta.uitype=='Custom'">
-      {{value}}
     </template>
     <!-- 定制的显示组件 -->
     <component

@@ -368,7 +368,7 @@ export default function editTask() {
   };
 
   this.getMeta = name => this.metadata.find(m => m.name == name);
-  this.getMetas = names => this.metadata.filter(m => names.indexOf(m.name) >= 0);
+  this.getMetas = names => this.metadata.filter(m => names.includes(m.name));
 
   ///////////////////////////////////数据修改//////////////////////////////////////
   //获取随机最大排序位
