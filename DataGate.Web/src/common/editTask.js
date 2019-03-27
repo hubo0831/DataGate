@@ -161,7 +161,7 @@ export default function editTask() {
       return;
     }
     var num = parseFloat(value);
-    if (num == NaN){
+    if (num == NaN) {
       callback(new Error("必须为数字"));
       return;
     }
@@ -622,72 +622,56 @@ export default function editTask() {
   };
 
   //////////////////////////////数据校验////////////////////////////////////////////
-  var rulesArr;
-  var addChanged;
-  this.validateProduct = function (pi) {
-    var product = addChanged[pi];
 
-    var loopValidate = (i) => {
-      var name = rulesArr[i];
-      var ruleItems = this.rules[name]; //ruleItems
-      return new Promise((resolve, reject) => {
-        var rc = 0;
-        for (var ri = 0; ri < ruleItems.length; ri++) {
-          var rule = ruleItems[ri];
-          if (rule.required && !product[name]) {
+  this.validateProduct = function (product, name, rule) {
+
+    return new Promise((resolve, reject) => {
+      if (rule.required && !product[name]) {
+        reject({
+          product,
+          name,
+          err: rule.message
+        });
+        return;
+      }
+      //todo:其他各类标准验证...
+      if (rule.validator) {
+        rule.validator(rule, product[name], (err) => {
+          if (err) {
             reject({
               product,
               name,
-              err: rule.message
+              err
             });
-            break;
-          }
-          //todo:其他各类标准验证...
-          if (rule.validator) {
-            rule.validator(rule, product[name], (err) => {
-              if (err) {
-                reject({
-                  product,
-                  name,
-                  err
-                });
-              } else if (++rc >= ruleItems.length) {
-                resolve();
-              }
-            });
-          } else if (++rc >= ruleItems.length) {
+          } else {
             resolve();
           }
-        }
-      }).then(() => {
-        if (++i < rulesArr.length) return loopValidate(i);
-      });
-    }
-    if (!rulesArr.length) return util.emptyPromise();
-    return loopValidate(0);
-  };
+        });
+      } else {
+        resolve();
+      }
+    });
+  }
 
   //对所有改过的数据进行验证
   this.validate = function () {
-    rulesArr = [];
-    var j = 0;
-    for (var i in this.rules) {
-      rulesArr[j++] = i;
-    }
-    addChanged = this.changedProducts.concat(this.addedProducts);
+    var addChanged = this.changedProducts.concat(this.addedProducts);
 
     if (addChanged.length == 0) {
-      return util.emptyPromise();
+      return Promise.resolve();
     }
 
-    var validateAll = (i) => {
-      return this.validateProduct(i)
-        .then(() => {
-          if (++i < addChanged.length) return validateAll(i);
-        });
-    }
+    var validatePromises = [];
 
-    return validateAll(0);
+    addChanged.forEach(product => {
+      for (var i in product) {
+        var rule = this.rules[i];
+        if (!rule) continue;
+        for (var j in rule)
+          validatePromises.push(this.validateProduct(product, i, rule[j]));
+      }
+    });
+    return Promise.all(validatePromises);
   };
 
   //////////////////////////////数据保存////////////////////////////////////////////
