@@ -113,19 +113,72 @@ export default function editTask() {
   this._initRules = function () {
     var rules = {};
     this.metadata.forEach(meta => {
+      rules[meta.name] = [];
       if (meta.required) {
         var requiredRule = {
           required: true,
           message: '请输入' + meta.title,
           trigger: 'blur'
         }
-        rules[meta.name] = [requiredRule];
+        rules[meta.name].push(requiredRule);
       }
+      if (meta.datatype == "Number") {
+        var minMaxRule = {
+          validator: validateNumber,
+          min: meta.attr.min,
+          max: meta.attr.max,
+          trigger: 'blur'
+        }
+        rules[meta.name].push(minMaxRule);
+      }
+      if (meta.attr.pattern) {
+        var patternRule = {
+          validator: validateReg,
+          pattern: meta.attr.pattern,
+          trigger: 'blur'
+        };
+        rules[meta.name].push(patternRule);
+      }
+      rules[meta.name].forEach(rule => rule.title = meta.title);
       //todo:其他各类标准验证...
     });
 
     return rules;
   };
+
+  function validateReg(rule, value, callback) {
+    var reg = new RegExp(rule.pattern);
+    if (reg.test(value)) {
+      callback();
+    } else {
+      callback(new Error(rule.title + ":格式不对,应满足：" + rule.pattern));
+    }
+  }
+
+  function validateNumber(rule, value, callback) {
+    if (!value) {
+      callback();
+      return;
+    }
+    var num = parseFloat(value);
+    if (num == NaN){
+      callback(new Error("必须为数字"));
+      return;
+    }
+    if (!rule.min) {
+      rule.min = 0;
+    }
+    if (!rule.max) {
+      rule.max = 99999999999999999999;
+    }
+    if (value < rule.min) {
+      callback(new Error(rule.title + ":数字太小"));
+    } else if (value > rule.max) {
+      callback(new Error(rule.title + ":数字太大"));
+    } else {
+      callback();
+    }
+  }
 
   //设置自定义检验规则，validateFunc的签名是(rule, value, callback)
   //验证不通过时是callback(new Error('错误信息'));通过时空的callback()
