@@ -34,6 +34,7 @@
           v-else-if="item.uitype=='TextBox' && item.datatype=='Number'"
           type="number"
           :min="0"
+          clearable
           v-model="task.editBuffer[item.name]"
           @change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
@@ -46,13 +47,15 @@
           @change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
           :maxlength="item.maxlength"
-          v-bind="item.attr"
+         clearable
+        v-bind="item.attr"
         ></el-input>
         <!-- 多行文本 -->
         <el-input
           v-else-if="item.uitype=='TextArea'"
           type="textarea"
           :rows="3"
+         clearable
           v-model="task.editBuffer[item.name]"
           @change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
@@ -63,7 +66,8 @@
         <el-select
           v-else-if="item.uitype=='DropdownList'"
           v-model="task.editBuffer[item.name]"
-          filterable
+             clearable
+        filterable
           @change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
           v-bind="item.attr"
@@ -81,7 +85,8 @@
           v-model="task.editBuffer[item.name]"
           multiple
           filterable
-          :value-key="item.valuekey"
+              clearable
+       :value-key="item.valuekey"
           @change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
           v-bind="item.attr"
@@ -127,6 +132,7 @@
           v-model="task.editBuffer[item.name]"
           @change="handleChange(item)"
           type="date"
+               clearable
           :placeholder="getPlaceholder(item)"
           v-bind="item.attr"
         ></el-date-picker>
@@ -136,6 +142,7 @@
           v-model="task.editBuffer[item.name]"
           @change="handleChange(item)"
           type="datetime"
+                 clearable
           :placeholder="getPlaceholder(item)"
           v-bind="item.attr"
         ></el-date-picker>
@@ -144,7 +151,8 @@
           v-else-if="item.uitype=='TextBox' || !item.uitype"
           v-model="task.editBuffer[item.name]"
           @change="handleChange(item)"
-          :placeholder="getPlaceholder(item)"
+                clearable
+           :placeholder="getPlaceholder(item)"
           v-bind="item.attr"
         ></el-input>
         <slot
@@ -159,7 +167,8 @@
           <el-input
             v-model="task.editBuffer[item.name]"
             @change="handleChange(item)"
-            :placeholder="getPlaceholder(item)"
+                clearable
+             :placeholder="getPlaceholder(item)"
             v-bind="item.attr"
           ></el-input>
         </slot>
