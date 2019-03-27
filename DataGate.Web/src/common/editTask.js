@@ -99,6 +99,8 @@ export default function editTask() {
         else if (m.datatype == "Boolean") m.column.align = "center";
       }
 
+      //将表单控件绑定对象attr加入，如果没有定义的话
+      if (!('attr' in m)) m.attr = {};
       //value默认值加入响应式
       if (!('value' in m)) m.value = null;
     });

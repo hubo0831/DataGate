@@ -29,13 +29,24 @@
         <template v-if="readonly || item.readonly">
           <display-item :meta="item" v-model="task.editBuffer[item.name]"></display-item>
         </template>
+        <!-- 数字输入框 -->
+        <el-input
+          v-else-if="item.uitype=='TextBox' && item.datatype=='Number'"
+          type="number"
+          :min="0"
+          v-model="task.editBuffer[item.name]"
+          @change="handleChange(item)"
+          :placeholder="getPlaceholder(item)"
+          :maxlength="item.maxlength"
+          v-bind="item.attr"
+        ></el-input>
         <!-- 普通文本 -->
         <el-input
           v-else-if="item.uitype=='TextBox'"
           v-model="task.editBuffer[item.name]"
-          v-on:change="handleChange(item)"
+          @change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
-          style="width:100%"
+          :maxlength="item.maxlength"
           v-bind="item.attr"
         ></el-input>
         <!-- 多行文本 -->
@@ -44,9 +55,9 @@
           type="textarea"
           :rows="3"
           v-model="task.editBuffer[item.name]"
-          v-on:change="handleChange(item)"
+          @change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
-          style="width:100%"
+          :maxlength="item.maxlength"
           v-bind="item.attr"
         ></el-input>
         <!-- 单项选择 -->
@@ -54,9 +65,8 @@
           v-else-if="item.uitype=='DropdownList'"
           v-model="task.editBuffer[item.name]"
           filterable
-          v-on:change="handleChange(item)"
+          @change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
-          style="width:100%"
           v-bind="item.attr"
         >
           <el-option
@@ -73,9 +83,8 @@
           multiple
           filterable
           :value-key="item.valuekey"
-          v-on:change="handleChange(item)"
+          @change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
-          style="width:100%"
           v-bind="item.attr"
         >
           <el-option
@@ -89,9 +98,8 @@
         <el-checkbox-group
           v-else-if="item.uitype=='CheckBoxList'"
           v-model="task.editBuffer[item.name]"
-          v-on:change="handleChange(item)"
+          @change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
-          style="width:100%"
           v-bind="item.attr"
         >
           <el-checkbox v-for="sel in item.options" :key="sel.value" :label="sel.text"></el-checkbox>
@@ -100,7 +108,7 @@
         <el-switch
           v-else-if="item.uitype=='Switch'"
           v-model="task.editBuffer[item.name]"
-          v-on:change="handleChange(item)"
+          @change="handleChange(item)"
           :active-value="1"
           :inactive-value="0"
           v-bind="item.attr"
@@ -118,7 +126,7 @@
         <el-date-picker
           v-else-if="item.uitype=='Date'"
           v-model="task.editBuffer[item.name]"
-          v-on:change="handleChange(item)"
+          @change="handleChange(item)"
           type="date"
           :placeholder="getPlaceholder(item)"
           v-bind="item.attr"
@@ -127,7 +135,7 @@
         <el-date-picker
           v-else-if="item.uitype=='DateTime'"
           v-model="task.editBuffer[item.name]"
-          v-on:change="handleChange(item)"
+          @change="handleChange(item)"
           type="datetime"
           :placeholder="getPlaceholder(item)"
           v-bind="item.attr"
@@ -136,9 +144,8 @@
         <el-input
           v-else-if="item.uitype=='TextBox' || !item.uitype"
           v-model="task.editBuffer[item.name]"
-          v-on:change="handleChange(item)"
+          @change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
-          style="width:100%"
           v-bind="item.attr"
         ></el-input>
         <slot
@@ -152,9 +159,8 @@
           <!-- Custom类型，用插槽定义输入组件，如果没有定义，则当成普通文本输入框 -->
           <el-input
             v-model="task.editBuffer[item.name]"
-            v-on:change="handleChange(item)"
+            @change="handleChange(item)"
             :placeholder="getPlaceholder(item)"
-            style="width:100%"
             v-bind="item.attr"
           ></el-input>
         </slot>
@@ -167,7 +173,7 @@
           :in-edit="true"
           :obj="task.editBuffer"
           :task="task"
-          v-on:change="handleChange(item)"
+          @change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
         ></component>
         <!-- 控件结束区内容插槽 -->
@@ -266,9 +272,8 @@ export default {
       return item.title || item.name;
     },
     handleChange(item) {
-      var that = this;
-      for (var i in that.task.metadata) {
-        var targetItem = that.task.metadata[i];
+      for (var i in this.task.metadata) {
+        var targetItem = this.task.metadata[i];
         //处理联动
         if (targetItem.linkto == item.name) {
           this.task.updateOptions(targetItem);
