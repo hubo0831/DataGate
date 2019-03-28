@@ -98,6 +98,7 @@
         <edit-form
           ref="editorForm"
           :task="task"
+          style="margin-right:30px"
           :height="height?height - 90:0"
           :label-width="labelWidth"
         >
@@ -105,7 +106,7 @@
             <!-- UIType='Custome'的组件在edit-from内的插槽 -->
           </slot>
         </edit-form>
-        <span slot="footer" class="dialog-footer">
+        <span slot="footer" style="margin-right:30px" class="dialog-footer">
           <el-button type="primary" @click="doSave">保存</el-button>
           <el-button @click="cancelEdit">取消</el-button>
         </span>
