@@ -23,7 +23,7 @@ Vue.mixin({
     formatDateTime2(date) {
       return util.formatDate(date, "yyyy-MM-dd hh:mm")
     },
-   //xx万元
+    //xx万元
     formatWan(num) {
       return util.formatWan(num);
     },
@@ -33,14 +33,16 @@ Vue.mixin({
     },
     // 百分数
     formatPercent(num) {
+      if (isNaN(num)) return '';
       var v = parseInt(num * 1000000);
-      return v  / 1000000 + '%';
+      return v / 1000000 + '%';
     },
     formatLess1Percent(num) {
+      if (isNaN(num)) return '';
       var v = parseInt(num * 1000000);
-      return v  / 10000 + '%';
+      return v / 10000 + '%';
     }
- },
+  },
   methods: {
     //统一处理模态对话框，不让它点空白处关闭
     handleDlgClose: function (done) {},
@@ -63,12 +65,14 @@ Vue.mixin({
     },
     // 百分数
     formatPercent(row, col, num, idx) {
+      if (isNaN(num)) return '';
       var v = parseInt(num * 10000);
-      return v  / 10000 + '%';
+      return v / 10000 + '%';
     },
     formatLess1Percent(row, col, num, idx) {
+      if (isNaN(num)) return '';
       var v = parseInt(num * 10000);
-      return v  / 100 + '%';
+      return v / 100 + '%';
     },
- }
+  }
 });

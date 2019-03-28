@@ -154,14 +154,14 @@ export default {
       var user = users[0];
 
       this.userPages = user.menus;
+      //在最后将user加入到响应式的userState中
+      this.userState.currentUser = user;
       routerObj.createRoutes(user.menus);
       var menuTree = util.buildNestData(user.menus.filter(m => m.showType));
       this.mainMenu = menuTree;
       var home = this.userPages.find(m => m.url == "/");
       this.selfMenu = this.userPages.filter(m => m.parentId == home.id);
       this.restoreMenu();
-      //在最后将user加入到响应式的userState中
-      this.userState.currentUser = user;
       this.user = user;
       this.logined = true;
     };
@@ -169,7 +169,7 @@ export default {
     //在用户登录后，UI加载之前 获取一些数据，在外面没有改变该事件时，什么也不做
     var userDataFunc = user => {
       var us = [];
-      var getUserData = [util.emptyPromise];
+      var getUserData = [];
       bus.$emit("logined", getUserData);
       for (var i in getUserData) {
         us.push(getUserData[i](user));
@@ -188,8 +188,8 @@ export default {
 
     //导航进入时生成面包屑,面包屑的层次取决于原始的菜单层次
     routerObj.router.afterEach((to, from) => {
-      var menu = this.userPages.find(p => p.url == to.path && to.path !='/');
-      if(!menu){
+      var menu = this.userPages.find(p => p.url == to.path && to.path != "/");
+      if (!menu) {
         menu = this.userPages.find(p => p.id == to.meta.id);
       }
       if (menu) {
