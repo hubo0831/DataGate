@@ -364,7 +364,6 @@ export default function editTask() {
         .options.find(opt => opt.value == this.editBuffer[item.linkto])
         .text;
     }
-
   };
 
   this.getMeta = name => this.metadata.find(m => m.name == name);
