@@ -23,6 +23,7 @@
       v-model="value"
       :meta="meta"
       :obj="obj"
+      :in-form="inForm"
     ></component>
     <template v-else>{{ value }}</template>
   </div>
@@ -30,7 +31,7 @@
 <script>
 export default {
   //meta-元数据 value-列的值 obj-整行的数据对象
-  props: ["meta", "value", "obj"],
+  props: ["meta", "value", "obj", "inForm"],
   filters: {},
   methods: {
     //显示单选下拉列表的值

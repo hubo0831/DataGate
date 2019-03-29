@@ -422,7 +422,7 @@ export default {
 
       function afterFail(r) {
         file.setStatus("error");
-        Vue.set(file, "status", "error");
+        that.$set(file, "status", "error");
       }
 
       var chunksTotal = Math.ceil(file.size / chunkSize);
@@ -435,8 +435,7 @@ export default {
           chunks: chunksTotal
         })
           //分片合并后返回值
-          .done(afterSuccess)
-          .fail(afterFail);
+          .then(afterSuccess, afterFail);
       } else {
         //response单文件返回值
         afterSuccess(response);

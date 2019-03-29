@@ -22,6 +22,7 @@ function showError(xhr, err, e) {
   } else {
     bus.$emit('invalid-result', '请求出错:' + (e || err));
   }
+  return Promise.reject();
 }
 
 function closeAll() {
