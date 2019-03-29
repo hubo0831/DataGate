@@ -117,6 +117,7 @@ export default function editTask() {
       if (meta.required) {
         var requiredRule = {
           validator: validateRequired,
+          required:true,
           message: '请输入' + meta.title,
           trigger: 'blur'
         }
