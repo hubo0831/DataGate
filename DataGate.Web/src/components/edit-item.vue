@@ -61,7 +61,8 @@
       :meta="meta"
       :obj="obj"
       :in-edit="true"
-    ></component>
+        v-bind="meta.attr"
+  ></component>
   </div>
 </template>
 <script>

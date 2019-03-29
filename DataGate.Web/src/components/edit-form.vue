@@ -26,12 +26,14 @@
           <slot name="item-label" :meta="item">{{item.title}}</slot>
         </label>
         <!-- Custom类型，用插槽定义输入组件，如果没有定义，则当成普通文本输入框 -->
-        <slot :name="item.name"
+        <slot
+          :name="item.name"
           v-if="item.uitype=='Custom'"
           :task="task"
           :in-edit="readonly || item.readonly"
           :meta="item"
           :obj="task.editBuffer"
+          v-bind="item.attr"
         >
           <el-input
             v-model="task.editBuffer[item.name]"
@@ -46,6 +48,7 @@
           v-else-if="readonly || item.readonly"
           :meta="item"
           v-model="task.editBuffer[item.name]"
+          v-bind="item.attr"
         ></display-item>
         <!-- 数字输入框 -->
         <el-input
@@ -185,9 +188,10 @@
           :task="task"
           @change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
+          v-bind="item.attr"
         ></component>
         <!-- 控件结束区内容插槽 -->
-        <slot :meta="item" :obj="task.editBuffer" name="item-footer"></slot>
+        <slot :meta="item" :obj="task.editBuffer" name="item-footer" v-bind="item.attr"></slot>
       </el-form-item>
     </el-form>
   </div>
