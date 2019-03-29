@@ -116,7 +116,7 @@ export default function editTask() {
       rules[meta.name] = [];
       if (meta.required) {
         var requiredRule = {
-          required: true,
+          validator: validateRequired,
           message: '请输入' + meta.title,
           trigger: 'blur'
         }
@@ -153,6 +153,13 @@ export default function editTask() {
     } else {
       callback(new Error(rule.title + ":格式不对,应满足：" + rule.pattern));
     }
+  }
+
+  function validateRequired(rule, value, callback) {
+    if (!value && ( value !== 0)) 
+      callback(new Error(rule.message));
+    else 
+      callback();
   }
 
   function validateNumber(rule, value, callback) {

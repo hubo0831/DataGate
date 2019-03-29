@@ -2,8 +2,8 @@
 // 此对象将在与appConfig合并时消除
 // 所有属性定义转到appConfig下
 window.globalConfig = {
-   //  apiUrl: 'http://192.168.1.249:31300',
-   apiUrl: 'http://localhost:60743',
+   apiUrl: 'http://192.168.1.249:31300',
+   // apiUrl: 'http://localhost:60743',
   systemName: 'XXX管理系统',
   elSize: 2, //控件和字体默认大小 1代表小 2代表中 3代表大
   //上传控件的初始配置值
