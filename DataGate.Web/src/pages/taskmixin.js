@@ -60,13 +60,17 @@ export default {
           this.task.products = result.data;
         });
     },
-    //由子类实现
+    //由子类实现,获取数据后的数据清洗
     apiDataFilter(key, data) {
       return data;
+    },
+    apiDataSaving(saveData){
+      //保存前对保存的数据的操作 v0.3.2+
     },
     apiSubmit(saveKey, successTips) {
       //this.$message.success(tips);
       var saveData = this.task.createSaveData();
+      this.apiDataSaving(saveData);
       return API.SUBMIT(saveKey, saveData)
         .done(() => this.$message.success(successTips))
         .done(this.loadData);

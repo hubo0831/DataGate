@@ -18,7 +18,7 @@ namespace DataGate.App.Files
             this._uploadDir = config.FilesDir;
             this._uploadPath = config.UploadFilesPath;
             this.TempPath = config.TempPath;
-            ClearTempFiles();
+          //  ClearTempFiles();
         }
 
         /// <summary>上传目录</summary>

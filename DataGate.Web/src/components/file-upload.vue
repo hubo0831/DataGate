@@ -3,7 +3,7 @@
   <div>
     <!-- 文件上传组件(简单展示) -->
     <div :id="id" class="uploader" v-if="options.simple">
-      <div class="queueList" style="border:0;margin-top:0">
+      <div class="queueList-Simple">
         <el-row :id="id + 'dndArea'" class="placeholder" style="border:0;margin-top:0;padding:0">
           <el-col :span="24">
             <div v-for="file in fileList" :key="file.id">
