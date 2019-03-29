@@ -21,7 +21,7 @@
 
 .uploader .placeholder {
     min-height: 40px;
-    color: #cccccc;
+    color: #666;
     position: relative;
     margin-top: 5px;
     display: flex;

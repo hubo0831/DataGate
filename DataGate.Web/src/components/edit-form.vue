@@ -49,6 +49,7 @@
           :meta="item"
           v-model="task.editBuffer[item.name]"
           v-bind="item.attr"
+          :in-form="true"
         ></display-item>
         <!-- 数字输入框 -->
         <el-input
@@ -186,6 +187,7 @@
           :in-edit="true"
           :obj="task.editBuffer"
           :task="task"
+          :in-form="true"
           @change="handleChange(item)"
           :placeholder="getPlaceholder(item)"
           v-bind="item.attr"
