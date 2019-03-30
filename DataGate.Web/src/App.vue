@@ -280,10 +280,12 @@ export default {
                 return;
               }
             }
-            return;
           }
         }
       }
+      //找不到时，定位到第一个选项卡
+      this.defaultMainIndex = this.mainMenu[0].id;
+      this.currentMenu = this.mainMenu[0];
     },
     handleMainMenu(index) {
       var main = this.mainMenu.find(m => m.id == index);

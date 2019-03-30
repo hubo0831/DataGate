@@ -1,8 +1,8 @@
 <template>
   <el-row class="warp">
     <el-col :span="24">
-      <h1>欢迎使用</h1>
-      </el-col>
+      <h1>欢迎使用{{appConfig.systemName}}!</h1>
+    </el-col>
   </el-row>
 </template>
 <style>
@@ -40,7 +40,5 @@
 </style>
 
 <script>
-export default{
-  
-}
+export default {};
 </script>
