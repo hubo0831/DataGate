@@ -186,7 +186,7 @@ export default {
       }
       if (a > b) return 1;
       if (a == b) return 0;
-      if (a < b) return -1;
+       return -1;
     });
   },
   //使用一个方法返回的值排降序
@@ -205,7 +205,7 @@ export default {
       }
       if (a < b) return 1;
       if (a == b) return 0;
-      if (a > b) return -1;
+      return -1;
     });
   },
   //数组去重, 指定主键的属性名或求返回主键值的函烽
@@ -262,12 +262,6 @@ export default {
     return uuid.toUpperCase();
   },
 
-  //返回一个无条件pass的promise
-  emptyPromise(obj) {
-    return new Promise((resolve) => {
-      resolve(obj)
-    });
-  },
   //判断一个对象是空值或空数组
   // 0不包含在内
   isEmpty(obj) {
