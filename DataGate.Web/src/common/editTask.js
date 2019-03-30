@@ -117,13 +117,14 @@ export default function editTask() {
       if (meta.required) {
         var requiredRule = {
           validator: validateRequired,
-          required:true,
+          required: true,
           message: '请输入' + meta.title,
           trigger: 'blur'
         }
         rules[meta.name].push(requiredRule);
       }
-      if (meta.datatype == "Number") {
+      //数字验证规则
+      if (meta.datatype == "Number" && (typeof meta.attr.min == 'number' || typeof meta.attr.max == 'number')) {
         var minMaxRule = {
           validator: validateNumber,
           min: meta.attr.min,
@@ -132,6 +133,7 @@ export default function editTask() {
         }
         rules[meta.name].push(minMaxRule);
       }
+      //正则表达式验证规则
       if (meta.attr.pattern) {
         var patternRule = {
           validator: validateReg,
@@ -157,14 +159,14 @@ export default function editTask() {
   }
 
   function validateRequired(rule, value, callback) {
-    if (!value && ( value !== 0)) 
+    if (!value && (value !== 0))
       callback(new Error(rule.message));
-    else 
+    else
       callback();
   }
 
   function validateNumber(rule, value, callback) {
-    if (!value) {
+    if (!value && value !== 0) {
       callback();
       return;
     }
@@ -173,19 +175,15 @@ export default function editTask() {
       callback(new Error("必须为数字"));
       return;
     }
-    if (!rule.min) {
-      rule.min = 0;
+    if (typeof rule.min == "number" && value < rule.min) {
+      callback(new Error(rule.title + ":数字太小, 必须大于等于" + rule.min));
+      return;
     }
-    if (!rule.max) {
-      rule.max = 99999999999999999999;
+    if (typeof rule.max == "number" && value > rule.max) {
+      callback(new Error(rule.title + ":数字太大, 必须小于等于" + rule.max));
+      return;
     }
-    if (value < rule.min) {
-      callback(new Error(rule.title + ":数字太小"));
-    } else if (value > rule.max) {
-      callback(new Error(rule.title + ":数字太大"));
-    } else {
-      callback();
-    }
+    callback();
   }
 
   //设置自定义检验规则，validateFunc的签名是(rule, value, callback)
