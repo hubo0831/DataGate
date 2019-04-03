@@ -46,30 +46,40 @@ Vue.mixin({
   methods: {
     //统一处理模态对话框，不让它点空白处关闭
     handleDlgClose: function (done) {},
-    //以下是配合element-ui的table的格式化方法
+    //以下是配合element-ui的table的格式化方法, 如要单独使用，则只用传一个参数
     //年月日YYYY-MM-dd
     formatDate(row, col, date, idx) {
+      if (arguments.length < 3) date = row;
       return util.formatDate(date)
     },
     //年月日时分秒
     formatDateTime(row, col, date, idx) {
-      return util.formatDate(date, "yyyy-MM-dd HH:mm:ss")
+      var format = "yyyy-MM-dd HH:mm:ss";
+      if (arguments.length < 3) {
+        date = row;
+        if (arguments.length == 2) format = col;
+      }
+      return util.formatDate(date, format)
     },
     //xx万元
     formatWan(row, col, num, idx) {
+      if (arguments.length < 3) num = row;
       return util.formatWan(num);
     },
     // xx亿元 或xx万元，取决于数字大小
     formatWanYi(row, col, num, idx) {
+      if (arguments.length < 3) num = row;
       return util.formatWanYi(num);
     },
     // 百分数
     formatPercent(row, col, num, idx) {
+      if (arguments.length < 3) num = row;
       if (isNaN(num)) return '';
       var v = parseInt(num * 10000);
       return v / 10000 + '%';
     },
     formatLess1Percent(row, col, num, idx) {
+      if (arguments.length < 3) num = row;
       if (isNaN(num)) return '';
       var v = parseInt(num * 10000);
       return v / 100 + '%';
