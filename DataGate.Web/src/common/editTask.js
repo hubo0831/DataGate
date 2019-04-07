@@ -1,14 +1,16 @@
 import util from "../common/util"
 import * as API from "../api"
 import appConfig from "../appConfig"
+import Vue from "vue"
 
-//用于批量编辑和批量保存
+//用于批量编辑和批量保存,跟踪和维护对象列表中对列的增删改状态
 export default function editTask() {
   this.metadata = [];
   this.name = ""; //任务名称
   this.productName = ""; //任务对应的成果名称
   this.key = ""; //在提交服务器时的数据修改的key
-  this.rules = null; //表单验证规则集合
+  this.rules = {}; //表单验证规则集合
+  this.details = {}; //主从表中的子表
 
   //清除元数据以外的数据
   //此方法运用不当可能会造成页面闪动
@@ -20,7 +22,6 @@ export default function editTask() {
     this.changed = 0;
     this.selection = []; //勾选中的成果列表，应该是products的子集
     this.editBuffer = {}; //根据selection合并后组成的单个成果，用以绑定form表单的值
-    this.details = {}; //主从表中的子表
 
     //如果是分页查询，则设置排序为custom
     if (paged) {
@@ -31,20 +32,22 @@ export default function editTask() {
 
   //生成明细表数据的子任务
   //propName - 主表中存明细表数据的集合属性，
-  //key - 提交更改时的明细表数据key
-  this.createDetails = function (propName, key) {
-    if (!this.products) {
-      throw '必须先有主集合才能有子集合';
-    }
+  //saveKey - 提交更改时的明细表数据key
+  this.createDetails = function (propName, saveKey, meta) {
     var detailTask = new editTask();
-    detailTask.key = key;
+    detailTask.key = saveKey;
+    Vue.set(this.details, propName, detailTask);
+    detailTask.setMetadata(meta);
+    this.getDetailsData(propName);
+  };
+
+  this.getDetailsData = function(propName){
+    var detailTask = this.details[propName];
     detailTask.clearData();
     this.products.forEach(p => {
       detailTask.products = detailTask.products.concat(p[propName]);
     });
-    this.details[propName] = detailTask;
-  };
-
+  }
   //////////////////////////////元数据定义//////////////////////////////////////
 
   //不能直接给metadta赋值,因担心和vue起冲突，所以没有用get set访问器

@@ -12,15 +12,15 @@
     <el-checkbox
       v-model="obj[meta.name]"
       v-else-if="meta.uitype=='CheckBox'"
-      :true-label="'1'"
-      :false-label="'0'"
+      :true-label="1"
+      :false-label="0"
       v-bind="meta.attr"
     ></el-checkbox>
     <el-switch
       v-model="obj[meta.name]"
       v-else-if="meta.uitype=='Switch'"
-      active-value="1"
-      inactive-value="0"
+      :active-value="1"
+      :inactive-value="0"
       v-bind="meta.attr"
     ></el-switch>
     <el-date-picker v-model="obj[meta.name]" v-else-if="meta.uitype=='Date'" v-bind="meta.attr"></el-date-picker>
@@ -39,7 +39,7 @@
       :placeholder="meta.title"
       v-bind="meta.attr"
     >
-      <el-option v-for="sel in meta.items" :key="sel.value" :label="sel.text" :value="sel.value"></el-option>
+      <el-option v-for="sel in meta.options" :key="sel.value" :label="sel.text" :value="sel.value"></el-option>
     </el-select>
     <el-select
       v-model="obj[meta.name]"
@@ -51,7 +51,7 @@
       :placeholder="meta.title"
       v-bind="meta.attr"
     >
-      <el-option v-for="sel in meta.items" :key="sel.value" :label="sel.text" :value="sel.value"></el-option>
+      <el-option v-for="sel in meta.options" :key="sel.value" :label="sel.text" :value="sel.value"></el-option>
     </el-select>
     <!-- 自定义输入组件 -->
     <component

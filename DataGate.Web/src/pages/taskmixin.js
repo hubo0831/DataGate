@@ -49,7 +49,7 @@ export default {
     },
     //根据url的参数进行查询， 通常用于子类的loadData方法中加载数据
     apiUrlPageQuery(key) {
-      if (!this.urlQuery.pageSize){
+      if (!this.urlQuery.pageSize) {
         this.urlQuery.pagesize = util.getCookie("pageSize");
       }
       return API.QUERY(key, this.urlQuery)
@@ -60,11 +60,20 @@ export default {
           this.task.products = result.data;
         });
     },
+    //不分页的查询， 通常用于子类的loadData方法中加载数据
+    apiUrlQuery(key) {
+      return API.QUERY(key, this.urlQuery)
+        .then(result => this.apiDataFilter(key, result))
+        .done(result => {
+          this.task.clearData();
+          this.task.products = result;
+        });
+    },
     //由子类实现,获取数据后的数据清洗
     apiDataFilter(key, data) {
       return data;
     },
-    apiDataSaving(saveData){
+    apiDataSaving(saveData) {
       //保存前对保存的数据的操作 v0.3.2+
     },
     apiSubmit(saveKey, successTips) {

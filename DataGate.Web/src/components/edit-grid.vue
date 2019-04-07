@@ -3,7 +3,7 @@
   <div @keyup.enter="submitRow()" @keyup.escape="cancelEdit()">
     <el-form
       :inline="true"
-      :model="rowBuffer"
+      :model="task.editBuffer"
       ref="gridForm"
       :rules="task.rules"
       status-icon
@@ -59,7 +59,7 @@
             <!-- 下面是编辑状态时的编辑界面 -->
             <!-- 显示时是一个字段，编辑时又是另一个字段的情况 -->
             <el-form-item v-else-if="meta.linkto && meta.uitype=='TextBox'" :prop="meta.linkto">
-              <edit-item :obj="rowBuffer" :meta="getMeta(meta.linkto)"></edit-item>
+              <edit-item :obj="task.editBuffer" :meta="getMeta(meta.linkto)"></edit-item>
             </el-form-item>
             <!-- 自定义编辑列的内容 -->
             <slot
@@ -71,7 +71,7 @@
             >{{scope.row[meta.name]}}</slot>
             <!-- 常规编辑 -->
             <el-form-item v-else :prop="meta.name">
-              <edit-item :obj="rowBuffer" :meta="meta"></edit-item>
+              <edit-item :obj="task.editBuffer" :meta="meta"></edit-item>
             </el-form-item>
           </template>
         </el-table-column>
@@ -157,7 +157,6 @@ export default {
     return {
       current: null,
       editingRow: null, //当前正在编辑的行
-      rowBuffer: {}, //行缓冲区, 用于切换到其他行时，暂存task.editBuffer
       showEdit: false,
       newItem: null //点击新增按钮时的新增对象暂存
     };
@@ -236,14 +235,13 @@ export default {
     },
     //勾选事件
     doSelectionChange(items) {
-      this.submitRow(true);
+      this.submitRow(true).then(() => this.task.setSelection(items));
       if (items.length == 1) {
         //刚开始时，鼠标如果正好点到复选框，将不会有当前行， 在此处强行指定
         this.changeCurrentRow(items[0]);
       } else if (items.length == 0) {
         this.changeCurrentRow(null);
       }
-      this.task.setSelection(items);
     },
     //为免与selectionChange和rowclick事件冲突，不触发，只调用此方法
     changeCurrentRow(item) {
@@ -253,7 +251,8 @@ export default {
     },
     //统一处理table的行点击事件，当行点击时自动选择
     doRowClick: function(row, event, column) {
-      if (row == this.editingRow) return;
+      if (row == this.current)return;
+      this.newItem = null;
       if (column.type != "selection") {
         this.$refs.dataGrid.clearSelection();
       }
@@ -284,11 +283,32 @@ export default {
       }
       this.submitRow().then(() => {
         this.editingRow = this.current;
-        this.rowBuffer = this.task.editBuffer;
         //  this.task.editBuffer = $.extend({}, this.current);
         this.showEdit = true;
         this.$emit("show-edit", this.newItem);
       });
+    },
+    //光标自动到指定行 https://www.jianshu.com/p/e2710643370d
+    gotoRow(row) {
+      if (!this.dataList) return;
+
+      // 获取行高
+      let height =
+        parseInt(
+          $(this.$refs.dataGrid.$el)
+            .find(".el-table__body tbody td:first-child")
+            .height()
+        ) || 32;
+
+      // 遍历表格数据，获取查询的数据
+      for (let i = 0; i < this.dataList.length; i++) {
+        const item = this.dataList[i];
+        // 判断查询的数据是否存在，存在则进行定位操作
+        if (item == row) {
+          this.$refs.dataGrid.bodyWrapper.scrollTop = height * (i - 1) + 10;
+          break;
+        }
+      }
     },
     getMaxOrder() {
       var sortField = this.task.getSortField();
@@ -309,11 +329,14 @@ export default {
         var newItem = this.task.createProduct();
         this.setOrder(newItem);
         this.$emit("new-row", newItem);
-        this.task.changeStatus(newItem, "added");
         this.$refs.dataGrid.clearSelection();
-        this.$refs.dataGrid.toggleRowSelection(newItem);
+        this.task.changeStatus(newItem, "added");
         this.newItem = newItem;
-        this.doEdit();
+        this.$nextTick(() => {
+          this.$refs.dataGrid.toggleRowSelection(newItem);
+          if (this.editMode == "inline") this.gotoRow(this.current);
+          this.doEdit();
+        });
       });
     },
     doSave() {
@@ -345,25 +368,22 @@ export default {
     },
     //inline编辑时的提交动作
     submitRow(silence) {
-      return new Promise(resolve => {
-        if (this.editingRow) {
-          this.$refs.gridForm.validate(v => {
-            if (v) {
-              //应该是只有在行内编辑时才会触发的分支
-              if (!Util.isEqual(this.editingRow, this.rowBuffer)) {
-                $.extend(this.editingRow, this.rowBuffer);
-                this.task.changeStatus(this.editingRow, "changed");
-              }
-              this.editingRow = null;
-              resolve();
-            } else if (!silence) {
-              this.$message.warning("请先完善正在编辑的行。");
-            }
-          });
-        } else {
-          resolve();
-        }
-      });
+      var dfd = Util.deferred();
+      if (this.editingRow) {
+        this.$refs.gridForm.validate(v => {
+          if (v) {
+            //应该是只有在行内编辑时才会触发的分支
+            this.task.acceptChanges();
+            this.editingRow = null;
+            dfd.resolve();
+          } else if (!silence) {
+            this.$message.warning("请先完善正在编辑的行。");
+          }
+        });
+      } else {
+        dfd.resolve();
+      }
+      return dfd.promise;
     },
     //确认删除后执行删除
     performDelRow(item) {

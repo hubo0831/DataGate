@@ -1,8 +1,8 @@
 /**
  * Created by jerry on 2017/4/14.
  */
-var SIGN_REGEXP = /([yMdhsmf])(\1*)/g
-var DEFAULT_PATTERN = 'yyyy-MM-dd'
+const SIGN_REGEXP = /([yMdhsmf])(\1*)/g
+const DEFAULT_PATTERN = 'yyyy-MM-dd'
 
 function padding(s, len) {
   let l = len - (s + '').length
@@ -10,6 +10,75 @@ function padding(s, len) {
     s = '0' + s
   }
   return s
+};
+
+let mineTypes = {
+  //{后缀名，MIME类型}   
+  "3gp": "video/3gpp",
+  "apk": "application/vnd.android.package-archive",
+  "asf": "video/x-ms-asf",
+  "avi": "video/x-msvideo",
+  "bin": "application/octet-stream",
+  "bmp": "image/bmp",
+  "c": "text/plain",
+  "class": "application/octet-stream",
+  "conf": "text/plain",
+  "cpp": "text/plain",
+  "doc": "application/msword",
+  "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "xls": "application/vnd.ms-excel",
+  "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "exe": "application/octet-stream",
+  "gif": "image/gif",
+  "gtar": "application/x-gtar",
+  "gz": "application/x-gzip",
+  "h": "text/plain",
+  "htm": "text/html",
+  "html": "text/html",
+  "jar": "application/java-archive",
+  "java": "text/plain",
+  "jpeg": "image/jpeg",
+  "jpg": "image/jpeg",
+  "js": "application/x-javascript",
+  "log": "text/plain",
+  "m3u": "audio/x-mpegurl",
+  "m4a": "audio/mp4a-latm",
+  "m4b": "audio/mp4a-latm",
+  "m4p": "audio/mp4a-latm",
+  "m4u": "video/vnd.mpegurl",
+  "m4v": "video/x-m4v",
+  "mov": "video/quicktime",
+  "mp2": "audio/x-mpeg",
+  "mp3": "audio/x-mpeg",
+  "mp4": "video/mp4",
+  "mpc": "application/vnd.mpohun.certificate",
+  "mpe": "video/mpeg",
+  "mpeg": "video/mpeg",
+  "mpg": "video/mpeg",
+  "mpg4": "video/mp4",
+  "mpga": "audio/mpeg",
+  "msg": "application/vnd.ms-outlook",
+  "ogg": "audio/ogg",
+  "pdf": "application/pdf",
+  "png": "image/png",
+  "pps": "application/vnd.ms-powerpoint",
+  "ppt": "application/vnd.ms-powerpoint",
+  "pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "prop": "text/plain",
+  "rc": "text/plain",
+  "rmvb": "audio/x-pn-realaudio",
+  "rtf": "application/rtf",
+  "sh": "text/plain",
+  "tar": "application/x-tar",
+  "tgz": "application/x-compressed",
+  "txt": "text/plain",
+  "wav": "audio/x-wav",
+  "wma": "audio/x-ms-wma",
+  "wmv": "audio/x-ms-wmv",
+  "wps": "application/vnd.ms-works",
+  "xml": "text/plain",
+  "z": "application/x-compress",
+  "zip": "application/x-zip-compressed",
 };
 
 export default {
@@ -186,7 +255,7 @@ export default {
       }
       if (a > b) return 1;
       if (a == b) return 0;
-       return -1;
+      return -1;
     });
   },
   //使用一个方法返回的值排降序
@@ -272,10 +341,7 @@ export default {
     return Array.isArray(obj) && !obj.length;
   },
   //从指定url下载文件 name-期望的文件名
-  download({
-    url,
-    name
-  }) {
+  download({ url, name }) {
     var a = document.createElement("a");
     a.href = url;
     name && (a.download = name);
@@ -285,7 +351,7 @@ export default {
     document.body.removeChild(a);
   },
   //https://segmentfault.com/q/1010000014406245
-  encodeParams: function (obj) {
+  encodeParams(obj) {
     var params = [];
     Object.keys(obj).forEach(function (key) {
       var value = obj[key];
@@ -297,5 +363,67 @@ export default {
       params.push([key, encodeURIComponent(value)].join("="));
     });
     return params.join("&");
+  },
+
+  base64toBlob(base64, type) {
+    // 将base64转为Unicode规则编码
+    let bstr = atob(base64, type),
+      n = bstr.length,
+      u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n); // 转换编码后才可以使用charCodeAt 找到Unicode编码
+    }
+    return new Blob([u8arr], {
+      type
+    });
+  },
+
+  //完整的base64 URL转Blob
+  dataURLtoBlob(dataurl) {
+    var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+      bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
+  },
+
+  jsonToBlob(obj) {
+    let json = obj;
+    if (typeof obj != "string") {
+      json = JSON.stringify(obj);
+    }
+    return new Blob([json], {
+      type: "text/json"
+    });
+  },
+  //构造一个语法糖以方便地使用Promise
+  //例：
+  /*
+  import {deferred} from '@/biz'
+  
+  function test() {
+    let dfd = deferred();
+    var a = new Date().getSeconds();
+    console.log("source=" + a);
+    if (a % 3 == 0) {
+      dfd.resolve(a);
+    } else {
+      dfd.reject(a);
+    }
+    return dfd.promise;
+  }*/
+  deferred() {
+    let dfd = {};
+    dfd.promise = new Promise((resolve, reject) => {
+      dfd.resolve = resolve;
+      dfd.reject = reject;
+    });
+    return dfd;
+  },
+  getMineType(fileURL) {
+    var ext = fileURL.substr(fileURL.lastIndexOf('.') + 1);
+    ext = ext.toLowerCase();
+    return mineTypes[ext];
   }
 }

@@ -497,14 +497,15 @@ namespace DataGate.App.DataService
                         {
                             return null;
                         }
+                        //如果指定了ForeinFiled，则用name作该列别名查询此外表字段
                         else if (!f.ForeignField.IsEmpty())
                         {
-                            return $"{db.AddFix(f.ForeignField)} {f.Name}";
+                            return $"{db.AddFix(f.ForeignField)} {tableMeta.Name}_{f.Name}";
                         }
                         else
                         {
-                            //带[]号的datatype中表示要查子表字段，用别名区分子表字段
-                            return $"{tableMeta.FixDbName}.{f.FixDbName}";
+                            //带[]号的datatype中表示要查子表字段，用'模型名_属性名'作为别名区分子表字段
+                            return $"{tableMeta.FixDbName}.{f.FixDbName} {tableMeta.Name}_{f.Name}";
                         }
                     }).Where(f => !f.IsEmpty()));
                     allFields.Add(otherFields);

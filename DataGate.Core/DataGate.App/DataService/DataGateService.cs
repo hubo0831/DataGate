@@ -89,7 +89,7 @@ namespace DataGate.App.DataService
         public async Task<object> QueryAsync(string key, object paramObj)
         {
             DataGateKey gkey = GetDataGate(key);
-           
+
             if (!(paramObj is IDictionary<string, object> param))
             {
                 param = CommOp.ToStrObjDict(paramObj);
@@ -724,11 +724,12 @@ namespace DataGate.App.DataService
                 bool hasValue = false;
                 foreach (FieldMeta fm in childModel.Fields)
                 {
-                    if (dr[fm.DbName] != DBNull.Value)
+                    var alias = $"{childModel.Name}_{fm.Name}";
+                    if (dr[alias] != DBNull.Value)
                     {
                         hasValue = true;
                     }
-                    newDr[fm.Name] = new JValue(dr[fm.DbName]);
+                    newDr[fm.Name] = new JValue(dr[alias]);
                 }
                 //忽略全部是空的行，这在左连接时经常发生
                 if (hasValue)

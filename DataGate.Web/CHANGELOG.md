@@ -1,3 +1,7 @@
+### 0.3.2 - 2019-04-07
+1. 增加deferred/blob操作等方法
+2. editGrid/editTask行内编辑优化
+
 ### 0.3.0 - 0.3.1 2019-03-06-2019-03-28
 1. 补充数据验证
 2. EditForm增加数字输入type=number
