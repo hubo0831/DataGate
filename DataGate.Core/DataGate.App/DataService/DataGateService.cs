@@ -718,18 +718,24 @@ namespace DataGate.App.DataService
         {
             var childModel = _ms.GetTableMeta(col.ArrayItemType);
             JArray childDt = new JArray();
+
+            //找到ForeignKey定义中的别名
+            string alias = null;
+            var aliases = col.ForeignKey.Split('.');
+            if (aliases.Length > 1) alias = aliases[0];
+
             foreach (var dr in drs)
             {
                 var newDr = new JObject();
                 bool hasValue = false;
                 foreach (FieldMeta fm in childModel.Fields)
                 {
-                    var alias = $"{childModel.Name}_{fm.Name}";
-                    if (dr[alias] != DBNull.Value)
+                    var bm = $"{alias ?? childModel.Name}_{fm.Name}";
+                    if (dr[bm] != DBNull.Value)
                     {
                         hasValue = true;
                     }
-                    newDr[fm.Name] = new JValue(dr[alias]);
+                    newDr[fm.Name] = new JValue(dr[bm]);
                 }
                 //忽略全部是空的行，这在左连接时经常发生
                 if (hasValue)

@@ -3,6 +3,7 @@
   <div :id="id" :style="getStyle()">
     <el-form
       size="mini"
+      :inline="inline"
       class="meta-form"
       :model="task.editBuffer"
       v-if="task.editBuffer"
@@ -219,6 +220,10 @@ export default {
       type: Boolean,
       default: false
     },
+    inline: {
+      type: Boolean,
+      default: false
+    },
     height: {
       type: Number,
       default: 0
@@ -273,11 +278,23 @@ export default {
       return style;
     },
     validate(callback) {
-      this.$refs.editForm.validate(valid => {
-        if (valid && callback) {
-          callback(valid);
-        }
-      });
+      //参数是回调函数时，验证通过直接调回调函数
+      if (callback) {
+        this.$refs.editForm.validate(valid => {
+          if (valid) {
+            callback(valid);
+          }
+        });
+      } else {
+        //没有回调函数时，返回一个promise
+        var dfd = util.deferred();
+        this.$refs.editForm.validate(valid => {
+          if (valid) {
+            dfd.resolve();
+          }
+        });
+        return dfd.promise;
+      }
     },
     resetFields() {
       this.$refs.editForm.resetFields();

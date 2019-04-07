@@ -21,7 +21,6 @@ namespace DataGate.App.DataService
         /// <summary>
         /// 在实际数据库中的名称
         /// </summary>
-        [JsonIgnore]
         public string DbName { get; set; }
 
         /// <summary>

@@ -482,9 +482,20 @@ namespace DataGate.App.DataService
             List<string> allFields = new List<string>();
             if (gkey.TableJoins.Count > 1)
             {
+                //拼接需要联查的子表中的字段
                 var otherTableFields = mainTable.Fields.Where(f => !f.ArrayItemType.IsEmpty());
                 foreach (var other in otherTableFields)
                 {
+                    if (other.ForeignKey.IsEmpty())
+                    {
+                        throw new Exception($"{mainTable.Name}.{other.Name}需要查子表，但没有定义ForeignKey指向子表主键");
+                    }
+
+                    //找到ForeignKey定义中的别名
+                    string alias = null;
+                    var aliases = other.ForeignKey.Split('.');
+                    if (aliases.Length > 1) alias = aliases[0];
+
                     var tableMeta = _tableMetas[other.ArrayItemType];
                     var otherFields = String.Join(",", tableMeta.Fields.Select(f =>
                     {
@@ -497,7 +508,7 @@ namespace DataGate.App.DataService
                         {
                             return null;
                         }
-                        //如果指定了ForeinFiled，则用name作该列别名查询此外表字段
+                        //如果指定了ForeignField，则用name作该列别名查询此外表字段
                         else if (!f.ForeignField.IsEmpty())
                         {
                             return $"{db.AddFix(f.ForeignField)} {tableMeta.Name}_{f.Name}";
@@ -505,7 +516,7 @@ namespace DataGate.App.DataService
                         else
                         {
                             //带[]号的datatype中表示要查子表字段，用'模型名_属性名'作为别名区分子表字段
-                            return $"{tableMeta.FixDbName}.{f.FixDbName} {tableMeta.Name}_{f.Name}";
+                            return $"{alias ?? tableMeta.FixDbName}.{f.FixDbName} {alias ?? tableMeta.Name}_{f.Name}";
                         }
                     }).Where(f => !f.IsEmpty()));
                     allFields.Add(otherFields);

@@ -48,7 +48,8 @@ export default {
       //由子类实现
     },
     //根据url的参数进行查询， 通常用于子类的loadData方法中加载数据
-    apiUrlPageQuery(key) {
+    apiUrlPageQuery(key, params) {
+      if (params) $.extend(this.urlQuery, params); //v0.3.2+
       if (!this.urlQuery.pageSize) {
         this.urlQuery.pagesize = util.getCookie("pageSize");
       }
@@ -61,7 +62,8 @@ export default {
         });
     },
     //不分页的查询， 通常用于子类的loadData方法中加载数据
-    apiUrlQuery(key) {
+    apiUrlQuery(key, params) {
+      if (params) $.extend(this.urlQuery, params);//v0.3.2+
       return API.QUERY(key, this.urlQuery)
         .then(result => this.apiDataFilter(key, result))
         .done(result => {
