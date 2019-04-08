@@ -221,47 +221,6 @@ namespace DataGate.Com.DB
         }
 
         /// <summary>
-        /// 执行存储过程
-        /// </summary>
-        /// <param name="procname">存储过程名称</param>
-        /// <param name="sp">可选参数数组</param>
-        /// <returns>影响的行数</returns>
-        public virtual int RunProcedure(string procname, params IDataParameter[] sp)
-        {
-            DbConnection conn = StartConn();
-            DbCommand sc = DBComm.CreateCommand(conn);
-            sc.CommandText = procname;
-            sc.CommandType = CommandType.StoredProcedure;
-            PrepareCommand(sc, sp);
-            int r = sc.ExecuteNonQuery();
-            sc.Parameters.Clear();
-            EndConn(conn);
-            return r;
-        }
-
-        /// <summary>
-        /// 执行存储过程(返回DataSet)
-        /// </summary>
-        /// <param name="procname">存储过程名称</param>
-        /// <param name="sp">可选参数数组</param>
-        /// <returns>DataSet</returns>
-        public virtual DataSet RunProcedureDs(string procname, params IDataParameter[] sp)
-        {
-            DbConnection conn = StartConn();
-            DbCommand sc = DBComm.CreateCommand(conn);
-            sc.CommandText = procname;
-            sc.CommandType = CommandType.StoredProcedure;
-            PrepareCommand(sc, sp);
-
-            DbDataAdapter da = DBComm.CreateDataAdapter(sc);
-            DataSet ds = new DataSet();
-            da.Fill(ds);
-            sc.Parameters.Clear();
-            EndConn(conn);
-            return ds;
-        }
-
-        /// <summary>
         /// 得到单一对象
         /// </summary>
         /// <param name="sql">要执行的sql语句</param>

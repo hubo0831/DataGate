@@ -23,12 +23,12 @@ namespace DataGate.Com.DB
             DbCommand sc = DBComm.CreateCommand(conn);
             sc.CommandText = sql;
             PrepareCommand(sc, sp);
+            if (!sql.Contains(' ')) sc.CommandType = CommandType.StoredProcedure;
             int r = await sc.ExecuteNonQueryAsync();
             sc.Parameters.Clear();
             EndConn(conn);
             return r;
         }
-
 
         /// <summary>
         /// 根据指定Sql返回一个DataReader

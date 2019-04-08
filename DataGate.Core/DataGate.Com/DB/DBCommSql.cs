@@ -74,7 +74,7 @@ namespace DataGate.Com.DB
         /// <returns></returns>
         public virtual double GetDBSize()
         {
-            DataSet ds = Helper.RunProcedureDs("sp_spaceused");
+            DataSet ds = Helper.ExecDataSet("sp_spaceused");
             string r = (string)ds.Tables[0].Rows[0]["database_size"];
             return CommOp.ToDouble(r.Split(' ')[0]);
         }
