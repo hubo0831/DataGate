@@ -432,9 +432,9 @@ export default {
       this.task.changeStatus(slibing, "changed");
       this.task.changeStatus(curr, "changed");
       slibing[sortField] = curr[sortField];
-      this.current[sortField] = ord;
+      curr[sortField] = ord;
       this.task.editBuffer[sortField] = ord;
-      this.$nextTick(() => this.changeCurrentRow(curr));
+      this.$nextTick(() => this.$refs.dataGrid.toggleRowSelection(curr));
     },
     //上移
     doUp() {
