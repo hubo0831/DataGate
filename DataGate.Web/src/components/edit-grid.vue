@@ -246,8 +246,10 @@ export default {
     //为免与selectionChange和rowclick事件冲突，不触发，只调用此方法
     changeCurrentRow(item) {
       this.$refs.dataGrid.setCurrentRow(item);
-      this.current = item;
-      this.$emit("current-change", item);
+      if (this.current != item) {
+        this.current = item;
+        this.$emit("current-change", item);
+      }
     },
     //统一处理table的行点击事件，当行点击时自动选择
     doRowClick: function(row, event, column) {
@@ -418,36 +420,42 @@ export default {
         this.$emit("after-del-rows");
       });
     },
-    doUp() {
+    //交换上下排序位
+    swapOrder(curr, slibing) {
       var sortField = this.task.getSortField();
       if (!sortField) {
         this.$message.warning("没有定义排序位[datatype=SortOrder]");
+        return;
+      }
+
+      var ord = slibing[sortField];
+      this.task.changeStatus(slibing, "changed");
+      this.task.changeStatus(curr, "changed");
+      slibing[sortField] = curr[sortField];
+      this.current[sortField] = ord;
+      this.task.editBuffer[sortField] = ord;
+      this.$nextTick(() => this.changeCurrentRow(curr));
+    },
+    //上移
+    doUp() {
+      if (!this.current) {
+        this.$message.warning("请先选择要上移的行");
         return;
       }
       var idx = this.dataList.indexOf(this.current);
       if (idx > 0) {
-        var ord = this.dataList[idx - 1][sortField];
-        this.task.changeStatus(this.dataList[idx - 1], "changed");
-        this.task.changeStatus(this.current, "changed");
-        this.dataList[idx - 1][sortField] = this.current[sortField];
-        this.current[sortField] = ord;
-        this.task.editBuffer[sortField] = ord;
+        this.swapOrder(this.current, this.dataList[idx - 1]);
       }
     },
+    //下移
     doDown() {
-      var sortField = this.task.getSortField();
-      if (!sortField) {
-        this.$message.warning("没有定义排序位[datatype=SortOrder]");
+      if (!this.current) {
+        this.$message.warning("请先选择要下移的行");
         return;
       }
       var idx = this.dataList.indexOf(this.current);
       if (idx < this.dataList.length - 1) {
-        var ord = this.dataList[idx + 1][sortField];
-        this.task.changeStatus(this.dataList[idx + 1], "changed");
-        this.task.changeStatus(this.current, "changed");
-        this.dataList[idx + 1][sortField] = this.current[sortField];
-        this.current[sortField] = ord;
-        this.task.editBuffer[sortField] = ord;
+        this.swapOrder(this.current, this.dataList[idx + 1]);
       }
     }
   }
