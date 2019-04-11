@@ -253,7 +253,10 @@ export default {
     },
     //统一处理table的行点击事件，当行点击时自动选择
     doRowClick: function(row, event, column) {
-      if (row == this.current) return;
+      if (row == this.current && this.editingRow == row){ 
+        //当在行编辑状态时，点击正在编辑的行，维持原状
+        return;
+      }
       this.newItem = null;
       if (column.type != "selection") {
         this.$refs.dataGrid.clearSelection();
