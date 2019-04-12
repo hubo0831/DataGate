@@ -41,7 +41,7 @@ export default function editTask() {
     this.getDetailsData(propName);
   };
 
-  this.getDetailsData = function(propName){
+  this.getDetailsData = function (propName) {
     var detailTask = this.details[propName];
     detailTask.clearData();
     this.products.forEach(p => {
@@ -500,17 +500,25 @@ export default function editTask() {
     return this.changed;
   };
 
-  //维护增删改状态
-  this.changeStatus = function (product, status /*removed/changed/added*/ ) {
+  //维护增删改状态, 返回当前增删改的总数
+  this.changeStatus = function (product, status /*removed/changed/added*/) {
+    //修改对象
     if (status == 'changed') {
+      var idx = this.products.indexOf(product);
+      //当修改的记录是原来没有的，则变为新增，v0.3.3+
+      if (idx < 0) {
+        return this.add(product);
+      }
       var idx = this.addedProducts.indexOf(product);
       //当对象是新增时，忽略修改标记
-      if (idx >= 0) return;
+      if (idx >= 0) return this.testChanged();
       idx = this.changedProducts.indexOf(product);
       if (idx < 0) {
         this.changedProducts.push(product);
       }
-    } else if (status == 'removed') {
+    }
+    //删除对象
+    else if (status == 'removed') {
       this._removeAllDetails(product);
       var idx = this.products.indexOf(product);
       if (idx >= 0) {
@@ -520,8 +528,7 @@ export default function editTask() {
       if (idx >= 0) {
         this.addedProducts.splice(idx, 1);
         //新增的被删除，成果是新的，不需要再处理
-        this.testChanged();
-        return;
+        return this.testChanged();
       }
 
       idx = this.changedProducts.indexOf(product);
@@ -529,10 +536,16 @@ export default function editTask() {
         this.changedProducts.splice(idx, 1);
       }
       this.removedProducts.push(product);
-    } else if (status == 'added') {
+    }
+    //新增对象
+    else if (status == 'added') {
       var idx = this.products.indexOf(product);
       if (idx < 0) {
         this.products.push(product);
+      }
+      //当新增的对象已存在时，执行修改逻辑 v0.3.3+
+      else {
+        return this.change(product);
       }
       idx = this.addedProducts.indexOf(product);
       if (idx < 0) {
@@ -540,8 +553,15 @@ export default function editTask() {
       }
       this._addAllDetails(product);
     }
-    this.testChanged();
+    return this.testChanged();
   };
+
+  //为方便调用，用以下三个快捷方法调用changeStatus
+
+  this.add = product => this.changeStatus(product, 'added');
+  this.change = product => this.changeStatus(product, 'changed');
+  this.remove = product => this.changeStatus(product, 'removed');
+
 
   //子表数据的增删维护工作
   this.changeDetails = function (meta, oldObj) {
@@ -569,12 +589,12 @@ export default function editTask() {
 
     //旧集合中在新集合中没有的就删除
     oldArr.filter(old => !newArr.find(n => equal(n, old))).forEach(old => {
-      this.details[meta.name].changeStatus(old, 'removed');
+      this.details[meta.name].remove(old);
     });
 
     //新集合中在旧集合中没有的就新增
     newArr.filter(newd => !oldArr.find(o => equal(o, newd))).forEach(newd => {
-      this.details[meta.name].changeStatus(newd, 'added');
+      this.details[meta.name].add(newd);
     });
 
   }
@@ -582,7 +602,7 @@ export default function editTask() {
   this._removeAllDetails = product => {
     for (var i in this.details) {
       for (var j in product[i]) {
-        this.details[i].changeStatus(product[i][j], 'removed');
+        this.details[i].remove(product[i][j]);
       }
     }
   };
@@ -590,7 +610,7 @@ export default function editTask() {
   this._addAllDetails = product => {
     for (var i in this.details) {
       for (var j in product[i]) {
-        this.details[i].changeStatus(product[i][j], 'added');
+        this.details[i].add(product[i][j]);
       }
     }
   }
@@ -624,7 +644,7 @@ export default function editTask() {
         }
         tObj[d.name] = this.editBuffer[d.name];
       }
-      if (changed) this.changeStatus(tObj, "changed");
+      if (changed) this.change(tObj);
     }
     this.setSelection(this.selection);
   };
