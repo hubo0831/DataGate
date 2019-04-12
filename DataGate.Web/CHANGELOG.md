@@ -1,3 +1,6 @@
+### 0.3.3
+1. 优化EditTask的增删改状态，无论对象是添加或修改的都可以调用add或change方法
+
 ### 0.3.2 - 2019-04-07
 1. 增加deferred/blob操作等方法
 2. editGrid/editTask行内编辑优化
