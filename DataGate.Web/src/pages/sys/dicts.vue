@@ -201,7 +201,7 @@ export default {
           parentCode: this.currentGroup.code,
           ord: maxOrder++
         });
-        this.task.changeStatus(item, "added");
+        this.task.add(item);
       });
       this.batchAddText = "";
     },

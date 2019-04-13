@@ -26,7 +26,7 @@
         @after-del-rows="submitDel"
         edit-mode="none"
       ></edit-grid>
-      <url-pager :total="total"></url-pager>
+      <url-pager :total="task.total"></url-pager>
     </el-col>
   </el-row>
 </template>

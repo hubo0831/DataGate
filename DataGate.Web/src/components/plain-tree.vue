@@ -71,7 +71,7 @@ export default {
     addBrother() {
       var menu = this.task.createProduct();
       menu.parentId = this.current ? this.current.parentId : null;
-      this.task.changeStatus(menu, "added");
+      this.task.add(menu);
       this.restoreSelection();
       this.doCurrentChange(menu);
     },
@@ -83,7 +83,7 @@ export default {
       this.raiseCheckChange = false;
       var menu = this.task.createProduct();
       menu.parentId = this.current.id;
-      this.task.changeStatus(menu, "added");
+      this.task.add(menu);
       this.restoreSelection();
       this.doCurrentChange(menu);
     },
@@ -96,7 +96,7 @@ export default {
       var menu = $.extend({}, this.current);
       menu.id = util.guid();
       menu.ord = this.task.getMaxOrder();
-      this.task.changeStatus(menu, "added");
+      this.task.add(menu);
       this.restoreSelection();
       this.doCurrentChange(menu);
     },
@@ -116,8 +116,8 @@ export default {
         prev.ord = this.current.ord;
         this.current.ord = ord;
         this.task.editBuffer.ord = ord;
-        this.task.changeStatus(prev, "changed");
-        this.task.changeStatus(this.current, "changed");
+        this.task.change(prev);
+        this.task.change(this.current);
         this.restoreSelection();
       }
     },
@@ -138,8 +138,8 @@ export default {
         next.ord = this.current.ord;
         this.task.editBuffer.ord = ord;
         this.current.ord = ord;
-        this.task.changeStatus(next, "changed");
-        this.task.changeStatus(this.current, "changed");
+        this.task.change(next);
+        this.task.change(this.current);
         this.restoreSelection();
       }
     },
@@ -161,7 +161,7 @@ export default {
           this.moveInner(node.data, nodeEnter.data);
           break;
       }
-      this.task.changeStatus(node.data, "changed");
+      this.task.change(node.data);
     },
     moveBefore(data, toData) {
       data.parentId = toData.parentId;
@@ -209,7 +209,7 @@ export default {
           this.selection = [];
           this.task.setSelection([]);
         }
-        this.task.changeStatus(item, "removed");
+        this.task.remove(item);
       });
       this.restoreSelection();
     },

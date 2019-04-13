@@ -25,7 +25,6 @@ export default {
   data: function () {
     return {
       task: new editTask(), //核心数据对象
-      total: 0, //记录总数，分页时有用
       urlQuery: {} //url传递的查询参数
     };
   },
@@ -57,7 +56,7 @@ export default {
         .then(result => this.apiDataFilter(key, result))
         .done(result => {
           this.task.clearData(result.total > result.data.length);
-          this.total = result.total;
+          this.task.total = result.total;
           this.task.products = result.data;
         });
     },

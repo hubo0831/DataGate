@@ -1,5 +1,9 @@
 ### 0.3.3
 1. 优化EditTask的增删改状态，无论对象是添加或修改的都可以调用add或change方法
+2. EditTask增加total属性，移除TaskMixin中的total。
+3. 优化EditGrid的列排序，当数据只有一页时本地排序。
+4. 增加Metadata中的col属性以绑定el-col中的span, 以定制Form列宽。
+5. 移除EditTask.changeStatus, 增加add, change remove三个独立的方法。
 
 ### 0.3.2 - 2019-04-07
 1. 增加deferred/blob操作等方法

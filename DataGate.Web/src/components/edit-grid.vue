@@ -223,6 +223,8 @@ export default {
     //用户点击列标题排序的事件
     doSortChange(cpo) {
       if (!this.$emitPass("sort-change", cpo).passed) return;
+      //当数据不满一页时,不进行url分页
+      if (this.task.total <= this.task.products.length) return;
       if (!cpo.prop) this.$delete(this.urlQuery, "_sort");
       else
         this.urlQuery._sort =
@@ -253,7 +255,7 @@ export default {
     },
     //统一处理table的行点击事件，当行点击时自动选择
     doRowClick: function(row, event, column) {
-      if (row == this.current && this.editingRow == row){ 
+      if (row == this.current && this.editingRow == row) {
         //当在行编辑状态时，点击正在编辑的行，维持原状
         return;
       }
@@ -335,7 +337,7 @@ export default {
         this.setOrder(newItem);
         this.$emit("new-row", newItem);
         this.$refs.dataGrid.clearSelection();
-        this.task.changeStatus(newItem, "added");
+        this.task.add(newItem);
         this.newItem = newItem;
         this.$nextTick(() => {
           this.$refs.dataGrid.toggleRowSelection(newItem);
@@ -365,7 +367,7 @@ export default {
     },
     cancelEdit() {
       if (this.newItem) {
-        this.task.changeStatus(this.newItem, "removed");
+        this.task.remove(this.newItem);
         this.newItem = null;
       }
       this.showEdit = false;
@@ -401,7 +403,7 @@ export default {
             this.$refs.dataGrid.setCurrentRow(this.dataList[idx]);
         });
       }
-      this.task.changeStatus(item, "removed");
+      this.task.remove(item);
     },
     //确认删除
     confirmDelRow(item) {
@@ -432,8 +434,8 @@ export default {
       }
 
       var ord = slibing[sortField];
-      this.task.changeStatus(slibing, "changed");
-      this.task.changeStatus(curr, "changed");
+      this.task.change(slibing);
+      this.task.change(curr);
       slibing[sortField] = curr[sortField];
       curr[sortField] = ord;
       this.task.editBuffer[sortField] = ord;

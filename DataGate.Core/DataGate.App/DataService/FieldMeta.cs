@@ -153,6 +153,13 @@ namespace DataGate.App.DataService
         public Dictionary<string, object> Attr { get; set; }
 
         /// <summary>
+        /// 动态的前端el-col列属性，主要用于整体绑定到输入控件的上层el-col列元素中，
+        /// 可以决定输入列的占的列宽
+        /// </summary>
+        [JsonProperty("col")]
+        public Dictionary<string, object> Col { get; set; }
+
+        /// <summary>
         /// 联动的字段
         /// </summary>
         [JsonProperty("linkto")]

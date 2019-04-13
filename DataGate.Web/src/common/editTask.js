@@ -11,6 +11,7 @@ export default function editTask() {
   this.key = ""; //在提交服务器时的数据修改的key
   this.rules = {}; //表单验证规则集合
   this.details = {}; //主从表中的子表
+  this.total = 0, //记录总数，分页时有用
 
   //清除元数据以外的数据
   //此方法运用不当可能会造成页面闪动
@@ -19,8 +20,9 @@ export default function editTask() {
     this.addedProducts = []; //新增的记录
     this.changedProducts = []; //修改过的记录
     this.removedProducts = []; //已删除的记录
-    this.changed = 0;
-    this.selection = []; //勾选中的成果列表，应该是products的子集
+    this.changed = 0;   
+    this.total = 0;
+     this.selection = []; //勾选中的成果列表，应该是products的子集
     this.editBuffer = {}; //根据selection合并后组成的单个成果，用以绑定form表单的值
 
     //如果是分页查询，则设置排序为custom
@@ -28,6 +30,7 @@ export default function editTask() {
       this.metadata.forEach(meta => meta.column.sortable && (meta.column.sortable = "custom"));
     }
   }
+
   this.clearData();
 
   //生成明细表数据的子任务
@@ -67,6 +70,7 @@ export default function editTask() {
       //在进vue响应式之前先加点料
       m.multiValue = false;
       if (!m.column) m.column = {};
+      if (!m.col) m.col = {}; //决定表单元素的列宽， v0.3.3+
       //没有声明显示顺序的主键都不显示
       if (m.primarykey && !m.order && m.order != 0) m.order = -1;
       else if (!m.order) m.order = 0;
@@ -500,67 +504,63 @@ export default function editTask() {
     return this.changed;
   };
 
-  //维护增删改状态, 返回当前增删改的总数
-  this.changeStatus = function (product, status /*removed/changed/added*/) {
-    //修改对象
-    if (status == 'changed') {
-      var idx = this.products.indexOf(product);
-      //当修改的记录是原来没有的，则变为新增，v0.3.3+
-      if (idx < 0) {
-        return this.add(product);
-      }
-      var idx = this.addedProducts.indexOf(product);
-      //当对象是新增时，忽略修改标记
-      if (idx >= 0) return this.testChanged();
-      idx = this.changedProducts.indexOf(product);
-      if (idx < 0) {
-        this.changedProducts.push(product);
-      }
+  //以下 change, add, remove 维护增删改状态, 返回当前增删改的总数
+  //新增对象
+  this.change = product => {
+    var idx = this.products.indexOf(product);
+    //当修改的记录是原来没有的，则变为新增，v0.3.3+
+    if (idx < 0) {
+      return this.add(product);
     }
-    //删除对象
-    else if (status == 'removed') {
-      this._removeAllDetails(product);
-      var idx = this.products.indexOf(product);
-      if (idx >= 0) {
-        this.products.splice(idx, 1);
-      }
-      idx = this.addedProducts.indexOf(product);
-      if (idx >= 0) {
-        this.addedProducts.splice(idx, 1);
-        //新增的被删除，成果是新的，不需要再处理
-        return this.testChanged();
-      }
-
-      idx = this.changedProducts.indexOf(product);
-      if (idx >= 0) {
-        this.changedProducts.splice(idx, 1);
-      }
-      this.removedProducts.push(product);
-    }
-    //新增对象
-    else if (status == 'added') {
-      var idx = this.products.indexOf(product);
-      if (idx < 0) {
-        this.products.push(product);
-      }
-      //当新增的对象已存在时，执行修改逻辑 v0.3.3+
-      else {
-        return this.change(product);
-      }
-      idx = this.addedProducts.indexOf(product);
-      if (idx < 0) {
-        this.addedProducts.push(product);
-      }
-      this._addAllDetails(product);
+    var idx = this.addedProducts.indexOf(product);
+    //当对象是新增时，忽略修改标记
+    if (idx >= 0) return this.testChanged();
+    idx = this.changedProducts.indexOf(product);
+    if (idx < 0) {
+      this.changedProducts.push(product);
     }
     return this.testChanged();
   };
 
-  //为方便调用，用以下三个快捷方法调用changeStatus
+  //添加对象
+  this.add = product => {
+    var idx = this.products.indexOf(product);
+    if (idx < 0) {
+      this.products.push(product);
+    }
+    //当新增的对象已存在时，执行修改逻辑 v0.3.3+
+    else {
+      return this.change(product);
+    }
+    idx = this.addedProducts.indexOf(product);
+    if (idx < 0) {
+      this.addedProducts.push(product);
+    }
+    this._addAllDetails(product);
+    return this.testChanged();
+  };
 
-  this.add = product => this.changeStatus(product, 'added');
-  this.change = product => this.changeStatus(product, 'changed');
-  this.remove = product => this.changeStatus(product, 'removed');
+  //删除对象
+  this.remove = product => {
+    this._removeAllDetails(product);
+    var idx = this.products.indexOf(product);
+    if (idx >= 0) {
+      this.products.splice(idx, 1);
+    }
+    idx = this.addedProducts.indexOf(product);
+    if (idx >= 0) {
+      this.addedProducts.splice(idx, 1);
+      //新增的被删除，成果是新的，不需要再处理
+      return this.testChanged();
+    }
+
+    idx = this.changedProducts.indexOf(product);
+    if (idx >= 0) {
+      this.changedProducts.splice(idx, 1);
+    }
+    this.removedProducts.push(product);
+    return this.testChanged();
+  }
 
 
   //子表数据的增删维护工作

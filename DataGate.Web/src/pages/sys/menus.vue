@@ -89,7 +89,7 @@ export default {
       if (menu.id == this.task.editBuffer.id) {
         this.task.editBuffer.showType = menu.showType;
       }
-      this.task.changeStatus(menu, "changed");
+      this.task.change(menu);
     },
     switchAuthType(menu) {
       if (menu.authType == "Auth") {
@@ -102,7 +102,7 @@ export default {
       if (menu.id == this.task.editBuffer.id) {
         this.task.editBuffer.authType = menu.authType;
       }
-      this.task.changeStatus(menu, "changed");
+      this.task.change(menu);
     },
     doSave() {
       this.task.acceptChanges();
