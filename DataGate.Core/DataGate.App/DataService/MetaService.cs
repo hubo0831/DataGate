@@ -130,7 +130,7 @@ namespace DataGate.App.DataService
             for (var i = 1; i < key.TableJoins.Count; i++)
             {
                 string joins = BuildTableJoins(key, i);
-                tableJoins += joins;
+                tableJoins += (joins + Environment.NewLine);
             };
             key.JoinSubTerm = tableJoins;
             //暂不考虑修改数据时生成表查询字段和语句
@@ -232,9 +232,11 @@ namespace DataGate.App.DataService
 
         private TableMeta CreateTableMeta(JObject metaObj)
         {
-            string key = (string)metaObj[nameof(TableMeta.Name)];
             JToken jt = metaObj[nameof(TableMeta.Fields)];
-            return CreateTableMeta(key, jt);
+            metaObj.Remove(nameof(TableMeta.Fields));
+            var tb = metaObj.ToObject<TableMeta>();
+            tb.Fields = ParseMetadata(jt).OrderBy(m => m.Order).ToList();
+            return tb;
         }
 
         private TableMeta CreateTableMeta(string key, JToken jt) => new TableMeta
@@ -391,14 +393,16 @@ namespace DataGate.App.DataService
                 {
                     tm = _tableMetas[name];
                 }
-
-                TranslateModelNames(GetTempDB(key), tm);
+                var db = GetTempDB(key);
+                TranslateModelNames(db, tm);
 
                 var joinInfo = new JoinInfo
                 {
                     Name = name,
-                    Table = _tableMetas[name],
-                    Alias = alias,
+                    Table = tm,
+                    Alias = alias ??
+                        //当模型名和数据库实际名称不对应时，（是手动配置指定的），则用模型名作查询的别名
+                        (tm.DbName == db.GetDbObjName(tm.Name) ? null : tm.Name),
                     JoinFlag = joinFlag
                 };
                 return joinInfo;
@@ -407,7 +411,10 @@ namespace DataGate.App.DataService
 
         void TranslateModelNames(DBHelper db, TableMeta tm)
         {
-            tm.DbName = tm.DbName ?? db.GetDbObjName(tm.Name);
+            if (tm.DbName.IsEmpty())
+            {
+                tm.DbName = db.GetDbObjName(tm.Name);
+            }
             tm.FixDbName = db.AddFix(tm.DbName);
             foreach (var fm in tm.Fields)
             {
@@ -425,31 +432,40 @@ namespace DataGate.App.DataService
         /// <returns></returns>
         private string BuildTableJoins(DataGateKey gkey, int idx)
         {
+#if DEBUG
+            if (gkey.Key == "GetPrjRuns")
+            {
+
+            }
+#endif
             var models = gkey.TableJoins;
             var db = GetTempDB(gkey);
             string modelRightName = models[idx].Name;
             for (var i = 0; i < idx; i++)
             {
-                var modelLeft = models[i].Table;
-                var modelRight = models[idx].Table;
+                var mdLeft = models[i];
+                var tbLeft = mdLeft.Table;
+                var mdRight = models[idx];
+                var tbRight = mdRight.Table;
+
                 var join = models[idx - 1].JoinFlag == ">" ? " left join"
                       : (models[idx - 1].JoinFlag == "=" ? " inner join" : "");
-                var joinField = modelRight.Fields.FirstOrDefault(f => (f.ForeignKey ?? "").StartsWith((models[i].Alias ?? modelLeft.Name) + "."));
-                string rightNames = models[idx].Alias == null ? modelRight.FixDbName :
-                    modelRight.FixDbName + " " + models[idx].Alias;
+                var joinField = tbRight.Fields.FirstOrDefault(f => (f.ForeignKey ?? "").StartsWith((mdLeft.Alias ?? tbLeft.Name) + "."));
+                string rightNames = mdRight.Alias == null ? tbRight.FixDbName :
+                    tbRight.FixDbName + " " + mdRight.Alias;
                 if (joinField == null)
                 {
-                    joinField = modelLeft.Fields.FirstOrDefault(f => (f.ForeignKey ?? "").StartsWith((models[idx].Alias ?? modelRight.Name) + "."));
+                    joinField = tbLeft.Fields.FirstOrDefault(f => (f.ForeignKey ?? "").StartsWith((mdRight.Alias ?? tbRight.Name) + "."));
                     if (joinField != null)
                     {
                         return $"{join} {rightNames} on" +
-                            $" {AddDotFix(db, joinField.ForeignKey)}={models[i].Alias ?? modelLeft.FixDbName}.{joinField.FixDbName}";
+                            $" {AddDotFix(db, joinField.ForeignKey)}={mdLeft.Alias ?? tbLeft.FixDbName}.{joinField.FixDbName}";
                     }
                 }
                 else
                 {
                     return $"{join} {rightNames} on" +
-                        $" {AddDotFix(db, joinField.ForeignKey)}={models[idx].Alias ?? modelRight.FixDbName}.{joinField.FixDbName}";
+                        $" {AddDotFix(db, joinField.ForeignKey)}={mdRight.Alias ?? tbRight.FixDbName}.{joinField.FixDbName}";
                 }
             }
             throw new ArgumentException($"找不到模型{modelRightName}中的{nameof(FieldMeta.ForeignKey)}定义。");
@@ -460,6 +476,7 @@ namespace DataGate.App.DataService
             return String.Join(".", dotName.Split('.').Select(n => db.AddFix(n)));
         }
 
+        string NQ = $"{Environment.NewLine},";
         //构造select后面的字段列表
         private string BuildQueryFields(DataGateKey gkey)
         {
@@ -483,7 +500,7 @@ namespace DataGate.App.DataService
             if (gkey.TableJoins.Count > 1)
             {
                 //拼接需要联查的子表中的字段
-                var otherTableFields = mainTable.Fields.Where(f => !f.ArrayItemType.IsEmpty());
+                var otherTableFields = mainTable.Fields.Where(f => f.ArrayItemType.IsNotEmpty());
                 foreach (var other in otherTableFields)
                 {
                     if (other.ForeignKey.IsEmpty())
@@ -497,7 +514,7 @@ namespace DataGate.App.DataService
                     if (aliases.Length > 1) alias = aliases[0];
 
                     var tableMeta = _tableMetas[other.ArrayItemType];
-                    var otherFields = String.Join(",", tableMeta.Fields.Select(f =>
+                    var otherFields = String.Join(NQ, tableMeta.Fields.Select(f =>
                     {
                         if (f.IsArray)
                         {
@@ -528,7 +545,7 @@ namespace DataGate.App.DataService
 
             }
 #endif
-            var mainFields = string.Join(",", mainTable.Fields.Select(f =>
+            var mainFields = string.Join(NQ, mainTable.Fields.Select(f =>
             {
                 if (f.IsArray)
                 {
@@ -560,7 +577,7 @@ namespace DataGate.App.DataService
                 }
             }).Where(f => !f.IsEmpty()));
             allFields.Insert(0, mainFields);
-            return String.Join(",", allFields);
+            return String.Join(NQ, allFields);
         }
 
         private string FormatQueryFields(DataGateKey gkey)

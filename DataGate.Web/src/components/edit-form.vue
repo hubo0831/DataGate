@@ -89,6 +89,7 @@
             @change="handleChange(item)"
             :placeholder="getPlaceholder(item)"
             v-bind="item.attr"
+            style="width:100%"
           >
             <el-option
               v-for="sel in item.options"
@@ -107,6 +108,7 @@
             :value-key="item.valuekey"
             @change="handleChange(item)"
             :placeholder="getPlaceholder(item)"
+            style="width:100%"
             v-bind="item.attr"
           >
             <el-option

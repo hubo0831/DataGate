@@ -45,6 +45,7 @@
                 v-if="meta.uitype=='Custom'"
                 :meta="meta"
                 :obj="scope.row"
+                :value="scope.row[meta.name]"
               >
                 <!-- 自定义显示状态的数据列内容 -->
                 {{scope.row[meta.name]}}

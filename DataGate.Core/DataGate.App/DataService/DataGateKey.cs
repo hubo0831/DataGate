@@ -134,6 +134,11 @@ namespace DataGate.App.DataService
         public string Alias { get; set; }
 
         public string Name { get; set; }
+
+        public override string ToString()
+        {
+            return $"Table={Table.Name} Flag={JoinFlag} Alias={Alias}";
+        }
     }
 
 

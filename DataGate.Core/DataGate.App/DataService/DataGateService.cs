@@ -871,7 +871,7 @@ namespace DataGate.App.DataService
         /// <returns></returns>
         private string GetSortField(string f, DataGateKey gkey)
         {
-            string[] qfs = gkey.QueryFieldsTerm.Split(',');
+            string[] qfs = gkey.QueryFieldsTerm.Split(',').Select(fs=>fs.Trim()).ToArray();
             var ff = gkey.GetField(f)?.FixDbName;
             for (var i = 0; i < qfs.Length; i++)
             {
@@ -911,7 +911,7 @@ namespace DataGate.App.DataService
         {
             if (gkey.TableJoins?.Count > 1)
             {
-                return await GetMasterDetaiArrayAsync(gkey, parameters);
+                return await GetMasterDetailArrayAsync(gkey, parameters);
             }
             var tableMeta = GetMainTable(gkey);
             if (gkey.Sql.IsEmpty())
@@ -926,7 +926,7 @@ namespace DataGate.App.DataService
             return dt;
         }
 
-        private async Task<JArray> GetMasterDetaiArrayAsync(DataGateKey gkey, IDictionary<string, object> parameters)
+        private async Task<JArray> GetMasterDetailArrayAsync(DataGateKey gkey, IDictionary<string, object> parameters)
         {
             var tableMeta = gkey.TableJoins[0].Table;
             if (gkey.Sql.IsEmpty())

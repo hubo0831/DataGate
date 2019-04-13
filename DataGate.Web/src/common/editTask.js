@@ -15,21 +15,25 @@ export default function editTask() {
 
   //清除元数据以外的数据
   //此方法运用不当可能会造成页面闪动
-  this.clearData = (paged) => {
+  this.clearData = paged => {
     this.products = []; //当前的主表
     this.addedProducts = []; //新增的记录
     this.changedProducts = []; //修改过的记录
     this.removedProducts = []; //已删除的记录
-    this.changed = 0;   
+    this.changed = 0;
     this.total = 0;
-     this.selection = []; //勾选中的成果列表，应该是products的子集
+    this.selection = []; //勾选中的成果列表，应该是products的子集
     this.editBuffer = {}; //根据selection合并后组成的单个成果，用以绑定form表单的值
+    
+    for (var i in this.details) {
+      this.details[i].clearData();
+    }
 
     //如果是分页查询，则设置排序为custom
     if (paged) {
       this.metadata.forEach(meta => meta.column.sortable && (meta.column.sortable = "custom"));
     }
-  }
+  };
 
   this.clearData();
 

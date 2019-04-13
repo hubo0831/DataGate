@@ -301,6 +301,16 @@ namespace DataGate.Com
         }
 
         /// <summary>
+        /// 判断一个列表不为null并且有数据
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public static bool IsNotEmpty<T>(this IEnumerable<T> s)
+        {
+            return s != null && s.Count() > 0;
+        }
+
+        /// <summary>
         /// 遍历执行某个方法
         /// </summary>
         /// <param name="list">传入的枚举</param>
