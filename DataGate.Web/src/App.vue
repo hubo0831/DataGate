@@ -161,7 +161,6 @@ export default {
       this.mainMenu = menuTree;
       var home = this.userPages.find(m => m.url == "/");
       this.selfMenu = this.userPages.filter(m => m.parentId == home.id);
-      this.restoreMenu();
       this.user = user;
       this.logined = true;
     };
@@ -200,6 +199,7 @@ export default {
           url: to.fullPath
         });
       } else this.breadCrumbMenu = [];
+      this.$nextTick(this.restoreMenu);
     });
 
     bus.$on("update-title", this.updateTitle);
