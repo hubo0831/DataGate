@@ -1,5 +1,5 @@
 @import "main.scss";
-$side-menu-height: 46px;
+$side-width: 42px;
 
 body {
   padding: 0px;
@@ -85,7 +85,7 @@ a {
   }
 
   aside {
-    min-width: $side-menu-height;
+    min-width: $side-width;
     background: $side-bgcolor;
 
     &::-webkit-scrollbar {
@@ -109,7 +109,7 @@ a {
     }
 
     .el-submenu .el-menu-item {
-      min-width: $side-menu-height;
+      min-width: $side-width;
     }
 
     .el-menu {
@@ -117,7 +117,7 @@ a {
     }
 
     .el-menu--collapse {
-      width: $side-menu-height;
+      width: $side-width;
     }
   }
 

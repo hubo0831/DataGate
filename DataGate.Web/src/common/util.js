@@ -400,8 +400,6 @@ export default {
   //构造一个语法糖以方便地使用Promise
   //例：
   /*
-  import {deferred} from '@/biz'
-  
   function test() {
     let dfd = deferred();
     var a = new Date().getSeconds();
