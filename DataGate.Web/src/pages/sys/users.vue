@@ -4,7 +4,7 @@
     <el-col :span="24">
       <div class="dg-toolbar">
         <el-button-group>
-          <el-button type="primary" icon="fa fa-file-text-o" v-on:click="doCmd('doAdd')">新增</el-button>
+          <el-button type="primary" icon="fa fa-user-plus" v-on:click="doCmd('doAdd')">新增</el-button>
           <el-button type="primary" icon="fa fa-edit" v-on:click="doCmd('doEdit')">修改</el-button>
           <!-- <el-button type="primary" icon="fa fa-edit" v-on:click='disable()'>禁用</el-button> -->
           <el-button type="primary" icon="fa fa-trash-o" v-on:click="doCmd('doDel')">删除</el-button>
@@ -59,7 +59,7 @@ export default {
         this.allRoles = roles[0];
         this.task.setMetadata(meta[0]);
         this.searchMeta = this.task.reDefineMetadata(
-          "account,name,email,roleName"
+          "account,name,tel,roleName"
         );
         var rolemeta = this.task.getMeta("roles");
         rolemeta.options = this.allRoles.map(r => ({

@@ -161,6 +161,7 @@ export default {
       this.mainMenu = menuTree;
       var home = this.userPages.find(m => m.url == "/");
       this.selfMenu = this.userPages.filter(m => m.parentId == home.id);
+      this.restoreMenu();
       this.user = user;
       this.logined = true;
     };
@@ -285,9 +286,11 @@ export default {
           }
         }
       }
+      if(this.mainMenu.length){
       //找不到时，定位到第一个选项卡
       this.defaultMainIndex = this.mainMenu[0].id;
       this.currentMenu = this.mainMenu[0];
+      }
     },
     handleMainMenu(index) {
       var main = this.mainMenu.find(m => m.id == index);
@@ -343,7 +346,7 @@ export default {
     },
     logout() {
       this.mainMenu = [];
-      this.currentMenu = {};
+      this.currentMenu = {children:[]};
       UserAPI.logout();
     },
     pop() {
