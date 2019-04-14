@@ -199,7 +199,9 @@ export default {
           url: to.fullPath
         });
       } else this.breadCrumbMenu = [];
-      this.$nextTick(this.restoreMenu);
+      this.$nextTick(() => {
+        this.restoreMenu();
+      });
     });
 
     bus.$on("update-title", this.updateTitle);
@@ -297,7 +299,9 @@ export default {
     handleSelect(index) {
       this.defaultChildIndex = index;
       var subMenu = this.userPages.find(m => m.id == index);
-      if (subMenu && subMenu.url) this.$router.push(subMenu.url);
+      if (subMenu && subMenu.url) {
+        this.$router.push(subMenu.url);
+      }
     },
     //折叠导航栏
     collapse() {

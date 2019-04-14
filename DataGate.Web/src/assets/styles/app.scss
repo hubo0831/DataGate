@@ -1,4 +1,5 @@
 @import "main.scss";
+$side-menu-height: 46px;
 
 body {
   padding: 0px;
@@ -8,6 +9,7 @@ body {
 a {
   text-decoration: none;
 }
+
 .container {
   position: absolute;
   top: 0px;
@@ -83,7 +85,7 @@ a {
   }
 
   aside {
-    min-width: 50px;
+    min-width: $side-menu-height;
     background: $side-bgcolor;
 
     &::-webkit-scrollbar {
@@ -95,7 +97,7 @@ a {
       overflow-y: auto;
     }
 
-    .el-menu{
+    .el-menu {
       height: 100%;
       /*写给不支持calc()的浏览器*/
       height: -moz-calc(100% - 80px);
@@ -107,7 +109,7 @@ a {
     }
 
     .el-submenu .el-menu-item {
-      min-width: 50px;
+      min-width: $side-menu-height;
     }
 
     .el-menu {
@@ -115,7 +117,7 @@ a {
     }
 
     .el-menu--collapse {
-      width: 50px;
+      width: $side-menu-height;
     }
   }
 
@@ -125,7 +127,7 @@ a {
     color: white;
     height: 26px;
     line-height: 30px;
-    cursor:pointer;
+    cursor: pointer;
   }
 
   .content-container {
