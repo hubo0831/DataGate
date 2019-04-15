@@ -31,7 +31,9 @@
             :obj="task.editBuffer"
             v-bind="item.attr"
           >
+            <span v-if="readonly || item.readonly">{{task.editBuffer[item.name]}}</span>
             <el-input
+              v-else
               v-model="task.editBuffer[item.name]"
               @change="handleChange(item)"
               clearable
