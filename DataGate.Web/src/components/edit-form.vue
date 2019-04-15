@@ -72,7 +72,6 @@
           <el-input
             v-else-if="item.uitype=='TextArea'"
             type="textarea"
-            :rows="3"
             clearable
             v-model="task.editBuffer[item.name]"
             @change="handleChange(item)"
