@@ -130,7 +130,7 @@ export default function editTask() {
           validator: validateRequired,
           required: true,
           message: '请输入' + meta.title,
-          trigger: 'blur'
+          trigger: 'change'
         }
         rules[meta.name].push(requiredRule);
       }
@@ -140,7 +140,7 @@ export default function editTask() {
           validator: validateNumber,
           min: meta.attr.min,
           max: meta.attr.max,
-          trigger: 'blur'
+          trigger: 'change'
         }
         rules[meta.name].push(minMaxRule);
       }
@@ -149,7 +149,7 @@ export default function editTask() {
         var patternRule = {
           validator: validateReg,
           pattern: meta.attr.pattern,
-          trigger: 'blur'
+          trigger: 'change'
         };
         rules[meta.name].push(patternRule);
       }
