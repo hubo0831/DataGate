@@ -11,7 +11,6 @@
       :readonly="readonly"
       :disabled="disabled || task.selection.length==0"
       :rules="task.rules"
-      status-icon
       inline-message
     >
       <el-col v-bind="item.col" v-for="item in metadataFilter" :key="item.name">
