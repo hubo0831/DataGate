@@ -1,6 +1,7 @@
 ﻿using DataGate.Com;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
@@ -211,7 +212,7 @@ namespace DataGate.Com.DB
         /// </summary>
         public INameConverter DbNameConverter { get; set; }
 
-        Dictionary<string, string> _propFieldDict = new Dictionary<string, string>();
+        ConcurrentDictionary<string, string> _propFieldDict = new ConcurrentDictionary<string, string>();
 
         /// <summary>
         /// 手动建立对象的属性名和数据库中名称之间的对应关系
