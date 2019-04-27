@@ -333,7 +333,7 @@ namespace DataGate.App.DataService
 
         private async Task<int> DeleteOneAsync(DataGateKey gkey, JToken jToken)
         {
-            var tableMeta = GetMainTable(gkey);
+            var tableMeta = gkey.MainTable;
             IDictionary<string, object> psin = jToken.ToDictionary();
             var fields = tableMeta.PrimaryKeys.Select(pk => pk.Name)
                 .Intersect(psin.Select(kv => kv.Key),
@@ -357,12 +357,6 @@ namespace DataGate.App.DataService
             }
             gkey.DataGate.OnRemoved(gkey, psin);
             return r;
-        }
-
-        private TableMeta GetMainTable(DataGateKey gkey)
-        {
-            if (gkey.TableJoins.IsEmpty()) return null;
-            return gkey.TableJoins[0].Table;
         }
 
         //在新增记录时，对于单一主键的记录，检查主键字段是否自增或是guid,是否值为空,
@@ -413,7 +407,7 @@ namespace DataGate.App.DataService
         /// <returns></returns>
         private async Task<string> InsertOneAsync(DataGateKey gkey, JToken jToken)
         {
-            var tableMeta = GetMainTable(gkey);
+            var tableMeta = gkey.MainTable;
             IDictionary<string, object> psin = jToken.ToDictionary();
             CheckPrimaryKey(tableMeta, psin, out string id, out string getMaxIdSql);
             gkey.DataGate.OnAdd(gkey, psin);
@@ -482,7 +476,7 @@ namespace DataGate.App.DataService
         //在v.0.2.1以后，有可能更新多条，可以带Filter条件更新多条
         private async Task<int> UpdateAsync(DataGateKey gkey, JToken jToken)
         {
-            var tableMeta = GetMainTable(gkey);
+            var tableMeta = gkey.MainTable;
             IDictionary<string, object> psin = jToken.ToDictionary();
             gkey.DataGate.OnChange(gkey, psin);
             List<string> fields = tableMeta.Fields.Where(f => !f.IsArray && f.ForeignField.IsEmpty())
@@ -610,7 +604,7 @@ namespace DataGate.App.DataService
             {
                 return await GetMasterDetailPageAsync(gkey, parameters);
             }
-            var tableMeta = GetMainTable(gkey);
+            var tableMeta = gkey.MainTable;
             CreateFilterStr(gkey, tableMeta, parameters);
             CreateOrderStr(gkey, tableMeta, parameters);
             var ps = DB.GetParameter(parameters);
@@ -871,7 +865,7 @@ namespace DataGate.App.DataService
         /// <returns></returns>
         private string GetSortField(string f, DataGateKey gkey)
         {
-            string[] qfs = gkey.QueryFieldsTerm.Split(',').Select(fs=>fs.Trim()).ToArray();
+            string[] qfs = gkey.QueryFieldsTerm.Split(',').Select(fs => fs.Trim()).ToArray();
             var ff = gkey.GetField(f)?.FixDbName;
             for (var i = 0; i < qfs.Length; i++)
             {
@@ -913,12 +907,9 @@ namespace DataGate.App.DataService
             {
                 return await GetMasterDetailArrayAsync(gkey, parameters);
             }
-            var tableMeta = GetMainTable(gkey);
-            if (gkey.Sql.IsEmpty())
-            {
-                CreateFilterStr(gkey, tableMeta, parameters);
-                CreateOrderStr(gkey, tableMeta, parameters);
-            }
+            var tableMeta = gkey.MainTable;
+            CreateFilterStr(gkey, tableMeta, parameters);
+            CreateOrderStr(gkey, tableMeta, parameters);
             var ps = DB.GetParameter(parameters);
             string sql = BuildSql(gkey);
             var dt = await DB.ExecDataTableAsync(sql, ps.ToArray());
@@ -929,11 +920,8 @@ namespace DataGate.App.DataService
         private async Task<JArray> GetMasterDetailArrayAsync(DataGateKey gkey, IDictionary<string, object> parameters)
         {
             var tableMeta = gkey.TableJoins[0].Table;
-            if (gkey.Sql.IsEmpty())
-            {
-                CreateFilterStr(gkey, tableMeta, parameters);
-                CreateOrderStr(gkey, tableMeta, parameters);
-            }
+            CreateFilterStr(gkey, tableMeta, parameters);
+            CreateOrderStr(gkey, tableMeta, parameters);
             var ps = DB.GetParameter(parameters);
             string sql = BuildMasterDetailSql(gkey);
 
@@ -946,10 +934,7 @@ namespace DataGate.App.DataService
         private string BuildMasterDetailSql(DataGateKey gkey)
         {
             if (!gkey.Sql.IsEmpty()) return gkey.Sql;
-            var tableMetas = gkey.TableJoins.Select(m =>
-            {
-                return m.Table;
-            });
+            var tableMetas = gkey.TableJoins.Select(m => m.Table);
             string orderBy = FormatOrderBy(gkey);
             if (!orderBy.IsEmpty())
             {
@@ -957,61 +942,42 @@ namespace DataGate.App.DataService
             }
             string filter = FormatFilter(gkey.Filter, tableMetas.ToArray());
             if (!filter.IsEmpty()) filter = " where " + filter;
-            return $"select {gkey.QueryFieldsTerm} from {gkey.JoinSubTerm}{filter}{orderBy}";
+            string sql = $"{filter}{orderBy}";
+            if (gkey.Sql.IsEmpty())
+            {
+                return $"select {gkey.QueryFieldsTerm} from {gkey.JoinSubTerm}{sql}";
+            }
+            else if (sql.IsEmpty())
+            {
+                return gkey.Sql;
+            }
+            else
+            {
+                return $"select * from ({gkey.Sql})c {sql}";
+            }
         }
 
         //单表的分页
         private IPager BuildPager(DataGateKey gkey, IDictionary<string, object> parameters)
         {
-            if (!gkey.Sql.IsEmpty())
-            {
-                return BuildSqlPager(gkey, parameters);
-            }
-            var mainModel = GetMainTable(gkey);
-            string filter = FormatFilter(gkey.Filter, mainModel);
+            var tableMeta = gkey.MainTable;
+            string filter = FormatFilter(gkey.Filter, tableMeta);
             if (!filter.IsEmpty())
             {
                 filter = " where " + filter;
             }
 
-            string sql = $"select {gkey.QueryFieldsTerm} from {mainModel.FixDbName}{filter}";
-
-            int pageSize = CommOp.ToInt(GetValueRemoveKey(parameters, "pageSize"));
-            if (pageSize <= 0) pageSize = Consts.DefaultPageSize;
-            DBPagerInfo pager = new DBPagerInfo
+            string sql = gkey.Sql;
+            if (sql.IsEmpty())
             {
-                Query = sql,
-                KeyId = $"{gkey.TableJoins[0].Alias ?? mainModel.FixDbName}.{mainModel.PrimaryKey.FixDbName}",
-                PageIndex = Math.Max(1, CommOp.ToInt(GetValueRemoveKey(parameters, "pageIndex"))) - 1,
-                PageSize = pageSize,
-                OrderBy = gkey.OrderBy,
-            };
-            return pager;
-        }
-
-        /// <summary>
-        /// 如果有Sql语句，直接根据Sql生成分页
-        /// </summary>
-        /// <param name="gkey"></param>
-        /// <param name="parameters"></param>
-        /// <returns></returns>
-        private IPager BuildSqlPager(DataGateKey gkey, IDictionary<string, object> parameters)
-        {
-            var mainModel = GetMainTable(gkey);
-            string filter = FormatFilter(gkey.Filter, mainModel);
-            if (!filter.IsEmpty())
-            {
-                filter = " where " + filter;
+                sql = $"select {gkey.QueryFieldsTerm} from {tableMeta.FixDbName}{filter}";
             }
-
-            string sql = $"{gkey.Sql}{filter}";
-
             int pageSize = CommOp.ToInt(GetValueRemoveKey(parameters, "pageSize"));
             if (pageSize <= 0) pageSize = Consts.DefaultPageSize;
             DBPagerInfo pager = new DBPagerInfo
             {
                 Query = sql,
-                KeyId = mainModel.PrimaryKey.FixDbName,
+                KeyId = $"{gkey.TableJoins[0].Alias ?? tableMeta.FixDbName}.{tableMeta.PrimaryKey.FixDbName}",
                 PageIndex = Math.Max(1, CommOp.ToInt(GetValueRemoveKey(parameters, "pageIndex"))) - 1,
                 PageSize = pageSize,
                 OrderBy = gkey.OrderBy,
@@ -1045,10 +1011,11 @@ namespace DataGate.App.DataService
         //单表不分页sql
         private string BuildSql(DataGateKey gkey)
         {
-            if (!gkey.Sql.IsEmpty()) return gkey.Sql;
-
-            var tableMeta = GetMainTable(gkey);
-
+            var tableMeta =gkey.MainTable;
+            if (tableMeta == null)
+            {
+                return gkey.Sql;
+            }
             string filter = FormatFilter(gkey.Filter, tableMeta);
             if (!filter.IsEmpty())
             {
@@ -1059,8 +1026,18 @@ namespace DataGate.App.DataService
             {
                 orderby = " order by " + orderby;
             }
-            string sql = $"select {gkey.QueryFieldsTerm} from {tableMeta.FixDbName}{filter}{orderby}";
-            return sql;
+            string sql = $"{filter }{ orderby}";
+            if (gkey.Sql.IsEmpty())
+            {
+                return $"select {gkey.QueryFieldsTerm} from {tableMeta.FixDbName}{sql}";
+            }
+            else if (sql.IsEmpty())
+            {
+                return gkey.Sql;
+            }
+            {
+                return $"SELECT * FROM ({gkey.Sql}) {tableMeta.DbName} {sql}";
+            }
         }
 
         //单表不分页查询，将orderby子句中的属性名替换成数据库字段限定名
