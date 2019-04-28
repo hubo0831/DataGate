@@ -25,7 +25,8 @@
         <el-col :span="12">
           <div class="card">
             <div class="card-header">
-              <i class="fa fa-check-square-o" aria-hidden="true"></i> 功能列表 - {{current? current.name :'请先选择一个角色'}}
+              <i class="fa fa-check-square-o" aria-hidden="true"></i>
+              功能列表 - {{current? current.name :'请先选择一个角色'}}
             </div>
             <div class="card-content dg-fit dg-scr" id="menuDiv">
               <el-tree
@@ -52,7 +53,8 @@ export default {
   mixins: [taskmixin],
   data: function() {
     return {
-      menus: [],
+      menus: [], //树形结构的菜单全集
+      plainMenus:[], //平面结构的菜单全集
       defaultProps: {
         children: "children",
         label: "name"
@@ -65,6 +67,7 @@ export default {
     $.when(API.META("getallrolemenus"), API.QUERY("GetAuthMenus")).done(
       (meta, menus) => {
         this.task.setMetadata(meta[0]);
+        this.plainMenus = menus[0];
         this.menus = util.buildNestData(menus[0]);
       }
     );
@@ -96,7 +99,18 @@ export default {
     doCurrentChange(item) {
       this.setRoleMenus();
       this.current = item;
-      if (item) this.$refs.tree.setCheckedKeys(item.menus.map(m => m.menuId));
+
+      if (!item) return;
+
+      //自动勾选所有角色有的菜单
+      var checkedMenuIds = item.menus.map(m => m.menuId);
+      this.$refs.tree.setCheckedKeys(checkedMenuIds);
+
+      //由于存在级联勾选，所以再自动去掉角色没有权限的勾选
+      var unchkedMenuIds = this.plainMenus
+        .map(m => m.id)
+        .filter(id => !checkedMenuIds.includes(id));
+      unchkedMenuIds.forEach(id => this.$refs.tree.setChecked(id, false));
     },
     doSave() {
       this.$refs.dataGrid.submitRow().then(() => {
