@@ -151,6 +151,12 @@ namespace DataGate.Api
 
                 routes.MapRoute(name: "default", template: "{controller=Home}/{action=Index}/{id?}");
             }).UseStaticFiles(); //访问wwwroot下的静态文件
+                                 //默认文件设置为index.html
+            var defaultFilesOptions = new DefaultFilesOptions();
+            defaultFilesOptions.DefaultFileNames.Clear();
+            defaultFilesOptions.DefaultFileNames.Add("index.html");
+            app.UseDefaultFiles(defaultFilesOptions);
+            app.UseCookiePolicy();
         }
 
         /// <summary>
