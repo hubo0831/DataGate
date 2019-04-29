@@ -84,7 +84,11 @@ namespace DataGate.App
         /// <returns></returns>
         private bool TestExpired(string token)
         {
-            if (_sessionDict[token].LastOpTime < DateTime.Now.AddMinutes(-Expires))
+            if (!_sessionDict.TryGetValue(token, out UserSession session))
+            {
+                return false;
+            }
+            if (session.LastOpTime < DateTime.Now.AddMinutes(-Expires))
             {
                 _sessionDict.TryRemove(token, out UserSession removed);
                 return true;
