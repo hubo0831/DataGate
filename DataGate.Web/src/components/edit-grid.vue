@@ -2,11 +2,11 @@
 <template>
   <div @keyup.enter="submitRow()" @keyup.escape="cancelEdit()">
     <el-form
-      :inline="true"
       :model="task.editBuffer"
       ref="gridForm"
       :rules="task.rules"
-      status-icon
+     size="mini"
+     status-icon
       :show-message="false"
     >
       <el-table
@@ -71,7 +71,7 @@
               v-else-if="meta.uitype=='Custom'"
             >{{scope.row[meta.name]}}</slot>
             <!-- 常规编辑 -->
-            <el-form-item v-else :prop="meta.name">
+            <el-form-item v-else :prop="meta.name" style="width:100%">
               <edit-item :obj="task.editBuffer" :meta="meta"></edit-item>
             </el-form-item>
           </template>
@@ -486,4 +486,5 @@ export default {
   width: 400px;
   display: block;
 }
+
 </style>
