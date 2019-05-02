@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>$id$</id>
-    <version>0.1.7</version>
+    <version>0.2.0</version>
     <title>$title$</title>
     <authors>$authors$</authors>
     <owners>$author$</owners>
@@ -28,9 +28,9 @@
       <dependency id="Microsoft.AspNetCore.TestHost" version="2.1.1" />
       <dependency id="Microsoft.NET.Test.Sdk" version="15.8.0" />
       <dependency id="xunit.runner.visualstudio" version="2.3.1" />
-      <dependency id="DataGate.Com" version="0.1.7" />
-      <dependency id="DataGate.App" version="0.1.7" />
-      <dependency id="DataGate.Api" version="0.1.7" />
+      <dependency id="DataGate.Com" version="0.2.0" />
+      <dependency id="DataGate.App" version="0.2.0" />
+      <dependency id="DataGate.Api" version="0.2.0" />
     </dependencies> 
   </metadata>
 </package>

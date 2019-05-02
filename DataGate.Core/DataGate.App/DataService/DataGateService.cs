@@ -479,7 +479,7 @@ namespace DataGate.App.DataService
             return r;
         }
 
-        //在v.0.1.7以后，有可能更新多条，可以带Filter条件更新多条
+        //在v.0.2.0以后，有可能更新多条，可以带Filter条件更新多条
         private async Task<int> UpdateAsync(DataGateKey gkey, JToken jToken)
         {
             var tableMeta = gkey.MainTable;
