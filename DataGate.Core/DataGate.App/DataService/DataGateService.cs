@@ -194,6 +194,42 @@ namespace DataGate.App.DataService
             return await NonQueryAsync(key, CommOp.ToStrObjDict(param));
         }
 
+        private async Task RecurDelete(DataGateKey gkey, DataSubmitRequest request)
+        {
+            //先删子表
+            foreach (var detail in request.Details)
+            {
+                var dkey = GetDataGate(detail.Key);
+                await RecurDelete(dkey, detail);
+            }
+
+            if (!request.Removed.IsEmpty())
+            {
+                await DeleteManyAsync(gkey, request.Removed);
+            }
+        }
+
+        private async Task<IEnumerable<string>> RecurUpdate(DataGateKey gkey, DataSubmitRequest request)
+        {
+            IEnumerable<string> ids = new string[0];
+            if (!request.Added.IsEmpty())
+            {
+                ids = await InsertManyAsync(gkey, request.Added);
+            }
+            if (!request.Changed.IsEmpty())
+            {
+                await UpdateManyAsync(gkey, request.Changed);
+            }
+
+            //后插子表
+            foreach (var detail in request.Details)
+            {
+                var dkey = GetDataGate(detail.Key);
+                await RecurUpdate(dkey, detail);
+            }
+            return ids;
+        }
+
         /// <summary>
         /// 批量执行增删改操作,是此系统的核心方法
         /// </summary>
@@ -210,57 +246,27 @@ namespace DataGate.App.DataService
                 return gkey.Data.Select(jk => jk.ToString());
             }
 
-            IEnumerable<string> ids = new string[0];
             bool isStartCall = !DB.InTrans;
 
             if (isStartCall) DB.BeginTrans();
 
             try
             {
-                //先删子表
-                foreach (var detail in request.Details)
-                {
-                    var dkey = GetDataGate(detail.Key);
-                    if (!detail.Removed.IsEmpty())
-                    {
-                        await DeleteManyAsync(dkey, detail.Removed);
-                    }
-                }
+                //先递归删除， 先删子表
+                await RecurDelete(gkey, request);
 
-                if (!request.Added.IsEmpty())
-                {
-                    ids = await InsertManyAsync(gkey, request.Added);
-                }
-                if (!request.Changed.IsEmpty())
-                {
-                    await UpdateManyAsync(gkey, request.Changed);
-                }
-                if (!request.Removed.IsEmpty())
-                {
-                    await DeleteManyAsync(gkey, request.Removed);
-                }
-
-                //后插子表
-                foreach (var detail in request.Details)
-                {
-                    var dkey = GetDataGate(detail.Key);
-                    if (!detail.Added.IsEmpty())
-                    {
-                        await InsertManyAsync(dkey, detail.Added);
-                    }
-                    if (!detail.Changed.IsEmpty())
-                    {
-                        await UpdateManyAsync(dkey, detail.Changed);
-                    }
-                }
+                //再递归增改， 先增改主表
+                return await RecurUpdate(gkey, request);
             }
-            catch (DbException)
+            catch (Exception)
             {
                 DB.RollbackTrans();
                 throw;
             }
-            if (isStartCall) DB.EndTrans();
-            return ids;
+            finally
+            {
+                if (isStartCall && DB.InTrans) DB.EndTrans();
+            }
         }
 
         /// <summary>
@@ -473,7 +479,7 @@ namespace DataGate.App.DataService
             return r;
         }
 
-        //在v.0.2.1以后，有可能更新多条，可以带Filter条件更新多条
+        //在v.0.1.7以后，有可能更新多条，可以带Filter条件更新多条
         private async Task<int> UpdateAsync(DataGateKey gkey, JToken jToken)
         {
             var tableMeta = gkey.MainTable;
@@ -650,6 +656,7 @@ namespace DataGate.App.DataService
             }
         }
 
+        int _deep = 0;
         /// <summary>
         /// 在结果集中对主表数据去重，并获取子表明细数据放到主表指定字段值中
         /// </summary>
@@ -658,43 +665,59 @@ namespace DataGate.App.DataService
         /// <returns></returns>
         private JArray CreateMasterArray(TableMeta tableMeta, DataTable dt)
         {
-            var pkey = tableMeta.PrimaryKey;
+            var pkeys = tableMeta.PrimaryKeys;
             JArray newDt = new JArray();
 
-            var ids = dt.Rows.Cast<DataRow>().Select(dr => dr[pkey.DbName]).Distinct();
+            var getPKeyValues = new Func<DataRow, string>(dr =>
+            {
+                var keyValues = pkeys.Select(pkey =>
+                {
+                    return dr[pkey.DbName].ToString();
+                });
+                return String.Join("^", keyValues);
+            });
+
+            //查询主表中不重复的主键字段值
+            var ids = dt.Rows.Cast<DataRow>().Select(dr => getPKeyValues(dr)).Distinct();
+
+            //遍历DataTable结果集， 找到相同的主键DataRow，并组装子表所在子集合
             ids.Each(id =>
             {
-                var drs = dt.Rows.Cast<DataRow>().Where(dr => dr[pkey.DbName].Equals(id));
-                var firstDr = drs.First();
+                var drs = dt.Rows.Cast<DataRow>().Where(dr => getPKeyValues(dr).Equals(id));
                 var newRow = new JObject();
-                tableMeta.Fields.Each(col =>
+
+                //遍历主表的每个字段，找出各类字段定义
+                tableMeta.Fields.Each(fm =>
                 {
-                    if (col.IsArray)
+                    if (fm.IsArray)
                     {
-                        newRow[col.Name] = GetChildItems(col, drs);
+                        _deep = 0;
+                        newRow[fm.Name] = GetChildItems(fm, drs);
                         return;
                     }
-                    else if (col.UIType == Consts.OperatorUIType)
-                    {
-                        return;
-                    }
-                    if (col.ForeignField.IsEmpty() && !dt.Columns.Contains(col.DbName))
+                    else if (fm.UIType == Consts.OperatorUIType)
                     {
                         return;
                     }
-                    if (!col.ForeignField.IsEmpty() && !dt.Columns.Contains(col.Name))
+                    if (fm.ForeignField.IsEmpty() && !dt.Columns.Contains(fm.DbName))
                     {
                         return;
                     }
+                    if (!fm.ForeignField.IsEmpty() && !dt.Columns.Contains(fm.Name))
+                    {
+                        return;
+                    }
+
+                    var firstDr = drs.First();
                     //在定义了外表字段时，表查询中是用别名表示外表字段名，所以这里应该分开处理
-                    if (!col.ForeignField.IsEmpty())
+                    if (!fm.ForeignField.IsEmpty())
                     {
-                        if (dt.Columns.Contains(col.Name))
-                            newRow[col.Name] = new JValue(firstDr[col.Name]);
+                        if (dt.Columns.Contains(fm.Name))
+                            newRow[fm.Name] = new JValue(firstDr[fm.Name]);
                     }
                     else
                     {
-                        newRow[col.Name] = new JValue(firstDr[col.DbName]);
+                        newRow[fm.Name] = new JValue(firstDr[fm.DbName]);
                     }
                 });
                 newDt.Add(newRow);
@@ -703,40 +726,81 @@ namespace DataGate.App.DataService
         }
 
         /// <summary>
-        /// 获取表连接时子表的明细数据
+        /// 获取表连接时子表的明细数据，递归执行
         /// </summary>
         /// <param name="col"></param>
-        /// <param name="drs"></param>
+        /// <param name="drList"></param>
         /// <returns></returns>
-        private JArray GetChildItems(FieldMeta col, IEnumerable<DataRow> drs)
+        private JArray GetChildItems(FieldMeta col, IEnumerable<DataRow> drList)
         {
-            var childModel = _ms.GetTableMeta(col.ArrayItemType);
             JArray childDt = new JArray();
+            if (++_deep > 8) return childDt; //防止递归层次过多
+            if (drList.IsEmpty()) return childDt;
+
+            var dt = drList.First().Table;
+            var childTable = _ms.GetTableMeta(col.ArrayItemType);
+            var pkeys = childTable.PrimaryKeys;
 
             //找到ForeignKey定义中的别名
             string alias = null;
             var aliases = col.ForeignKey.Split('.');
             if (aliases.Length > 1) alias = aliases[0];
 
-            foreach (var dr in drs)
+            //当从表的主键字段在数据集中找不到时，说明没有联接此从表
+            if (pkeys.Any(pkey =>
+                {
+                    var pkeyAlias = $"{alias ?? childTable.Name}_{pkey.Name}";
+                    return !dt.Columns.Contains(pkeyAlias);
+                }))
             {
-                var newDr = new JObject();
-                bool hasValue = false;
-                foreach (FieldMeta fm in childModel.Fields)
-                {
-                    var bm = $"{alias ?? childModel.Name}_{fm.Name}";
-                    if (dr[bm] != DBNull.Value)
-                    {
-                        hasValue = true;
-                    }
-                    newDr[fm.Name] = new JValue(dr[bm]);
-                }
-                //忽略全部是空的行，这在左连接时经常发生
-                if (hasValue)
-                {
-                    childDt.Add(newDr);
-                }
+                return childDt;
             }
+
+            var getPKeyValues = new Func<DataRow, string>(dr =>
+            {
+                var keyValues = pkeys.Select(pkey =>
+                {
+                    var pkeyAlias = $"{alias ?? childTable.Name}_{pkey.Name}";
+                    return dr[pkeyAlias].ToString();
+                });
+                return String.Join("^", keyValues);
+            });
+
+            //查询主子表中不重复的主键字段值
+            var ids = drList
+                   .Select(dr => getPKeyValues(dr))
+             .Where(kv => kv.IsNotEmpty()).Distinct();
+
+            ids.Each(id =>
+            {
+                var drs = drList.Where(dr => getPKeyValues(dr).Equals(id));
+                var newRow = new JObject();
+
+                //遍历主表的每个字段，找出各类字段定义
+                childTable.Fields.Each(fm =>
+                {
+                    var bm = $"{alias ?? childTable.Name}_{fm.Name}";
+
+                    if (fm.IsArray)
+                    {
+                        newRow[fm.Name] = GetChildItems(fm, drs);
+                        return;
+                    }
+                    else if (fm.UIType == Consts.OperatorUIType)
+                    {
+                        return;
+                    }
+                    if (fm.ForeignField.IsEmpty() && !dt.Columns.Contains(bm))
+                    {
+                        return;
+                    }
+
+                    var firstDr = drs.First();
+                    newRow[fm.Name] = new JValue(firstDr[bm]);
+                });
+                childDt.Add(newRow);
+            });
+            _deep--;
             return childDt;
         }
 
@@ -933,7 +997,6 @@ namespace DataGate.App.DataService
         //构造不分页的主从表查询语句
         private string BuildMasterDetailSql(DataGateKey gkey)
         {
-            if (!gkey.Sql.IsEmpty()) return gkey.Sql;
             var tableMetas = gkey.TableJoins.Select(m => m.Table);
             string orderBy = FormatOrderBy(gkey);
             if (!orderBy.IsEmpty())
@@ -1011,7 +1074,7 @@ namespace DataGate.App.DataService
         //单表不分页sql
         private string BuildSql(DataGateKey gkey)
         {
-            var tableMeta =gkey.MainTable;
+            var tableMeta = gkey.MainTable;
             if (tableMeta == null)
             {
                 return gkey.Sql;

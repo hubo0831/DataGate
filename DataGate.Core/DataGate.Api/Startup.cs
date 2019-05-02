@@ -145,6 +145,11 @@ namespace DataGate.Api
                  template: "api/dg/d/{id}/{filename?}",
                  defaults: new { controller = "Files", action = "DownById" });
 
+                //同时返回元数据和数据的查询路由 v0.1.7+
+                routes.MapRoute(name: "datagate-metaquery",
+                    template: "api/dg/q/{key}",
+                    defaults: new { controller = "DataGate", action = "MetaQuery" });
+
                 //通用的数据查询路由
                 routes.MapRoute(name: "datagate-query",
                     template: "api/dg/{key}",

@@ -5,24 +5,20 @@
       :model="task.editBuffer"
       ref="gridForm"
       :rules="task.rules"
-     size="mini"
-     status-icon
+      size="mini"
+      status-icon
       :show-message="false"
     >
       <el-table
         v-bind:data="dataList"
         ref="dataGrid"
-        border
-        fit
-        highlight-current-row
         @sort-change="doSortChange"
-        :stripe="stripe"
         :height="height"
         @selection-change="doSelectionChange"
         @row-dblclick="doRowDblClick"
         @row-click="doRowClick"
-        tooltip-effect="light"
         style="width: 100%;"
+        v-bind="options"
       >
         <el-table-column type="selection" v-if="multiSelect"></el-table-column>
         <el-table-column type="index" v-if="showIndex"></el-table-column>
@@ -108,8 +104,10 @@
           </slot>
         </edit-form>
         <span slot="footer" style="margin-right:30px" class="dialog-footer">
-          <el-button type="primary" @click="doSave">保存</el-button>
-          <el-button @click="cancelEdit">取消</el-button>
+          <slot name="edit-form-footer">
+            <el-button type="primary" @click="doSave">保存</el-button>
+            <el-button @click="cancelEdit">取消</el-button>
+          </slot>
         </span>
       </el-dialog>
     </template>
@@ -127,6 +125,13 @@
 </template>
 <script>
 import { Util, Bus } from "../";
+let defaultOptions = {
+  stripe: true,
+  highlightCurrentRow: true,
+  border: true,
+  tooltipEffect: "light",
+  fit: true
+};
 export default {
   props: {
     task: Object, //包含数据，元数据的对象
@@ -139,10 +144,6 @@ export default {
       type: Boolean, //显示行号
       default: true
     },
-    stripe: {
-      type: Boolean, //显示斑马线
-      default: true
-    },
     editMode: {
       //编辑模式：inline-行内编辑, side-侧边栏编辑, popup-弹出窗, none-不能编辑
       //如果有其他自定义模式，响应事件 show-edit 来自定义编辑行为，在事件中，通过task.editBuffer来得到当前要编辑的行信息
@@ -152,6 +153,11 @@ export default {
     labelWidth: {
       type: Number,
       default: 120
+    },
+    //el-table的element属性，参见defaultOptions的定义
+    options: {
+      type: Object,
+      default: () => ({})
     }
   },
   data: function() {
@@ -172,12 +178,7 @@ export default {
     }
   },
   created() {
-    // if (!this.dataList) {
-    //   this.dataList = this.task.products;
-    // }
-    // if (!this.metadata) {
-    //   this.metadata = this.task.metadata;
-    // }
+    $.extend(this.options, defaultOptions);
   },
   // mounted(){
   //   if (this.editMode == "popup")
@@ -282,11 +283,11 @@ export default {
     },
     doEdit() {
       if (!this.multiEdit && this.task.selection.length > 1) {
-        this.$message.warning("不能同时编辑多行。");
+        this.$message.warning(`不能同时编辑多个${this.task.productName}。`);
         return;
       }
       if (!this.current) {
-        this.$message.warning("您还没有选择要编辑的行。");
+        this.$message.warning(`您还没有选择要编辑的${this.task.productName}。`);
         return;
       }
       this.submitRow().then(() => {
@@ -385,7 +386,9 @@ export default {
             this.editingRow = null;
             dfd.resolve();
           } else if (!silence) {
-            this.$message.warning("请先完善正在编辑的行。");
+            this.$message.warning(
+              `请先完善正在编辑的${this.task.productName}。`
+            );
           }
         });
       } else {
@@ -416,7 +419,7 @@ export default {
         rowsForDel = [this.current];
       }
       if (!rowsForDel.length) {
-        this.$message.warning("您还没有选择要删除的行。");
+        this.$message.warning(`您还没有选择要删除的${this.task.productName}。`);
         return;
       }
       this.$emitPass("before-del-rows", rowsForDel, sel => {
@@ -486,5 +489,4 @@ export default {
   width: 400px;
   display: block;
 }
-
 </style>

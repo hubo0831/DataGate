@@ -125,6 +125,12 @@ export const META = key => {
   return GET('/api/dg/m/' + key).done(filterResult);
 }
 
+
+//通用查询,同时获取元数据
+export const METAQUERY = (key, params) => {
+  return GET('/api/dg/q/' + key, params).done(filterResult);
+}
+
 //通用导出Excel, 生成一个文件下载链接并自动点击
 export const EXPORT = (key, params) => {
   params.token = userState.token;

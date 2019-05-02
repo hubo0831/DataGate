@@ -73,7 +73,7 @@ namespace DataGate.Api.Controllers
             var key = (string)this.ControllerContext.RouteData.Values["key"];
             Log.ObjectId = key;
             var dict = Request.Query.ToDictionary(kv => kv.Key, kv => (object)kv.Value.FirstOrDefault());
-            
+
             string fileName = (string)dict["filename"] ?? "导出.xlsx";
             var result = await _dg.GetExcelStreamAsync(key, dict);
             return File(result, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
@@ -110,16 +110,37 @@ namespace DataGate.Api.Controllers
         }
 
         /// <summary>
-        /// 获取某Key值对应的字段元数据描述
+        /// 获取某Key值对应的字段元数据描述数组,
+        /// 如果是，分隔的多个key,则返回元数据数组的数组 
         /// </summary>
         /// <returns>元数据描述对象数组</returns>
         [HttpGet]
-        public IEnumerable<FieldMeta> Metadata()
+        public object Metadata()
+        {
+            var keyv = (string)this.ControllerContext.RouteData.Values["key"];
+            Log.ObjectId = keyv;
+            var keys = keyv.Split(',').Select(k => k.Trim());
+            var result = keys.Select(_dg.Metadata);
+
+            if (keys.Count() == 1) return result.First();
+            return result; //V0.1.7+
+        }
+
+        /// <summary>
+        /// 通过指定的key配置同时查询元数据和数据
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<ActionResult<object>> MetaQuery()
         {
             var key = (string)this.ControllerContext.RouteData.Values["key"];
             Log.ObjectId = key;
-            var result = _dg.Metadata(key);
-            return result;
+            var dict = Request.Query.ToDictionary(kv => kv.Key, kv => (object)kv.Value.FirstOrDefault());
+            dict.Remove("_"); //排除jQuery的随机数
+            var meta = _dg.Metadata(key);
+            var data = await _dg.QueryAsync(key, dict);
+            //throw new ArgumentException("手动引发的异常");
+            return new { meta, data };
         }
     }
 }

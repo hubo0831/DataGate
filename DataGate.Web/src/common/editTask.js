@@ -5,6 +5,8 @@ import Vue from "vue"
 
 //用于批量编辑和批量保存,跟踪和维护对象列表中对列的增删改状态
 export default function editTask() {
+  var that = this;
+
   this.metadata = [];
   this.name = ""; //任务名称
   this.productName = ""; //任务对应的成果名称
@@ -13,27 +15,27 @@ export default function editTask() {
   this.details = {}; //主从表中的子表
   this.total = 0, //记录总数，分页时有用
 
-  //清除元数据以外的数据
-  //此方法运用不当可能会造成页面闪动
-  this.clearData = paged => {
-    this.products = []; //当前的主表
-    this.addedProducts = []; //新增的记录
-    this.changedProducts = []; //修改过的记录
-    this.removedProducts = []; //已删除的记录
-    this.changed = 0;
-    this.total = 0;
-    this.selection = []; //勾选中的成果列表，应该是products的子集
-    this.editBuffer = {}; //根据selection合并后组成的单个成果，用以绑定form表单的值
-    
-    for (var i in this.details) {
-      this.details[i].clearData();
-    }
+    //清除元数据以外的数据
+    //此方法运用不当可能会造成页面闪动
+    this.clearData = paged => {
+      this.products = []; //当前的主表
+      this.addedProducts = []; //新增的记录
+      this.changedProducts = []; //修改过的记录
+      this.removedProducts = []; //已删除的记录
+      this.changed = 0;
+      this.total = 0;
+      this.selection = []; //勾选中的成果列表，应该是products的子集
+      this.editBuffer = {}; //根据selection合并后组成的单个成果，用以绑定form表单的值
 
-    //如果是分页查询，则设置排序为custom
-    if (paged) {
-      this.metadata.forEach(meta => meta.column.sortable && (meta.column.sortable = "custom"));
-    }
-  };
+      for (var i in this.details) {
+        this.details[i].clearData();
+      }
+
+      //如果是分页查询，则设置排序为custom
+      if (paged) {
+        this.metadata.forEach(meta => meta.column.sortable && (meta.column.sortable = "custom"));
+      }
+    };
 
   this.clearData();
 
@@ -118,12 +120,12 @@ export default function editTask() {
 
     this.metadata = mtemp;
     this.updateAllOptions();
-    this.rules = this._initRules();
+    this.rules = _initRules();
   };
 
-  this._initRules = function () {
+  function _initRules() {
     var rules = {};
-    this.metadata.forEach(meta => {
+    that.metadata.forEach(meta => {
       rules[meta.name] = [];
       if (meta.required) {
         var requiredRule = {
@@ -312,6 +314,7 @@ export default function editTask() {
     this.metadata = this.formMetadata;
     return this;
   };
+
   //获取主键字段
   this.getPrimaryKeys = () => {
     var pkeys = this.metadata.filter(p => p.primarykey);
@@ -540,13 +543,13 @@ export default function editTask() {
     if (idx < 0) {
       this.addedProducts.push(product);
     }
-    this._addAllDetails(product);
+    _addAllDetails(product);
     return this.testChanged();
   };
 
   //删除对象
   this.remove = product => {
-    this._removeAllDetails(product);
+    _removeAllDetails(product);
     var idx = this.products.indexOf(product);
     if (idx >= 0) {
       this.products.splice(idx, 1);
@@ -603,7 +606,7 @@ export default function editTask() {
 
   }
 
-  this._removeAllDetails = product => {
+  var _removeAllDetails = product => {
     for (var i in this.details) {
       for (var j in product[i]) {
         this.details[i].remove(product[i][j]);
@@ -611,7 +614,7 @@ export default function editTask() {
     }
   };
 
-  this._addAllDetails = product => {
+  var _addAllDetails = product => {
     for (var i in this.details) {
       for (var j in product[i]) {
         this.details[i].add(product[i][j]);
@@ -656,7 +659,6 @@ export default function editTask() {
   //////////////////////////////数据校验////////////////////////////////////////////
 
   this.validateProduct = function (product, name, rule) {
-
     return new Promise((resolve, reject) => {
       if (rule.required && !product[name]) {
         reject({
@@ -717,16 +719,16 @@ export default function editTask() {
 
     return {
       key: this.key,
-      added: this._clearSaveData(this.addedProducts),
-      removed: this._clearRemoveData(this.removedProducts),
-      changed: this._clearSaveData(this.changedProducts),
+      added: _clearSaveData(this.addedProducts),
+      removed: _clearRemoveData(this.removedProducts),
+      changed: _clearSaveData(this.changedProducts),
       details
     }
   };
 
   //对于已删除记录，只传删除的主键的值（如果有的话），以节约带宽
-  this._clearRemoveData = function (toRemove) {
-    var pkeys = this.getPrimaryKeys();
+  function _clearRemoveData(toRemove) {
+    var pkeys = that.getPrimaryKeys();
     if (toRemove.length && pkeys.length) {
       return toRemove.map(p => {
         var r = {};
@@ -739,11 +741,11 @@ export default function editTask() {
   };
 
   //清理将要保存的数据，只留下元数据明确定义的字段的值
-  this._clearSaveData = function (toSave) {
-    if (this.metadata.length) {
+  function _clearSaveData(toSave) {
+    if (that.metadata.length) {
       return toSave.map(p => {
         var s = {};
-        this.metadata.forEach(meta => {
+        that.metadata.forEach(meta => {
           //将主表的明细数据清除，在details集合中单独处理
           if (meta.datatype.startsWith('[')) return;
           s[meta.name] = p[meta.name];

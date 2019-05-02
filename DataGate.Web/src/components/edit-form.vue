@@ -245,7 +245,8 @@ export default {
     };
   },
   mounted() {
-    if (this.getStyle().height) $("#" + this.id).slimScroll({});
+    //if (this.needScroll()) 
+    $("#" + this.id).slimScroll();
   },
   watch: {
     "task.editBuffer": function() {
@@ -265,7 +266,7 @@ export default {
     getStyle() {
       var style = this.styles || {};
       if (this.height) {
-        style.height = this.height + "px";
+        style.maxHeight = this.height + "px";
       }
       if (this.width) {
         style.width = this.width + "px";

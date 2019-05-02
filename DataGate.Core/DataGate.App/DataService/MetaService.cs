@@ -476,7 +476,7 @@ namespace DataGate.App.DataService
             return String.Join(".", dotName.Split('.').Select(n => db.AddFix(n)));
         }
 
-        string NQ = $"{Environment.NewLine},";
+        string NLN = $"{Environment.NewLine},";
         //构造select后面的字段列表
         private string BuildQueryFields(DataGateKey gkey)
         {
@@ -500,7 +500,13 @@ namespace DataGate.App.DataService
             if (gkey.TableJoins.Count > 1)
             {
                 //拼接需要联查的子表中的字段
-                var otherTableFields = mainTable.Fields.Where(f => f.ArrayItemType.IsNotEmpty());
+                List<FieldMeta> otherTableFields = new List<FieldMeta>();
+                foreach (var tableJoin in gkey.TableJoins)
+                {
+                    var fields = tableJoin.Table.Fields.Where(f => f.ArrayItemType.IsNotEmpty()
+                    && gkey.TableJoins.Any(tj => tj.Table.Name == f.ArrayItemType));
+                    otherTableFields.AddRange(fields);
+                }
                 foreach (var other in otherTableFields)
                 {
                     if (other.ForeignKey.IsEmpty())
@@ -514,7 +520,8 @@ namespace DataGate.App.DataService
                     if (aliases.Length > 1) alias = aliases[0];
 
                     var tableMeta = _tableMetas[other.ArrayItemType];
-                    var otherFields = String.Join(NQ, tableMeta.Fields.Select(f =>
+
+                    var otherFields = String.Join(NLN, tableMeta.Fields.Select(f =>
                     {
                         if (f.IsArray)
                         {
@@ -525,7 +532,7 @@ namespace DataGate.App.DataService
                         {
                             return null;
                         }
-                        //如果指定了ForeignField，则用name作该列别名查询此外表字段
+                        //如果指定了ForeignField，用'模型名_属性名'作为别名区分子表字段
                         else if (!f.ForeignField.IsEmpty())
                         {
                             return $"{db.AddFix(f.ForeignField)} {tableMeta.Name}_{f.Name}";
@@ -545,7 +552,7 @@ namespace DataGate.App.DataService
 
             }
 #endif
-            var mainFields = string.Join(NQ, mainTable.Fields.Select(f =>
+            var mainFields = string.Join(NLN, mainTable.Fields.Select(f =>
             {
                 if (f.IsArray)
                 {
@@ -577,7 +584,7 @@ namespace DataGate.App.DataService
                 }
             }).Where(f => !f.IsEmpty()));
             allFields.Insert(0, mainFields);
-            return String.Join(NQ, allFields);
+            return String.Join(NLN, allFields);
         }
 
         private string FormatQueryFields(DataGateKey gkey)

@@ -16,6 +16,11 @@ a, a:visited {
   color:$top-bgcolor
 }
 
+input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+}
+
 #app {
   font-family: 'Microsoft YaHei', '微软雅黑';
   -webkit-font-smoothing: antialiased;
@@ -97,8 +102,7 @@ a, a:visited {
   background: #fff;
 
   .card-header {
-    height: 32px;
-    padding: 5px;
+    padding: 10px;
     border-bottom: 1px solid #dcdfe6;
   }
 
