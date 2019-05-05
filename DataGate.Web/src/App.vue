@@ -229,10 +229,14 @@ export default {
       this.$message.error(msg);
     });
 
-    var token = userState.token;
-    if (token) {
-      getUser();
-    }
+    var args = { passed: false };
+    //如果有第三方登录,
+    bus.$emitPass("custom-login", args, null, () => {
+      var token = userState.token;
+      if (token) {
+        getUser();
+      }
+    });
   },
   watch: {
     isbackForward(newVal, oldVal) {
@@ -286,10 +290,10 @@ export default {
           }
         }
       }
-      if(this.mainMenu.length){
-      //找不到时，定位到第一个选项卡
-      this.defaultMainIndex = this.mainMenu[0].id;
-      this.currentMenu = this.mainMenu[0];
+      if (this.mainMenu.length) {
+        //找不到时，定位到第一个选项卡
+        this.defaultMainIndex = this.mainMenu[0].id;
+        this.currentMenu = this.mainMenu[0];
       }
     },
     handleMainMenu(index) {
@@ -346,7 +350,7 @@ export default {
     },
     logout() {
       this.mainMenu = [];
-      this.currentMenu = {children:[]};
+      this.currentMenu = { children: [] };
       UserAPI.logout();
     },
     pop() {

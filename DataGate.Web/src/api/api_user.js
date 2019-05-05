@@ -76,8 +76,9 @@ function logout() {
 
   if (!userState.token) {
     releaseUser();
+    return Promise.resolve();
   } else {
-    API.POST('/api/Check/Logout').always(releaseUser);
+    return API.POST('/api/Check/Logout').always(releaseUser);
   }
 }
 
