@@ -55,3 +55,5 @@ import {Run} from "datagate.web"
 Run();
 
 非常简单！
+
+![](https://gitee.com/uploads/images/2019/0503/151200_4afd66aa_2338638.png)

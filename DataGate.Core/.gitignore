@@ -5,6 +5,6 @@
 .vs/
 bin/
 obj/
-Nuget/
+packages/
 *.csproj.user
 Upload_*/
