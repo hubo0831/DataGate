@@ -57,6 +57,7 @@ export default function editTask() {
       detailTask.products = detailTask.products.concat(p[propName]);
     });
   }
+  
   //////////////////////////////元数据定义//////////////////////////////////////
 
   //不能直接给metadta赋值,因担心和vue起冲突，所以没有用get set访问器
@@ -511,8 +512,43 @@ export default function editTask() {
     return this.changed;
   };
 
+  //子表数据的增删维护工作
+  let changeDetails = (meta, oldObj) => {
+    var oldArr = oldObj[meta.name];
+    var newArr = this.editBuffer[meta.name];
+
+    if (meta.foreignkey) {
+      var pkey = this.getPrimaryKeys()[0].name;
+      newArr.forEach(newd => {
+        //在多选编辑时，子表的外键因为合并成单一对象的原因可能为空
+        //在此处再补上, 这里可能有问题
+        newd[meta.foreignkey] = oldObj[pkey];
+      });
+    } else {
+      throw '集合属性必须声明foreignkey, 以表明子集合中哪个属性代表外键';
+    }
+
+    var equal = (o, n) => {
+      if (meta.valuekey) {
+        return o[meta.valuekey] == n[meta.valuekey];
+      } else {
+        return o == n;
+      }
+    };
+
+    //旧集合中在新集合中没有的就删除
+    oldArr.filter(old => !newArr.find(n => equal(n, old))).forEach(old => {
+      this.details[meta.name].remove(old);
+    });
+
+    //新集合中在旧集合中没有的就新增
+    newArr.filter(newd => !oldArr.find(o => equal(o, newd))).forEach(newd => {
+      this.details[meta.name].add(newd);
+    });
+  }
+
   //以下 change, add, remove 维护增删改状态, 返回当前增删改的总数
-  //新增对象
+  //修改对象
   this.change = product => {
     var idx = this.products.indexOf(product);
     //当修改的记录是原来没有的，则变为新增，v0.3.3+
@@ -569,43 +605,6 @@ export default function editTask() {
     return this.testChanged();
   }
 
-
-  //子表数据的增删维护工作
-  this.changeDetails = function (meta, oldObj) {
-    var oldArr = oldObj[meta.name];
-    var newArr = this.editBuffer[meta.name];
-
-    if (meta.foreignkey) {
-      var pkey = this.getPrimaryKeys()[0].name;
-      newArr.forEach(newd => {
-        //在多选编辑时，子表的外键因为合并成单一对象的原因可能为空
-        //在此处再补上, 这里可能有问题
-        newd[meta.foreignkey] = oldObj[pkey];
-      });
-    } else {
-      throw '集合属性必须声明foreignkey, 以表明子集合中哪个属性代表外键';
-    }
-
-    var equal = (o, n) => {
-      if (meta.valuekey) {
-        return o[meta.valuekey] == n[meta.valuekey];
-      } else {
-        return o == n;
-      }
-    };
-
-    //旧集合中在新集合中没有的就删除
-    oldArr.filter(old => !newArr.find(n => equal(n, old))).forEach(old => {
-      this.details[meta.name].remove(old);
-    });
-
-    //新集合中在旧集合中没有的就新增
-    newArr.filter(newd => !oldArr.find(o => equal(o, newd))).forEach(newd => {
-      this.details[meta.name].add(newd);
-    });
-
-  }
-
   var _removeAllDetails = product => {
     for (var i in this.details) {
       for (var j in product[i]) {
@@ -645,7 +644,7 @@ export default function editTask() {
 
         //如果有子集合
         if (this.details[d.name]) {
-          this.changeDetails(d, tObj);
+          changeDetails(d, tObj);
         } else if (!util.isEqual(tObj[d.name], this.editBuffer[d.name])) {
           changed = true;
         }
