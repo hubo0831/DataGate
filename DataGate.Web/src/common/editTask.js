@@ -57,7 +57,7 @@ export default function editTask() {
       detailTask.products = detailTask.products.concat(p[propName]);
     });
   }
-  
+
   //////////////////////////////元数据定义//////////////////////////////////////
 
   //不能直接给metadta赋值,因担心和vue起冲突，所以没有用get set访问器
@@ -207,6 +207,9 @@ export default function editTask() {
     if (!meta) return;
     if (!this.rules[meta.name]) {
       this.rules[meta.name] = [];
+    }
+    if (this.rules[meta.name].some(v => v.validator == validateFunc)) {
+      return;
     }
     this.rules[meta.name].push({
       validator: validateFunc,
