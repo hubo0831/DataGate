@@ -188,6 +188,7 @@
             :in-form="true"
             @change="handleChange(item)"
             :placeholder="getPlaceholder(item)"
+             v-on="$listeners"
             v-bind="item.attr"
           ></component>
           <!-- 控件结束区内容插槽 -->

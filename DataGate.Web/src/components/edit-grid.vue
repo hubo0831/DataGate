@@ -56,7 +56,7 @@
             <!-- 下面是编辑状态时的编辑界面 -->
             <!-- 显示时是一个字段，编辑时又是另一个字段的情况 -->
             <el-form-item v-else-if="meta.linkto && meta.uitype=='TextBox'" :prop="meta.linkto">
-              <edit-item :obj="task.editBuffer" :meta="getMeta(meta.linkto)"></edit-item>
+              <edit-item :obj="task.editBuffer" :meta="getMeta(meta.linkto)"  v-on="$listeners" :task="task"></edit-item>
             </el-form-item>
             <!-- 自定义编辑列的内容 -->
             <slot
@@ -68,7 +68,7 @@
             >{{scope.row[meta.name]}}</slot>
             <!-- 常规编辑 -->
             <el-form-item v-else :prop="meta.name" style="width:100%">
-              <edit-item :obj="task.editBuffer" :meta="meta"></edit-item>
+              <edit-item :obj="task.editBuffer" :meta="meta" v-on="$listeners" :task="task"></edit-item>
             </el-form-item>
           </template>
         </el-table-column>
@@ -257,7 +257,7 @@ export default {
     },
     //统一处理table的行点击事件，当行点击时自动选择
     doRowClick: function(row, event, column) {
-      if (row == this.current && this.editingRow == row) {
+      if (row == this.current && (this.editingRow == row || this.editMode == 'inline')) {
         //当在行编辑状态时，点击正在编辑的行，维持原状
         return;
       }
