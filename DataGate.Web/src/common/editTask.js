@@ -121,11 +121,11 @@ export default function editTask() {
 
     this.metadata = mtemp;
     this.updateAllOptions();
-    this.rules = _initRules();
+    _initRules();
   };
 
-  function _initRules() {
-    var rules = {};
+  let _initRules = () => {
+    let { rules } = this;
     that.metadata.forEach(meta => {
       rules[meta.name] = [];
       if (meta.required) {
@@ -159,8 +159,6 @@ export default function editTask() {
       rules[meta.name].forEach(rule => rule.title = meta.title);
       //todo:其他各类标准验证...
     });
-
-    return rules;
   };
 
   function validateReg(rule, value, callback) {
