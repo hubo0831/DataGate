@@ -474,11 +474,10 @@ export default {
 .dg-toolbar {
   margin: 5px 0;
 }
-.el-table td.el-table-column--selection,
-.el-table th.el-table-column--selection{
-  text-overflow:clip;
 
+.el-table .el-table-column--selection{
   div{
+    text-align: center;
     text-overflow:clip;
   }
 }
