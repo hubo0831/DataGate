@@ -299,10 +299,35 @@ export default function editTask() {
     return newdef;
   };
 
+  //与元数据初始定义合并, newdef从oldDef新增不存在的属性,overwrite决定是否改写存在的属性
+  this.mergeMeta = function (newdef, oldDef, overwrite) {
+    if (typeof oldDef == "boolean") {
+      overwrite = oldDef;
+    }
+    else if (!oldDef) {
+      oldDef = this.metadata;
+    }
+    for (var i in newdef) {
+      var ele = newdef[i];
+      for (var j in oldDef) {
+        var def = oldDef[j];
+        if (ele.name == def.name) {
+          for (var p in def) {
+            if (!(p in ele) || overwrite) {
+              ele[p] = def[p];
+            }
+          }
+          break;
+        }
+      }
+    }
+    return newdef;
+  };
+
   //纵向合并不同的元数据集合，去重并与初始定义横向合并
   //如果两个定义name相同，则排在后面的元素优先
   //最后按itemorder进行排序
-  this.concatDef = function () {
+  this.concatMeta = function () {
     var formMetadata = this.metadata;
     for (var i in arguments) {
       var arg = arguments[i];
@@ -311,7 +336,7 @@ export default function editTask() {
     formMetadata = formMetadata.filter(function (m) {
       return m.name;
     }); //排除name为空的异常配置项
-    formMetadata = this.mergeDef(util.distinct(formMetadata, "name"));
+    formMetadata = this.mergeMeta(util.distinct(formMetadata, "name"));
     formMetadata.sort((m1, m2) => m1.order - m2order);
     this.metadata = this.formMetadata;
     return this;
