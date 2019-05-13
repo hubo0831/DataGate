@@ -470,11 +470,18 @@ export default {
   }
 };
 </script>
-<style scoped lang="scss">
+<style  lang="scss">
 .dg-toolbar {
   margin: 5px 0;
 }
+.el-table td.el-table-column--selection,
+.el-table th.el-table-column--selection{
+  text-overflow:clip;
 
+  div{
+    text-overflow:clip;
+  }
+}
 .el-form-item {
   margin: 0;
   padding: 0;
