@@ -678,12 +678,13 @@ namespace DataGate.App.DataService
             });
 
             //查询主表中不重复的主键字段值
-            var ids = dt.Rows.Cast<DataRow>().Select(dr => getPKeyValues(dr)).Distinct();
-
+            var ids = dt.Rows.Cast<DataRow>().Select(dr => getPKeyValues(dr)).Distinct().ToList();
+            var dtRows = dt.Rows.Cast<DataRow>().ToList();
             //遍历DataTable结果集， 找到相同的主键DataRow，并组装子表所在子集合
-            ids.Each(id =>
+            ids.ForEach(id =>
             {
-                var drs = dt.Rows.Cast<DataRow>().Where(dr => getPKeyValues(dr).Equals(id));
+                var drs = dtRows.Where(dr => getPKeyValues(dr).Equals(id)).ToList();
+                drs.ForEach(dr => dtRows.Remove(dr));
                 var newRow = new JObject();
 
                 //遍历主表的每个字段，找出各类字段定义
