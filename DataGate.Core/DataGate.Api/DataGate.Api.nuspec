@@ -15,12 +15,12 @@
     <releaseNotes>v0.1.3</releaseNotes>
     <tags>DataGate API SSOLogin</tags>
     <dependencies>
-      <dependency id="Autofac" version="4.8.1" />
-      <dependency id="Autofac.Extensions.DependencyInjection" version="4.3.0" />
-      <dependency id="Microsoft.AspNetCore.App"  version="2.1.1" />
-      <dependency id="Microsoft.AspNetCore.Cors" version="2.1.1" />
-      <dependency id="Microsoft.VisualStudio.Web.CodeGeneration.Design" version="2.1.1" />
-      <dependency id="Newtonsoft.Json" version="11.0.2" />
+      <dependency id="Autofac" version="4.9.2" />
+      <dependency id="Autofac.Extensions.DependencyInjection" version="4.4.0" />
+      <dependency id="Microsoft.AspNetCore.App"  version="2.2.5" />
+      <dependency id="Microsoft.AspNetCore.Cors" version="2.2.0" />
+      <dependency id="Microsoft.VisualStudio.Web.CodeGeneration.Design" version="2.2.3" />
+      <dependency id="Newtonsoft.Json" version="12.0.2" />
       <dependency id="DataGate.Com" version="0.2.1" />
       <dependency id="DataGate.App" version="0.2.1" />
     </dependencies>

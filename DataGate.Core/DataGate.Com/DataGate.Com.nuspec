@@ -19,9 +19,9 @@
     <tags>Oracle SqlServer DBHelper DataAccess ORM ADO</tags>
     <!-- Dependencies are automatically installed when the package is installed -->
     <dependencies>
-      <dependency id="Newtonsoft.Json" version="11.0.2" />
-      <dependency id="Oracle.ManagedDataAccess.Core" version="2.18.3" />
-      <dependency id="System.Data.SqlClient" version="4.5.1" />
+      <dependency id="Newtonsoft.Json" version="12.0.2" />
+      <dependency id="Oracle.ManagedDataAccess.Core" version="2.18.6" />
+      <dependency id="System.Data.SqlClient" version="4.6.1" />
     </dependencies>
   </metadata>
 </package>
