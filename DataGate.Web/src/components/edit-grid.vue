@@ -481,7 +481,8 @@ export default {
     text-overflow:clip;
   }
 }
-.el-form-item {
+
+.el-table .el-form-item {
   margin: 0;
   padding: 0;
 }
