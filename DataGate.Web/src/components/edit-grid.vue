@@ -244,7 +244,7 @@ export default {
     },
     //勾选事件
     doSelectionChange(items) {
-      this.submitRow(true).then(() => {
+      let selectionChange = items => {
         this.task.setSelection(items);
         if (items.length == 1) {
           //刚开始时，鼠标如果正好点到复选框，将不会有当前行， 在此处强行指定
@@ -252,8 +252,12 @@ export default {
         } else if (items.length == 0) {
           this.changeCurrentRow(null);
         }
-      });
+      };
+
+      if (!this.editingRow) selectionChange(items);
+      else this.submitRow(true).then(() => selectionChange(items));
     },
+
     //为免与selectionChange和rowclick事件冲突，不触发，只调用此方法
     changeCurrentRow(item) {
       this.$refs.dataGrid.setCurrentRow(item);
@@ -352,7 +356,7 @@ export default {
         this.task.add(newItem);
         this.newItem = newItem;
         this.$nextTick(() => {
-          this.$refs.dataGrid.toggleRowSelection(newItem);
+          this.$refs.dataGrid.toggleRowSelection(newItem, true);
           if (this.editMode == "inline") this.gotoRow(this.current);
           this.doEdit();
         });

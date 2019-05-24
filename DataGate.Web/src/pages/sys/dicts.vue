@@ -124,7 +124,6 @@ export default {
   },
   data: function() {
     return {
-      groupsCache: null,
       currentGroup: null,
       currentItem: null,
       groupMeta: null,
@@ -143,12 +142,10 @@ export default {
   },
   computed: {
     groupFilter() {
-      if (!this.groupsCache || !this.groupsCache.length)
-        this.groupsCache = util.sort(
-          this.task.products.filter(p => !p.parentCode),
-          a => a.ord
-        );
-      return this.groupsCache;
+      return util.sort(
+        this.task.products.filter(p => !p.parentCode),
+        a => a.ord
+      );
     },
 
     itemFilter() {
@@ -167,7 +164,6 @@ export default {
       });
     },
     doGroupCmd(cmd) {
-      this.groupsCache = null;
       this.$refs.groupEdit[cmd]();
     },
     doItemCmd(cmd) {
