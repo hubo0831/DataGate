@@ -67,6 +67,7 @@ export default {
     $.when(API.META("getallrolemenus"), API.QUERY("GetAuthMenus")).done(
       (meta, menus) => {
         this.task.setMetadata(meta[0]);
+        this.task.productName = "角色";
         this.plainMenus = menus[0];
         this.menus = util.buildNestData(menus[0]);
       }

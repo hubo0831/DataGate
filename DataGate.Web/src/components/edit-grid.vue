@@ -245,13 +245,13 @@ export default {
     //勾选事件
     doSelectionChange(items) {
       let selectionChange = items => {
-        this.task.setSelection(items);
         if (items.length == 1) {
           //刚开始时，鼠标如果正好点到复选框，将不会有当前行， 在此处强行指定
           this.changeCurrentRow(items[0]);
         } else if (items.length == 0) {
           this.changeCurrentRow(null);
         }
+        this.task.setSelection(items);
       };
 
       if (!this.editingRow) selectionChange(items);
@@ -275,11 +275,13 @@ export default {
         //当在行编辑状态时，点击正在编辑的行，维持原状
         return;
       }
-      this.newItem = null;
-      if (column.type != "selection") {
-        this.$refs.dataGrid.clearSelection();
-      }
-      this.$refs.dataGrid.toggleRowSelection(row);
+      this.submitRow().then(() => {
+        this.newItem = null;
+        if (column.type != "selection") {
+          this.$refs.dataGrid.clearSelection();
+        }
+        this.$refs.dataGrid.toggleRowSelection(row);
+      });
     },
     //双击编辑
     doRowDblClick(item) {
@@ -392,16 +394,16 @@ export default {
     //inline编辑时的提交动作
     submitRow(silence) {
       var dfd = Util.deferred();
+      //应该是只有在行内编辑时才会触发的分支
       if (this.editingRow) {
         this.$refs.gridForm.validate(v => {
           if (v) {
-            //应该是只有在行内编辑时才会触发的分支
             this.task.acceptChanges();
             this.editingRow = null;
             dfd.resolve();
           } else if (!silence) {
             this.$message.warning(
-              `请先完善正在编辑的${this.task.productName}。`
+              `请先完善正在编辑的${this.task.productName || '项'}。`
             );
           }
         });

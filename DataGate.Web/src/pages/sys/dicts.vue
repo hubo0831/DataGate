@@ -135,6 +135,7 @@ export default {
   created() {
     API.META("getsysdict").done(meta => {
       this.task.setMetadata(meta);
+      this.task.productName = "字典项";
       this.groupMeta = this.task.reDefineMetadata(groupMeta);
       this.itemMeta = meta;
     });
