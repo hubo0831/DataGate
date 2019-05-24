@@ -56,7 +56,12 @@
             <!-- 下面是编辑状态时的编辑界面 -->
             <!-- 显示时是一个字段，编辑时又是另一个字段的情况 -->
             <el-form-item v-else-if="meta.linkto && meta.uitype=='TextBox'" :prop="meta.linkto">
-              <edit-item :obj="task.editBuffer" :meta="getMeta(meta.linkto)"  v-on="$listeners" :task="task"></edit-item>
+              <edit-item
+                :obj="task.editBuffer"
+                :meta="getMeta(meta.linkto)"
+                v-on="$listeners"
+                :task="task"
+              ></edit-item>
             </el-form-item>
             <!-- 自定义编辑列的内容 -->
             <slot
@@ -239,13 +244,15 @@ export default {
     },
     //勾选事件
     doSelectionChange(items) {
-      this.submitRow(true).then(() => this.task.setSelection(items));
-      if (items.length == 1) {
-        //刚开始时，鼠标如果正好点到复选框，将不会有当前行， 在此处强行指定
-        this.changeCurrentRow(items[0]);
-      } else if (items.length == 0) {
-        this.changeCurrentRow(null);
-      }
+      this.submitRow(true).then(() => {
+        this.task.setSelection(items);
+        if (items.length == 1) {
+          //刚开始时，鼠标如果正好点到复选框，将不会有当前行， 在此处强行指定
+          this.changeCurrentRow(items[0]);
+        } else if (items.length == 0) {
+          this.changeCurrentRow(null);
+        }
+      });
     },
     //为免与selectionChange和rowclick事件冲突，不触发，只调用此方法
     changeCurrentRow(item) {
@@ -257,7 +264,10 @@ export default {
     },
     //统一处理table的行点击事件，当行点击时自动选择
     doRowClick: function(row, event, column) {
-      if (row == this.current && (this.editingRow == row || this.editMode == 'inline')) {
+      if (
+        row == this.current &&
+        (this.editingRow == row || this.editMode == "inline")
+      ) {
         //当在行编辑状态时，点击正在编辑的行，维持原状
         return;
       }
@@ -475,10 +485,10 @@ export default {
   margin: 5px 0;
 }
 
-.el-table .el-table-column--selection{
-  div{
+.el-table .el-table-column--selection {
+  div {
     text-align: center;
-    text-overflow:clip;
+    text-overflow: clip;
   }
 }
 
