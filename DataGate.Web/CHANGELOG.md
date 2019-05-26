@@ -3,6 +3,8 @@
 ## 0.3.4
 
 1. 升级vue和element-ui到最新版本
+2. 优化search-form，初始化时清除默认值
+3. editTask 增加getSearchMeta()获取查询表单的元数据定义。用Column:{searchable:true}标识。
 
 ## 0.3.3
 

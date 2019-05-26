@@ -1,5 +1,5 @@
 <template>
-  <div v-on:keyup.enter="search">
+  <div v-on:keyup.enter="search" v-if="metadata.length">
     <!-- @*筛选条件组件*@ -->
     <el-form :inline="true">
       <el-form-item v-for="meta in metaFilter" :key="meta.name" :label="meta.title">

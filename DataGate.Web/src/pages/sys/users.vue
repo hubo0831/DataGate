@@ -58,9 +58,7 @@ export default {
       .done((meta, roles) => {
         this.allRoles = roles[0];
         this.task.setMetadata(meta[0]);
-        this.searchMeta = this.task.reDefineMetadata(
-          "account,name,tel,roleName"
-        );
+        this.searchMeta = this.task.getSearchMeta();
         var rolemeta = this.task.getMeta("roles");
         rolemeta.options = this.allRoles.map(r => ({
           value: {

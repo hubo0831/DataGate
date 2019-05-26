@@ -114,7 +114,7 @@ export default function editTask() {
       }
 
       //将表单控件绑定对象attr加入，如果没有定义的话
-      if (!('attr' in m)) m.attr = { };
+      if (!('attr' in m)) m.attr = {};
       //默认可清除
       if (!('clearable' in m.attr)) m.attr.clearable = true;
       //value默认值加入响应式
@@ -266,6 +266,13 @@ export default function editTask() {
           return "TextBox";
         }
     }
+  }
+
+  //生成查询表单的元数据定义 v0.3.4+
+  this.getSearchMeta = function () {
+    return this.metadata
+      .filter(m => m.column.searchable)
+      .map(m => $.extend({}, m));
   }
 
   //重新定义元数据属性, 并从原有元数据定义抽取未定义属性
