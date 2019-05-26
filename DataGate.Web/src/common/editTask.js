@@ -114,7 +114,9 @@ export default function editTask() {
       }
 
       //将表单控件绑定对象attr加入，如果没有定义的话
-      if (!('attr' in m)) m.attr = {};
+      if (!('attr' in m)) m.attr = { };
+      //默认可清除
+      if (!('clearable' in m.attr)) m.attr.clearable = true;
       //value默认值加入响应式
       if (!('value' in m)) m.value = null;
     });
