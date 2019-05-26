@@ -74,9 +74,10 @@ export default {
     apiDataFilter(key, data) {
       return data;
     },
+    //保存前对保存的数据的操作,由子类实现 v0.3.2+
     apiDataSaving(saveData) {
-      //保存前对保存的数据的操作 v0.3.2+
     },
+    //数据的保存到服务器操作，保存成功后自动调用loadData
     apiSubmit(saveKey, successTips) {
       //this.$message.success(tips);
       var saveData = this.task.createSaveData();

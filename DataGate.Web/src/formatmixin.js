@@ -6,7 +6,7 @@ Vue.mixin({
   data() {
     return {
       appConfig, //系统全局配置项
-      userState, //用户信息
+      userState, //用户信息: { currentUser :{ account, name, email, tel, menus:[ ... ]...}
     }
   },
   //Vue.mixin全局混入，用于常用格式化
