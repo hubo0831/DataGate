@@ -42,7 +42,6 @@
               filterable
               @change="onChange"
               allow-create
-              default-first-option
               style="width:100%"
               :placeholder="getPlaceholder(meta)"
             >
@@ -62,7 +61,6 @@
               filterable
               allow-create
               @change="onChange"
-              default-first-option
               :placeholder="getPlaceholder(meta)"
             >
               <el-option
@@ -177,6 +175,7 @@ export default {
         if (!meta.operator) {
           meta.operator = this.getOperators(meta)[0].value;
         }
+        meta.value = null; //去掉meta的默认值
         this.$set(meta, "value1", null);
       });
       task.updateAllOptions(val);
@@ -279,7 +278,14 @@ export default {
     search: function() {
       var filter = [];
       this.metadata.forEach(meta => {
-        if (!(meta.value || meta.operator == "n" || meta.operator == "nn")) {
+        if (
+          !(
+            meta.value ||
+            meta.value === 0 ||
+            meta.operator == "n" ||
+            meta.operator == "nn"
+          )
+        ) {
           return;
         }
         var wp = {
