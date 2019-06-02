@@ -74,6 +74,7 @@
             @change="handleChange(item)"
             :placeholder="getPlaceholder(item)"
             :maxlength="item.maxlength"
+            show-word-limit
             v-bind="item.attr"
           ></el-input>
           <!-- 单项选择 -->
@@ -94,7 +95,7 @@
             ></el-option>
           </el-select>
           <!-- 多项选择 ,此项涉及到一对多表关系-->
-          <el-select
+          <el-select 
             v-else-if="item.uitype=='List'"
             v-model="task.editBuffer[item.name]"
             multiple

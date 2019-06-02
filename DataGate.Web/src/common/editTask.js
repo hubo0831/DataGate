@@ -423,7 +423,14 @@ export default function editTask() {
   };
 
   this.getMeta = name => this.metadata.find(m => m.name == name);
-  this.getMetas = names => this.metadata.filter(m => names.includes(m.name));
+
+  //根据，分隔的字符串或一个字符串数组，获取元数据定义子集
+  this.getMetas = names => {
+    if (typeof names == 'string'){
+      names = names.split(',');
+    }
+    return this.metadata.filter(m => names.includes(m.name));
+  }
 
   ///////////////////////////////////数据修改//////////////////////////////////////
   //获取随机最大排序位
