@@ -294,7 +294,7 @@ export default {
       return item.title || item.name;
     },
     handleChange(item) {
-      var val = this.task.editBuffer[item.name];
+      var val = this.task.editBuffer[item.name] || '';
       if (item.maxlength && val.length > item.maxlength) {
         this.task.editBuffer[item.name] = val.slice(0, item.maxlength);
       }
