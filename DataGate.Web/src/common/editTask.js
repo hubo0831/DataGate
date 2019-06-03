@@ -203,7 +203,7 @@ export default function editTask() {
   //设置自定义检验规则，validateFunc的签名是(rule, value, callback)
   //验证不通过时是callback(new Error('错误信息'));通过时空的callback()
   this.setRule = function (name, validateFunc) {
-    var meta = this.metadta.find(m => m.name == name);
+    var meta = this.metadata.find(m => m.name == name);
     if (!meta) return;
     if (!this.rules[meta.name]) {
       this.rules[meta.name] = [];
