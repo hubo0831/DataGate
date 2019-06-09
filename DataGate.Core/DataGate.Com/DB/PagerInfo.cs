@@ -47,7 +47,7 @@ namespace DataGate.Com.DB
             set
             {
                 recordCount = value;
-                Validate();
+               // Validate();
             }
         }
 
@@ -78,7 +78,10 @@ namespace DataGate.Com.DB
             set;
         }
 
-        private void Validate()
+        /// <summary>
+        /// 以recordcount为基准，验证页码的有效性
+        /// </summary>
+        public void Validate()
         {
             if (StartIndex >= recordCount) StartIndex = recordCount - PageSize;
             if (StartIndex < 0) StartIndex = 0;

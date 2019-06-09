@@ -54,7 +54,7 @@ Vue.mixin({
     },
     //年月日时分秒
     formatDateTime(row, col, date, idx) {
-      var format = "yyyy-MM-dd HH:mm:ss";
+      var format = "yyyy-MM-dd hh:mm:ss";
       if (arguments.length < 3) {
         date = row;
         if (arguments.length == 2) format = col;
