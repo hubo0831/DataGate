@@ -7,6 +7,9 @@ using System.Text;
 
 namespace DataGate.App.Logs
 {
+    /// <summary>
+    /// NLog的日志实现
+    /// </summary>
     public class NLogImpl : ILog
     {
         readonly Logger _nlogger;
@@ -18,6 +21,7 @@ namespace DataGate.App.Logs
 
         public void Write(LogInfo logInfo, Exception ex = null)
         {
+            logInfo.OpTime = DateTime.Now;
             LogEventInfo logEvent = new LogEventInfo(LogLevel.Info, "", logInfo.Message);
             if (ex != null)
             {
@@ -31,7 +35,7 @@ namespace DataGate.App.Logs
                 var val = pi.GetValue(logInfo);
                 logEvent.Properties[pi.Name] = val;
             }
-            logEvent.TimeStamp = DateTime.Now;
+            logEvent.TimeStamp = logInfo.OpTime;
             logEvent.Exception = ex;
 
             logEvent.Level = ConvertLevel(logInfo.LogLevel);
