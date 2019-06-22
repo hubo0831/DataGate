@@ -71,7 +71,7 @@ namespace DataGate.Api
                 //不序列化等于默认值的属性
                 options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
             })
-            .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             var builder = new ContainerBuilder();//实例化 AutoFac  容器                  
             builder.Populate(services);
             //注册其他程序集中的模块

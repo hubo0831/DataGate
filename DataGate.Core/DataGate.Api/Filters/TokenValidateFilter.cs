@@ -38,6 +38,11 @@ namespace DataGate.Api.Filters
         {
         }
 
+        /// <summary>
+        /// 例外的方法，不进行权限判断
+        /// </summary>
+        public static string[] ExceptActions { get; set; } = new string[0];
+
         public virtual void OnActionExecuting(ActionExecutingContext context)
         {
             if (Consts.IsTesting)
@@ -57,6 +62,12 @@ namespace DataGate.Api.Filters
 
             //标记了[AllowAnonymous]的方法被Pass掉
             if (action.MethodInfo.CustomAttributes.Any(attr => typeof(AllowAnonymousAttribute).IsAssignableFrom(attr.AttributeType)))
+            {
+                return;
+            }
+
+            // 例外的方法不进行判断
+            if (ExceptActions.Contains(controller.GetType().Name + "." + action.MethodInfo.Name))
             {
                 return;
             }

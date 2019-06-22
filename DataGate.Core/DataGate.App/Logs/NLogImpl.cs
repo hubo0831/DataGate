@@ -31,8 +31,9 @@ namespace DataGate.App.Logs
                 var val = pi.GetValue(logInfo);
                 logEvent.Properties[pi.Name] = val;
             }
-            logEvent.TimeStamp = logInfo.OpTime;
+            logEvent.TimeStamp = DateTime.Now;
             logEvent.Exception = ex;
+
             logEvent.Level = ConvertLevel(logInfo.LogLevel);
             _nlogger.Log(logEvent);
         }

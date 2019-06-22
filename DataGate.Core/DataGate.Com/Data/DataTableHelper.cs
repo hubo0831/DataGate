@@ -688,6 +688,49 @@ namespace DataGate.Com
         }
 
         /// <summary>
+        /// 将DataRow中的值转换成Int32
+        /// </summary>
+        /// <param name="dr"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static long ToLong(this DataRow dr, string key)
+        {
+            return CommOp.ToLong(dr[key]);
+        }
+
+        /// <summary>
+        /// 将DataRow中的值转换成Int64
+        /// </summary>
+        /// <param name="dr"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static long ToLong(this DataRow dr, int index)
+        {
+            return CommOp.ToLong(dr[index]);
+        }
+
+        /// <summary>
+        /// 将DataRow中的值转换成int?
+        /// </summary>
+        /// <param name="dr"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static long? ToLongNull(this DataRow dr, int index)
+        {
+            return CommOp.ToLongNull(dr[index]);
+        }
+
+        /// 将DataRow中的值转换成Int32
+        /// </summary>
+        /// <param name="dr"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static long? ToLongNull(this DataRow dr, string key)
+        {
+            return CommOp.ToLongNull(dr[key]);
+        }
+
+        /// <summary>
         /// 将DataRow中的值转换成double
         /// </summary>
         /// <param name="dr"></param>

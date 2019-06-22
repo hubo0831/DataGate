@@ -186,7 +186,6 @@ namespace DataGate.Tests
             {
                 yield return new KeyValuePair<string, string>(prop.Name, prop.GetValue(entity, null)?.ToString());
             }
-
         }
 
         /// <summary>
