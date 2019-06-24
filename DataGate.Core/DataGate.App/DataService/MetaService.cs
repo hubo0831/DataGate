@@ -339,7 +339,11 @@ namespace DataGate.App.DataService
         public TableMeta GetTableMeta(string name)
         {
             if (!_modelInited) InitTableMetas();
-            return _tableMetas[name];
+            if (_tableMetas.ContainsKey(name))
+            {
+                return _tableMetas[name];
+            }
+            return null;
         }
 
         /// <summary>
