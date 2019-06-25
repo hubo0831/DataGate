@@ -17,19 +17,24 @@ namespace DataGate.Com.Logs
         }
 
         /// <summary>
-        /// 输出日志到Log4Net
+        /// 输出日志到Log
         /// </summary>
         /// <param name="logInfo"></param>
         /// <param name="ex"></param>
         public static void Write(LogInfo logInfo, Exception ex = null)
         {
-            //修改人：卢英杰
-            //修改于: 2015.8.26。
-            //原因：发现写入日志文件的时候有许多空日志，所以加入一些判断来限制空日志信息的产生。
-            //if (log != null)   原方法
-            //if (log != null && logInfo != null && !string.IsNullOrWhiteSpace(logInfo.ActionName) 
-            //    && !string.IsNullOrWhiteSpace(logInfo.ModuleName))
             log?.Write(logInfo, ex);
+        }
+
+        /// <summary>
+        /// 输出日志到Log,立即写
+        /// </summary>
+        /// <param name="logInfo"></param>
+        /// <param name="ex"></param>
+        public static void WriteFast(LogInfo logInfo, Exception ex = null)
+        {
+            log?.Write(logInfo, ex);
+            log.Flush();
         }
     }
 }

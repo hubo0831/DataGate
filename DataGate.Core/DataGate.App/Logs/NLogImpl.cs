@@ -42,6 +42,11 @@ namespace DataGate.App.Logs
             _nlogger.Log(logEvent);
         }
 
+        public void Flush()
+        {
+            _nlogger.Factory.Flush();
+        }
+
         private LogLevel ConvertLevel(LogType logType)
         {
             switch (logType)
