@@ -147,6 +147,7 @@ import util from "../common/util.js";
 import editTask from "../common/editTask.js";
 var task = new editTask();
 var timeOut = 0;
+let r = 0;
 export default {
   props: {
     //传入的待搜索的元数据定义
@@ -315,6 +316,7 @@ export default {
           } else {
             this.$delete(this.urlQuery, "_filter");
           }
+          this.urlQuery._r = r++; //强行修改url让数据能在点按钮时刷新
           this.$router.replace({
             path: this.$route.path,
             query: this.urlQuery
