@@ -31,9 +31,10 @@ namespace DataGate.Com.Logs
         /// </summary>
         /// <param name="logInfo"></param>
         /// <param name="ex"></param>
-        public static void WriteFast(LogInfo logInfo, Exception ex = null)
+        public static void WriteFast(LogInfo logInfo = null, Exception ex = null)
         {
-            log?.Write(logInfo, ex);
+            if (logInfo != null)
+                log?.Write(logInfo, ex);
             log.Flush();
         }
     }
