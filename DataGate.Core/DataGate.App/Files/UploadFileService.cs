@@ -225,7 +225,7 @@ namespace DataGate.App.Files
             {
                 throw new Exception("指定文件不存在");
             }
-            return DownloadAsync(file);
+            return Download(file);
         }
 
         /// <summary>
@@ -233,7 +233,7 @@ namespace DataGate.App.Files
         /// </summary>
         /// <param name="file">SysFile文件实体信息</param>
         /// <returns>文件下载结果</returns>
-        public DownloadResult DownloadAsync(SysFile file)
+        public DownloadResult Download(SysFile file)
         {
             var result = new DownloadResult();
             result.FileName = file.Name;
