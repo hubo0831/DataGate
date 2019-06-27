@@ -18,5 +18,10 @@ namespace DataGate.App.Files
         /// 上传中，检测到重复的文件 wang加
         /// </summary>
         public bool Dup { get; set; }
+
+        /// <summary>
+        /// 文件的MD5 (v0.2.1+)
+        /// </summary>
+        public string Md5 { get; set; }
     }
 }

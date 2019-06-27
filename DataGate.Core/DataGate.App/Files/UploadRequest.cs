@@ -24,5 +24,10 @@ namespace DataGate.App.Files
         /// 上传时的文件所在路径
         /// </summary>
         public string FilePath { get; set; }
+
+        /// <summary>
+        /// 扩展要存的属性 v0.2.1+
+        /// </summary>
+        public Dictionary<string, object> Metadata { get; set; } = new Dictionary<string, object>();
     }
 }

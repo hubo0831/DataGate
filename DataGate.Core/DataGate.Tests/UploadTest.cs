@@ -29,11 +29,12 @@ namespace DataGate.Tests
         [Theory]
         [InlineData("TestData/Endless Space 2.jpg")]
         [InlineData("TestData/witcher3.png")]
-        public async Task TestUploadFile(string filePath)
+        public async Task<string> TestUploadFile(string filePath)
         {
             string fullName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filePath);
             string fileId = await UploadFile(new FileInfo(fullName), null);
             Assert.False(fileId.IsEmpty());
+            return fileId;
         }
 
         HttpClient _client;
@@ -160,6 +161,28 @@ namespace DataGate.Tests
         {
             var result = await _client.PostAsJsonAsync(url, request);
             return await result.Content.ReadAsStringAsync();
+        }
+
+        /// <summary>
+        /// 下载文件
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="filename"></param>
+        public async Task<Stream> DownloadFile(string url)
+        {
+            System.IO.Stream st = await _client.GetStreamAsync(url);
+
+            Stream so = new System.IO.MemoryStream();
+            byte[] by = new byte[1024];
+            int osize = st.Read(by, 0, by.Length);
+            while (osize > 0)
+            {
+                so.Write(by, 0, osize);
+                osize = st.Read(by, 0, by.Length);
+            }
+            st.Close();
+            so.Seek(0, SeekOrigin.Begin);
+            return so;
         }
     }
 }

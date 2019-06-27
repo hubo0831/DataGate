@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DataGate.Com;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -18,6 +20,11 @@ namespace DataGate.App.Files
             this.FileName = request.FileName;
         }
 
+        public ServerUploadRequest()
+        {
+
+        }
+
         /// <summary>服务端接收文件</summary>
         public string ServerFile { get; set; }
 
@@ -27,5 +34,4 @@ namespace DataGate.App.Files
         public string UserId { get; set; }
 
     }
-
 }

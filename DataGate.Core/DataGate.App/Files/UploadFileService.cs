@@ -15,14 +15,10 @@ namespace DataGate.App.Files
         public UploadFileService(SysFileMan fileMan, UploadConfig config)
         {
             _fileMan = fileMan;
-            this._uploadDir = config.FilesDir;
             this._uploadPath = config.UploadFilesPath;
             this.TempPath = config.TempPath;
-          //  ClearTempFiles();
+            //  ClearTempFiles();
         }
-
-        /// <summary>上传目录</summary>
-        string _uploadDir;
 
         /// <summary>上传路径</summary>
         string _uploadPath;
@@ -82,6 +78,7 @@ namespace DataGate.App.Files
             UploadResult result = new UploadResult();
             var doc = await BuildNewCheckExists(request, result);
             result.Id = doc.Id;
+            result.Md5 = doc.Md5;
             return result;
         }
 
@@ -128,6 +125,7 @@ namespace DataGate.App.Files
                 }
                 request.ServerFile = mergeFile;
                 var doc = await BuildNewCheckExists(request, result);
+                result.Md5 = doc.Md5;
                 result.Id = doc.Id;
                 chunkFiles.ForEach(File.Delete);
                 #endregion
@@ -163,7 +161,13 @@ namespace DataGate.App.Files
                 }
                 result.Dup = true;
             }
-            await _fileMan.InsertAsync(doc);
+
+            var dict = CommOp.ToStrObjDict(doc);
+            foreach(var kv in request.Metadata)
+            {
+                dict[kv.Key] = kv.Value;
+            }
+            doc.Id = await _fileMan.InsertAsync(dict);
             return doc;
         }
 
@@ -216,22 +220,24 @@ namespace DataGate.App.Files
         public async Task<DownloadResult> DownloadAsync(string id)
         {
             var result = new DownloadResult();
-            DownloadRequest request = new DownloadRequest();
             var file = await _fileMan.GetByIdAsync(id);
             if (file == null)
             {
                 throw new Exception("指定文件不存在");
             }
-            request.FileName = file.Name;
-            request.ContentRef = file.RelativePath;
-            return DownloadAsync(request, file);
+            return DownloadAsync(file);
         }
 
-        DownloadResult DownloadAsync(DownloadRequest request, SysFile file)
+        /// <summary>
+        /// 根据指定SysFile文件实体信息下载文件，即使SysFile不在数据库中
+        /// </summary>
+        /// <param name="file">SysFile文件实体信息</param>
+        /// <returns>文件下载结果</returns>
+        public DownloadResult DownloadAsync(SysFile file)
         {
             var result = new DownloadResult();
-            result.FileName = request.FileName; //wang加
-            var relativePath = request.ContentRef.Replace('/', '\\');
+            result.FileName = file.Name;
+            var relativePath = file.RelativePath;
             if (result.FileName.IsEmpty()) result.FileName = Path.GetFileName(relativePath);
             var filePath = this._uploadPath + relativePath;
             if (File.Exists(filePath))
