@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using DataGate.App.Models;
 
 namespace DataGate.App.DataService
 {
@@ -21,11 +22,10 @@ namespace DataGate.App.DataService
             {
                 pwd = (string)ps[pwdKey];
             }
-
             string passwordSalt = CommOp.NewId();
             string password = Encryption.MD5(pwd + passwordSalt);
             DateTime createDate = DateTime.Now;
-            string id = (string)ps["id"];
+            string id = (string)ps[GetLUKey(ps, "id")];
             gkey.DataService.DB.ExecNonQuery(@"UPDATE APP_USER SET PASSWORD=@password,
 CREATE_DATE=@createDate,PASSWORD_SALT=@passwordSalt WHERE ID=@id", gkey.DataService.DB.GetParameter(new
             {
