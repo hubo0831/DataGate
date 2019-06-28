@@ -150,9 +150,7 @@ export default {
     };
 
     //Promise.all返回的是一个用户数组，其实每个用户都是一样的
-    var getUserMenus = users => {
-      var user = users[0];
-
+    var getUserMenus = user => {
       this.userPages = user.menus;
       //在最后将user加入到响应式的userState中
       this.userState.currentUser = user;
@@ -174,7 +172,7 @@ export default {
       for (var i in getUserData) {
         us.push(getUserData[i](user));
       }
-      return Promise.all(us);
+      return Promise.all(us).then(() => user);
     };
 
     var getUser = () => {

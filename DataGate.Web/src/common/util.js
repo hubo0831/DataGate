@@ -423,5 +423,26 @@ export default {
     var ext = fileURL.substr(fileURL.lastIndexOf('.') + 1);
     ext = ext.toLowerCase();
     return mineTypes[ext];
+  },
+  isPhoneNumber(mobile) {
+    var tel = /^0\d{2,3}-?\d{7,8}$/;
+    var phone = /^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1}))+\d{8})$/; 
+    if(mobile.length == 11){//手机号码
+      if(phone.test(mobile)) {
+        console.log(mobile);
+        return true;
+      }
+    }else if(mobile.length == 13 && mobile.indexOf("-") != -1 ){//电话号码
+      if(tel.test(mobile)) {
+        console.log(mobile);
+        return true;
+      }
+    }
+    return false;
+  },
+  isEmail(email){
+    var mailReg = /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/;
+    return mailReg.test(email);
   }
+  
 }
