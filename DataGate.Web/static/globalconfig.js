@@ -2,7 +2,7 @@
 // 此对象将在与appConfig合并时消除
 // 所有属性定义转到appConfig下
 window.globalConfig = {
-   apiUrl: 'http://120.77.39.38:8090/wgqeiweb',
+   apiUrl: 'http://192.168.1.249:31300',
    // apiUrl: 'http://localhost:60743',
   systemName: 'DataGate数据管理系统',
   elSize: 2, //控件和字体默认大小 1代表小 2代表中 3代表大
