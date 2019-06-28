@@ -184,9 +184,9 @@ namespace DataGate.App.Files
 
             var level1Dir = doc.CreateTime.ToString("yyyyMM");
             var level2Dir = doc.CreateTime.ToString("ddHH");
-            var docPath = $@"{this._uploadPath}\{level1Dir}\{level2Dir}";
+            var docPath = $@"{this._uploadPath}/{level1Dir}/{level2Dir}";
             if (!Directory.Exists(docPath)) Directory.CreateDirectory(docPath);
-            doc.RelativePath = $@"\{level1Dir}\{level2Dir}\{Guid.NewGuid().ToString("N")}{ext}";
+            doc.RelativePath = $@"/{level1Dir}/{level2Dir}/{Guid.NewGuid().ToString("N")}{ext}";
             doc.ContentType = IOHelper.GetContentType(request.FileName);
             return doc;
         }
@@ -206,14 +206,14 @@ namespace DataGate.App.Files
         private string GetNewChunkFile(ServerUploadRequest request, int chunk)
         {
             var ext = Path.GetExtension(request.FileName);
-            return $@"{this.TempPath}\{request.Guid}_PART_{chunk.ToString()}{ext}";
+            return $@"{this.TempPath}/{request.Guid}_PART_{chunk.ToString()}{ext}";
         }
 
         /// <summary>获得分片合并文件路径</summary>
         private string GetNewMergeFile(ServerUploadRequest request)
         {
             var ext = Path.GetExtension(request.FileName);
-            return $@"{this.TempPath}\{request.Guid}{ext}";
+            return $@"{this.TempPath}/{request.Guid}{ext}";
         }
 
         /// <summary>根据FileID获得相关文件流, wang加</summary>
@@ -276,7 +276,7 @@ namespace DataGate.App.Files
         public Task<List<string>> GetUploadFolderFilesAsync(string folderFullName)
         {
             folderFullName = folderFullName.Replace('/', Path.DirectorySeparatorChar).Trim(Path.DirectorySeparatorChar);
-            var path = $@"{this._uploadPath}\{folderFullName}";
+            var path = $@"{this._uploadPath}/{folderFullName}";
             var files = Directory.GetFiles(path).Select(e => e.Substring(path.Length + 1)).ToList();
             return Task.FromResult(files);
         }
