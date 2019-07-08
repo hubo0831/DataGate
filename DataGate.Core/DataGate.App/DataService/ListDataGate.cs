@@ -104,5 +104,13 @@ namespace DataGate.App.DataService
                 dg.OnRemoved(gkey, param);
             }
         }
+
+        public void OnSubmit(DataGateKey gkey, DataSubmitRequest request)
+        {
+            foreach (var dg in _dataGates.OfType<IGlobalSubmitDataGate>())
+            {
+                dg.OnSubmit(gkey, request);
+            }
+        }
     }
 }

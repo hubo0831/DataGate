@@ -240,6 +240,8 @@ namespace DataGate.App.DataService
         {
             DataGateKey gkey = GetDataGate(key);
 
+            gkey.DataGate.OnSubmit(gkey, request);
+
             //有测试数据时直接返回测试数据
             if (gkey.Data != null)
             {
