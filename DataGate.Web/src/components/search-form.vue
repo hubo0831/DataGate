@@ -9,7 +9,7 @@
               <el-date-picker
                 v-model="meta.value"
                 type="date"
-                @change="onChange"
+                @change="onChange(meta)"
                 clearable
                 placeholder="起始日期"
               ></el-date-picker>
@@ -18,7 +18,7 @@
               <el-date-picker
                 v-model="meta.value1"
                 type="date"
-                @change="onChange"
+                @change="onChange(meta)"
                 clearable
                 placeholder="结束日期"
               ></el-date-picker>
@@ -28,7 +28,7 @@
             <el-date-picker
               v-model="meta.value"
               type="date"
-              @change="onChange"
+              @change="onChange(meta)"
               clearable
               :placeholder="getPlaceholder(meta)"
             ></el-date-picker>
@@ -121,7 +121,12 @@
           ></component>
           <!-- 没有明确定义的组件 -->
           <template v-else>
-            <el-input v-model="meta.value" clearable :placeholder="meta.title" @input="onInput(meta)"></el-input>
+            <el-input
+              v-model="meta.value"
+              clearable
+              :placeholder="meta.title"
+              @input="onInput(meta)"
+            ></el-input>
           </template>
         </div>
       </el-form-item>
@@ -167,7 +172,7 @@ export default {
     metaFilter() {
       //按照原order顺序排序，如果order是负数则取绝对值
       //因为原不显示出来的字段可能也要参加搜索
-      return util.sort(this.metadata, m => Math.abs(m.order));
+      return util.sort(this.metadata, m => Math.abs(m.order || 0));
     }
   },
   watch: {
@@ -176,8 +181,11 @@ export default {
         if (!meta.operator) {
           meta.operator = this.getOperators(meta)[0].value;
         }
-        meta.value = null; //去掉meta的默认值
-        this.$set(meta, "value1", null);
+        if (!("value" in meta) || r == 0) {
+          this.$set(meta, "value", null); //去掉meta的默认值
+          this.$set(meta, "value1", null);
+          r++;
+        }
       });
       task.updateAllOptions(val);
       this.restoreFormValue();
