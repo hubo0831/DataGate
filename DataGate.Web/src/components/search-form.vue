@@ -60,7 +60,7 @@
               clearable
               filterable
               allow-create
-              @change="onChange"
+              @change="onChange(meta)"
               :placeholder="getPlaceholder(meta)"
             >
               <el-option
@@ -75,7 +75,7 @@
             v-else-if="meta.uitype=='CheckBox'"
             v-model="meta.value"
             :true-label="'1'"
-            @change="onChange"
+            @change="onChange(meta)"
             :indeterminate="meta.value !=1 && meta.value!=0"
             :false-label="'0'"
           ></el-checkbox>
@@ -85,7 +85,7 @@
               style="width:100%"
               clearable
               :placeholder="getPlaceholder(meta)"
-              @input="onInput"
+              @input="onInput(meta)"
             ></el-input>
           </template>
           <template v-else-if="meta.uitype=='TextArea'">
@@ -94,13 +94,13 @@
               style="width:100%"
               clearable
               :placeholder="getPlaceholder(meta)"
-              @change="onChange"
+              @change="onChange(meta)"
             ></el-input>
           </template>
           <!-- Custom自定义组件暂时用文本框 -->
           <template v-else-if="meta.uitype=='Custom'">
             <el-input
-              @change="onChange"
+              @change="onChange(meta)"
               style="width:100%"
               v-model="meta.value"
               clearable
@@ -115,13 +115,13 @@
             :meta="meta"
             :obj="meta"
             :in-edit="true"
-            @change="onChange"
+            @change="onChange(meta)"
             :placeholder="getPlaceholder(meta)"
             v-bind="meta.attr"
           ></component>
           <!-- 没有明确定义的组件 -->
           <template v-else>
-            <el-input v-model="meta.value" clearable :placeholder="meta.title" @input="onInput"></el-input>
+            <el-input v-model="meta.value" clearable :placeholder="meta.title" @input="onInput(meta)"></el-input>
           </template>
         </div>
       </el-form-item>
@@ -185,15 +185,15 @@ export default {
   },
 
   methods: {
-    onChange(val) {
+    onChange(meta) {
       //如果只有一个框就立即搜
-      if (this.metaFilter.length == 1) {
+      if (this.metaFilter.length == 1 || meta.fast) {
         this.search();
       }
     },
-    onInput(val) {
+    onInput(meta) {
       //如果只有一个框，文本框，值输入就开始搜
-      if (this.metaFilter.length == 1) {
+      if (this.metaFilter.length == 1 || meta.fast) {
         clearTimeout(timeOut);
         timeOut = setTimeout(this.search, 500);
       }
