@@ -152,7 +152,7 @@ import util from "../common/util.js";
 import editTask from "../common/editTask.js";
 var task = new editTask();
 var timeOut = 0;
-let r = 0;
+
 export default {
   props: {
     //传入的待搜索的元数据定义
@@ -167,6 +167,11 @@ export default {
       default: 150
     }
   },
+  data() {
+    return {
+      r: 0 //确保地址栏会更新，在空按搜索按钮时仍然会搜索
+    };
+  },
   inject: ["urlQuery"],
   computed: {
     metaFilter() {
@@ -177,6 +182,7 @@ export default {
   },
   watch: {
     metadata(val) {
+      let { r } = this;
       val.forEach(meta => {
         if (!meta.operator) {
           meta.operator = this.getOperators(meta)[0].value;
@@ -195,13 +201,19 @@ export default {
   methods: {
     onChange(meta) {
       //如果只有一个框就立即搜
-      if (this.metaFilter.length == 1 || (meta.column && meta.column.fastsearch)) {
+      if (
+        this.metaFilter.length == 1 ||
+        (meta.column && meta.column.fastsearch)
+      ) {
         this.search();
       }
     },
     onInput(meta) {
       //如果只有一个框，文本框，值输入就开始搜
-      if (this.metaFilter.length == 1 || (meta.column && meta.column.fastsearch)) {
+      if (
+        this.metaFilter.length == 1 ||
+        (meta.column && meta.column.fastsearch)
+      ) {
         clearTimeout(timeOut);
         timeOut = setTimeout(this.search, 500);
       }
@@ -324,7 +336,7 @@ export default {
           } else {
             this.$delete(this.urlQuery, "_filter");
           }
-          this.urlQuery._r = r++; //强行修改url让数据能在点按钮时刷新
+          this.urlQuery._r = this.r++; //强行修改url让数据能在点按钮时刷新
           this.$router.replace({
             path: this.$route.path,
             query: this.urlQuery
