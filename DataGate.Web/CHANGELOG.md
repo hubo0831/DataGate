@@ -5,6 +5,7 @@
 1. 升级vue和element-ui到最新版本
 2. 优化search-form，初始化时清除默认值
 3. editTask 增加getSearchMeta()获取查询表单的元数据定义。用Column:{searchable:true}标识。
+4. Column属性中加fastsearch属性以立即搜索表单
 
 ## 0.3.3
 
