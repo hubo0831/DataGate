@@ -184,9 +184,9 @@ export default {
         if (!("value" in meta) || r == 0) {
           this.$set(meta, "value", null); //去掉meta的默认值
           this.$set(meta, "value1", null);
-          r++;
         }
       });
+      r++;
       task.updateAllOptions(val);
       this.restoreFormValue();
     }
@@ -195,13 +195,13 @@ export default {
   methods: {
     onChange(meta) {
       //如果只有一个框就立即搜
-      if (this.metaFilter.length == 1 || meta.fast) {
+      if (this.metaFilter.length == 1 || (meta.column && meta.column.fastsearch)) {
         this.search();
       }
     },
     onInput(meta) {
       //如果只有一个框，文本框，值输入就开始搜
-      if (this.metaFilter.length == 1 || meta.fast) {
+      if (this.metaFilter.length == 1 || (meta.column && meta.column.fastsearch)) {
         clearTimeout(timeOut);
         timeOut = setTimeout(this.search, 500);
       }
