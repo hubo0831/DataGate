@@ -206,6 +206,14 @@ export default {
     }
     return null
   },
+
+  //日期相减得天数
+  dateDiff(dstart, dend) {
+    var days = new Date(dend).getTime() - new Date(dstart).getTime();
+    var day = parseInt(days / (1000 * 60 * 60 * 24));
+    return day;
+  },
+
   //判断对象各属性是否相等，只判断两层
   isEqual: function (a, b) {
     if (a == b) {
@@ -426,23 +434,23 @@ export default {
   },
   isPhoneNumber(mobile) {
     var tel = /^0\d{2,3}-?\d{7,8}$/;
-    var phone = /^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1}))+\d{8})$/; 
-    if(mobile.length == 11){//手机号码
-      if(phone.test(mobile)) {
+    var phone = /^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1}))+\d{8})$/;
+    if (mobile.length == 11) {//手机号码
+      if (phone.test(mobile)) {
         console.log(mobile);
         return true;
       }
-    }else if(mobile.length == 13 && mobile.indexOf("-") != -1 ){//电话号码
-      if(tel.test(mobile)) {
+    } else if (mobile.length == 13 && mobile.indexOf("-") != -1) {//电话号码
+      if (tel.test(mobile)) {
         console.log(mobile);
         return true;
       }
     }
     return false;
   },
-  isEmail(email){
+  isEmail(email) {
     var mailReg = /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/;
     return mailReg.test(email);
   }
-  
+
 }
