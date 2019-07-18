@@ -20,7 +20,7 @@
               v-model="loginModel.account"
               autofocus
               autoselect
-              placeholder="账号"
+              placeholder="账号/手机/邮箱"
             ></el-input>
           </el-form-item>
           <el-form-item prop="password">

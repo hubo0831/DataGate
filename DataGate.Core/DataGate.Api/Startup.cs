@@ -11,6 +11,8 @@ using Autofac.Extensions.DependencyInjection;
 using DataGate.Api.Filters;
 using DataGate.App;
 using DataGate.App.DataService;
+using DataGate.App.Logs;
+using DataGate.App.Models;
 using DataGate.Com.DB;
 using DataGate.Com.Logs;
 using Microsoft.AspNetCore.Builder;
@@ -48,6 +50,28 @@ namespace DataGate.Api
         //}
         public IContainer ApplicationContainer { get; private set; }
 
+        void DefaultBuild(ContainerBuilder builder)
+        {
+            //注册app层
+            builder.RegisterAssemblyTypes(typeof(AppUser).Assembly);
+            builder.RegisterAssemblyTypes(typeof(AppUser).Assembly)
+                   .Where(t => typeof(ISingleton).IsAssignableFrom(t))
+                   .SingleInstance();
+
+            builder.RegisterType<LogInfo>().AsSelf();
+            builder.RegisterType<NLogManager>().As<ILogManager>().SingleInstance();
+
+            builder.Register(c =>
+            {
+                return DBFactory.CreateDBHelper("Default");
+            })
+            .As<DBHelper>();
+            //// .SingleInstance(); 由于事务的存在，DBHelper不能单例
+
+            builder.RegisterGeneric(typeof(DBCrud<>));
+            builder.RegisterType<MetaService>().As<IMetaService>().SingleInstance();
+        }
+
         //先于Configure执行
         public virtual IServiceProvider ConfigureServices(IServiceCollection services)
         {
@@ -74,6 +98,9 @@ namespace DataGate.Api
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             var builder = new ContainerBuilder();//实例化 AutoFac  容器                  
             builder.Populate(services);
+
+            DefaultBuild(builder);
+
             //注册其他程序集中的模块
             builder.RegisterAssemblyModules(AppDomain.CurrentDomain.GetAssemblies());
 
@@ -108,7 +135,7 @@ namespace DataGate.Api
 
             loggerFactory.AddNLog();
             LogHelper.Init(Consts.Get<ILogManager>(), "*");
-           
+
             //默认文件设置为index.html
             var defaultFilesOptions = new DefaultFilesOptions();
             app.UseDefaultFiles(defaultFilesOptions);

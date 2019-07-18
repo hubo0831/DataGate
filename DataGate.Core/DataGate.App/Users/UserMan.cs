@@ -19,7 +19,7 @@ namespace DataGate.App
         /// </summary>
         /// <param name="account"></param>
         /// <returns></returns>
-        public async Task<AppUser> GetAsync(string account)
+        public virtual async Task<AppUser> GetAsync(string account)
         {
             return await GetModelByWhereAsync("account=@account", new { account });
         }
@@ -29,7 +29,7 @@ namespace DataGate.App
         /// </summary>
         /// <param name="tel"></param>
         /// <returns></returns>
-        public async Task<AppUser> GetByTelAsync(string tel)
+        public virtual async Task<AppUser> GetByTelAsync(string tel)
         {
             return await GetModelByWhereAsync("tel=@tel", new { tel });
         }
@@ -39,7 +39,7 @@ namespace DataGate.App
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
-        public async Task<AppUser> GetByEmailAsync(string email)
+        public virtual async Task<AppUser> GetByEmailAsync(string email)
         {
             return await GetModelByWhereAsync("email=@email", new { email });
         }
@@ -49,7 +49,7 @@ namespace DataGate.App
         /// </summary>
         /// <param name="info"></param>
         /// <returns>用户名、手机或邮箱</returns>
-        public async Task<AppUser> GetByAllAsync(string info)
+        public virtual async Task<AppUser> GetByAllAsync(string info)
         {
             return await GetModelByWhereAsync("account=@info OR email=@info OR tel=@info", new { info });
         }

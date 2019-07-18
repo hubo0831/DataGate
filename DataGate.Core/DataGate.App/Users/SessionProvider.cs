@@ -229,11 +229,19 @@ namespace DataGate.App
             _sessionDict.TryAdd(session.Token, session);
 
             DataGateService ds = Consts.Get<DataGateService>();
-            await ds.UpdateAsync("UpdateLastLoginTime", new
+
+            //写最后登录时间，并进一步判断用户是否存在
+            int exists =  await ds.UpdateAsync("UpdateLastLoginTime", new
             {
                 id = user.Id,
                 LastLoginDate = session.LastOpTime
             });
+
+            if (exists == 0)
+            {
+                return MSG.UserNotExists;
+            }
+
             //要求“记住我”时，将登录信息加密回传,根据服务端的加密
             if (request.Remember == "1")
             {
