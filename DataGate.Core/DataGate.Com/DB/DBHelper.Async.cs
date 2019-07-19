@@ -54,10 +54,10 @@ namespace DataGate.Com.DB
                 sc.Parameters.Clear();
                 return rdr;
             }
-            catch (Exception ex)
+            catch
             {
                 EndConn(conn);
-                throw ex;
+                throw;
             }
         }
 
