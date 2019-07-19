@@ -7,7 +7,10 @@ using DataGate.App.Models;
 
 namespace DataGate.App.DataService
 {
-    public class UsersGate : ISubmitedDataGate
+    /// <summary>
+    /// 在用户注册前，将账号信息变小写; 用户注册后，加密密码
+    /// </summary>
+    public class UsersGate : ISubmitDataGate, ISubmitedDataGate
     {
         string GetLUKey(IDictionary<string, object> ps, string key)
         {
@@ -58,6 +61,27 @@ CREATE_DATE=@createDate,PASSWORD_SALT=@passwordSalt WHERE ID=@id", gkey.DataServ
         }
 
         public void OnRemoved(DataGateKey gkey, IDictionary<string, object> ps)
+        {
+        }
+
+        public void OnAdd(DataGateKey gkey, IDictionary<string, object> ps)
+        {
+            foreach (string key in new string[] { "account", "email", "tel" })
+            {
+                string accountKey = GetLUKey(ps, key);
+                if (!accountKey.IsEmpty())
+                {
+                    ps[accountKey] = CommOp.ToStr(ps[accountKey]).ToLower();
+                }
+            }
+        }
+
+        public void OnChange(DataGateKey gkey, IDictionary<string, object> ps)
+        {
+            OnAdd(gkey, ps);
+        }
+
+        public void OnRemove(DataGateKey gkey, IDictionary<string, object> ps)
         {
         }
     }

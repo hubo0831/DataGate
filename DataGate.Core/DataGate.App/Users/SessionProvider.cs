@@ -194,6 +194,7 @@ namespace DataGate.App
                 requestPass = request.Password;
             }
             AppUser user = null;
+            request.Account = request.Account.ToLower();
             if (user == null && CommOp.IsEmail(request.Account))
             {
                 user = await _user.GetByEmailAsync(request.Account);
@@ -315,7 +316,7 @@ namespace DataGate.App
         public async Task<ApiResult> CheckNewUserAsync(AppUser user)
         {
             ApiResult result = new ApiResult();
-
+            user.Account = user.Account.ToLower();
             AppUser existsUser = await _user.GetAsync(user.Account);
             if (existsUser != null)
             {
@@ -324,6 +325,7 @@ namespace DataGate.App
 
             if (!user.Tel.IsEmpty())
             {
+                user.Tel = user.Tel.ToLower();
                 existsUser = await _user.GetByTelAsync(user.Tel);
             }
             if (existsUser != null)
@@ -333,6 +335,7 @@ namespace DataGate.App
 
             if (!user.Email.IsEmpty())
             {
+                user.Email = user.Email.ToLower();
                 existsUser = await _user.GetByEmailAsync(user.Email);
             }
             if (existsUser != null)
