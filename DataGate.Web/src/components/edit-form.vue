@@ -285,6 +285,12 @@ export default {
         return dfd.promise;
       }
     },
+    clearValidate(arr){
+      this.$refs.editForm.clearValidate(arr);
+    },
+    validateField(f, c){
+     this.$refs.editForm.validateField(f, c);
+    },
     resetFields() {
       this.$refs.editForm.resetFields();
     },
