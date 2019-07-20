@@ -132,6 +132,7 @@ export default function editTask() {
       rules[meta.name] = [];
       if (meta.required) {
         var requiredRule = {
+          meta,
           validator: validateRequired,
           required: true,
           message: '请输入' + meta.title,
@@ -142,6 +143,7 @@ export default function editTask() {
       //数字验证规则
       if (meta.datatype == "Number" && (typeof meta.attr.min == 'number' || typeof meta.attr.max == 'number')) {
         var minMaxRule = {
+          meta,
           validator: validateNumber,
           min: meta.attr.min,
           max: meta.attr.max,
@@ -152,6 +154,7 @@ export default function editTask() {
       //正则表达式验证规则
       if (meta.attr.pattern) {
         var patternRule = {
+          meta,
           validator: validateReg,
           pattern: meta.attr.pattern,
           trigger: 'change'
@@ -211,10 +214,17 @@ export default function editTask() {
     if (this.rules[meta.name].some(v => v.validator == validateFunc)) {
       return;
     }
-    this.rules[meta.name].push({
-      validator: validateFunc,
-      trigger: 'blur'
-    })
+    if (typeof validateFunc == 'function') {
+      this.rules[meta.name].push({
+        meta,
+        validator: validateFunc,
+        trigger: 'blur'
+      })
+    }
+    else {
+      validateFunc.meta = meta;
+      this.rules[meta.name].push(validateFunc);
+    }
   }
 
   function guessDataType(meta) {
@@ -426,7 +436,7 @@ export default function editTask() {
 
   //根据，分隔的字符串或一个字符串数组，获取元数据定义子集
   this.getMetas = names => {
-    if (typeof names == 'string'){
+    if (typeof names == 'string') {
       names = names.split(',');
     }
     return this.metadata.filter(m => names.includes(m.name));
