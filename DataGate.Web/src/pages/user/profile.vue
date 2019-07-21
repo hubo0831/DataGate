@@ -1,7 +1,7 @@
 <template>
   <el-row>
     <el-col :xs="24" :sm="24" :md="18" :lg="12" :xl="8">
-      <el-form ref="form" :model="form" :rules="rules" size="mini" label-width="80px">
+      <el-form ref="profileForm" :model="form" :rules="rules" inline-message size="mini" label-width="80px">
         <el-form-item label="账号">
           <el-input v-model="form.account" disabled></el-input>
         </el-form-item>
@@ -27,17 +27,45 @@ import * as API from "../../api";
 
 export default {
   data() {
+    //设置用户账号手机邮箱自定义检验规则，validateFunc的签名是(rule, value, callback)
+    //验证不通过时是callback(new Error('错误信息'));通过时空的callback()
+    const validateAccountTelEmail = (rule, value, callback) => {
+      value = value || "";
+      API.QUERY("CheckUser", {
+        key: value.toLowerCase(),
+        id: this.userState.currentUser.id
+      }).then(r => {
+        if (r.cnt > 0) {
+          callback(new Error(`${rule.title}已注册，请换一个名称`));
+        } else {
+          callback();
+        }
+      });
+    };
+
     return {
       form: {},
       rules: {
         name: [{ required: true, message: "请输入姓名", trigger: "blur" }],
-        tel: [{ required: true, message: "请输入手机或电话", trigger: "blur" }],
+        tel: [
+          { required: true, message: "请输入手机或电话", trigger: "blur" },
+          {
+            validator: validateAccountTelEmail,
+            trigger: "blur",
+            title: "手机"
+          }
+        ],
         email: [
           { required: true, message: "请输入邮箱", trigger: "blur" },
           {
             type: "email",
             message: "请输入正确的邮箱地址",
             trigger: "blur,change"
+          },
+          {
+            validator: validateAccountTelEmail,
+            trigger: "blur",
+            title: "邮箱"
           }
         ]
       }
@@ -48,13 +76,13 @@ export default {
   },
   methods: {
     doSave() {
-      let that = this;
-      that.$refs.form.validate(valid => {
+      let { form } = this;
+      this.$refs.profileForm.validate(valid => {
         if (valid) {
           let args = {
-            name: that.form.name,
-            tel: that.form.tel,
-            email: that.form.email
+            name: form.name,
+            tel: form.tel,
+            email: form.email
           };
           API.POST("/api/check/ChangeProfile", args).done(r => {
             $.extend(this.userState.currentUser, args);

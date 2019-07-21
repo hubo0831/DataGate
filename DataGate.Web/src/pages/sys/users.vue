@@ -38,19 +38,6 @@
   </el-row>
 </template>
 <script>
-//设置用户账号手机邮箱自定义检验规则，validateFunc的签名是(rule, value, callback)
-//验证不通过时是callback(new Error('错误信息'));通过时空的callback()
-function validateAccountTelEmail(rule, value, callback) {
-  value = value || "";
-  API.QUERY("CheckNewUser", { key: value.toLowerCase() }).then(r => {
-    if (r.cnt > 0) {
-      callback(new Error("用户账号/手机/邮箱已注册，请换一个名称"));
-    } else {
-      callback();
-    }
-  });
-}
-
 // import "jquery-slimscroll";
 import TaskMixin from "../taskmixin.js";
 import * as API from "../../api";
@@ -71,6 +58,22 @@ export default {
       .done((meta, roles) => {
         this.allRoles = roles[0];
         this.task.setMetadata(meta[0]);
+        //设置用户账号手机邮箱自定义检验规则，validateFunc的签名是(rule, value, callback)
+        //验证不通过时是callback(new Error('错误信息'));通过时空的callback()
+        const validateAccountTelEmail = (rule, value, callback) => {
+          value = value || "";
+          API.QUERY("CheckUser", {
+            key: value.toLowerCase(),
+            id: this.task.editBuffer.id
+          }).then(r => {
+            if (r.cnt > 0) {
+              callback(new Error(`用户${rule.meta.title}已注册，请换一个名称`));
+            } else {
+              callback();
+            }
+          });
+        };
+
         this.task.setRule("account", validateAccountTelEmail);
         this.task.setRule("email", validateAccountTelEmail);
         this.task.setRule("tel", validateAccountTelEmail);

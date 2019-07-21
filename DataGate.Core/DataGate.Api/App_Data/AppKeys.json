@@ -24,9 +24,9 @@
     "OrderBy": "account"
   },
   {
-    "Key": "CheckNewUser",
+    "Key": "CheckUser",
     "Name": "检查注册用户信息有无重复",
-    "Sql": "SELECT COUNT(1) cnt FROM APP_USER WHERE ACCOUNT=@key OR EMAIL=@key OR TEL=@key",
+    "Sql": "SELECT COUNT(1) cnt FROM APP_USER WHERE (ACCOUNT=@key OR EMAIL=@key OR TEL=@key) AND ID!=@id",
     "OpType": "GetObject"
   },
   {

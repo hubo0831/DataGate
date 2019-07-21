@@ -1,7 +1,7 @@
 <template>
   <el-row class="warp">
     <el-col :span="12" class="warp-main">
-      <el-form ref="form" status-icon :model="form" label-width="100px" :rules="rules" size="mini">
+      <el-form ref="form" status-icon :model="form" label-width="100px" inline-message :rules="rules" size="mini">
         <el-form-item label="账号">
           <label>{{userState.currentUser.account}}</label>
         </el-form-item>
