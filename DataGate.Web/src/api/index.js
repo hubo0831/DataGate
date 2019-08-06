@@ -140,7 +140,7 @@ export const EXPORT = (key, params) => {
   });
 }
 
-export const getDownloadUrl = file => {
-  file.url = `${appConfig.apiUrl}/api/dg/d/${file.id}/${file.name}?token=${userState.token}`;
+export const getDownloadUrl = file => {  
+  file.url = `${appConfig.apiUrl}/api/dg/d/${file.id}/${encodeURI(file.name)}?token=${userState.token}`;
   return file;
 }
