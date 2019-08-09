@@ -3,7 +3,7 @@
   <div class="tagmenu">
     <i :class="menu.iconCls || 'fa fa-file-o'"></i>
     {{menu.name}}
-    <sup v-if="menu.tag">{{menu.tag}}</sup>
+    <span class="sup" v-if="menu.tag">{{menu.tag}}</span>
   </div>
 </template>
 
@@ -15,7 +15,7 @@ export default {
 
 <style lang="scss" scoped>
 .tagmenu {
-  sup {
+  .sup {
     position: relative;
     right: 5px;
     top: -5px;
@@ -24,7 +24,6 @@ export default {
     
     border-radius: 10px;
     padding:2px 5px;
-
   }
 }
 </style>
