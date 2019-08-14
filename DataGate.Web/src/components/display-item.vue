@@ -24,6 +24,7 @@
       :meta="meta"
       :obj="obj"
       :in-form="inForm"
+      v-bind="meta.attr"
     ></component>
     <template v-else>{{ value }}</template>
   </div>

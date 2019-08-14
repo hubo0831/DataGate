@@ -29,6 +29,7 @@ namespace DataGate.Api.Controllers
         public async Task<UploadResult> Upload(UploadRequest request)
         {
             var userSession = GetSession();
+            BuildMetadata(request);
             ServerUploadRequest request2 = new ServerUploadRequest(request);
             request2.UserId = userSession?.Id;
 
@@ -46,6 +47,23 @@ namespace DataGate.Api.Controllers
             }
 
             return await _fileService.UploadAsync(request2);
+        }
+
+        static string[] requestConstProps = typeof(UploadRequest).GetProperties().Select(p => p.Name).ToArray();
+
+        /// <summary>
+        /// 将Reqesut.Form中没有在UploadRequest中定义的属性放到Metadata属性中。
+        /// </summary>
+        /// <param name="request"></param>
+        private void BuildMetadata(UploadRequest request)
+        {
+            foreach (string key in this.Request.Form.Keys)
+            {
+                if (!requestConstProps.Contains(key, StringComparer.OrdinalIgnoreCase))
+                {
+                    request.Metadata[key] = CommOp.ToStr(Request.Form[key]);
+                }
+            }
         }
 
         /// <summary>

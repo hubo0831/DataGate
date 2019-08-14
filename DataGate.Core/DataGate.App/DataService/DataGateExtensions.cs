@@ -28,5 +28,6 @@ namespace DataGate.App.DataService
         {
             return tableMeta.Fields.FirstOrDefault(f => f.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
+
     }
 }

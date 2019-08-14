@@ -320,7 +320,13 @@ namespace DataGate.App.DataService
 
                 if (reg.IsMatch(filter))
                 {
-                    filter = reg.Replace(filter, $"$1{tableMeta.FixDbName}$2");
+                    string suffixDbName = tableMeta.FixDbName;
+                    //表的逻辑名称和物理名称不对应的情况下，在字段名前加别名前缀，否则加物理名称前缀
+                    if (IsVirtualTable(tableMeta))
+                    {
+                        suffixDbName = tableMeta.Name;
+                    }
+                    filter = reg.Replace(filter, $"$1{suffixDbName}$2");
                 }
 
                 foreach (var field in tableMeta.Fields)
@@ -1070,10 +1076,21 @@ namespace DataGate.App.DataService
             };
         }
 
+        /// <summary>
+        /// 判断是否是虚表（name和DbName不对应）
+        /// </summary>
+        /// <param name="meta"></param>
+        /// <returns></returns>
+        private bool IsVirtualTable(TableMeta meta)
+        {
+            return DB.GetDbObjName(meta.Name) != meta.DbName; 
+        }
+
         //单表不分页sql
         private string BuildSql(DataGateKey gkey)
         {
             var tableMeta = gkey.MainTable;
+            
             if (tableMeta == null)
             {
                 return gkey.Sql;
@@ -1097,9 +1114,7 @@ namespace DataGate.App.DataService
             {
                 return gkey.Sql;
             }
-            {
-                return $"SELECT * FROM ({gkey.Sql}) {tableMeta.DbName} {sql}";
-            }
+            return $"SELECT * FROM ({gkey.Sql}) {tableMeta.DbName} {sql}";
         }
 
         //单表不分页查询，将orderby子句中的属性名替换成数据库字段限定名

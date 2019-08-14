@@ -98,10 +98,10 @@
                   <i v-bind:class="getStateIco(scope.row).ico"></i>
                 </el-tooltip>
                 <a href="javascript:;" @click="download(file)">
-                  <i class="el-icon-download" title="下载文件"/>
+                  <i class="el-icon-download" title="下载文件" />
                 </a>
                 <a href="javascript:;" v-on:click="removeFile(scope.row)">
-                  <i class="el-icon-delete" title="删除"/>
+                  <i class="el-icon-delete" title="删除" />
                 </a>
               </template>
             </el-table-column>
@@ -187,7 +187,7 @@ export default {
     },
     //webuploader的各个初始化选项
     //参考：http://fex.baidu.com/webuploader/doc/index.html#WebUploader_Uploader
-    options: {
+    uploadOptions: {
       type: Object,
       default() {
         return {};
@@ -213,6 +213,7 @@ export default {
       isInProgress: false,
       progress: [], //用以计算总进度的文件数组
       totalSize: 0,
+      options: {},
       totalFinishedSize: 0,
       paused: false //在一次上传过程中暂停
     };
@@ -278,11 +279,12 @@ export default {
       //fileSingleSizeLimit: 50 * 1024 * 1024    // 50 M
     };
 
-    $.extend(optionsDefault, this.appConfig.uploadOptions);
-    //合并默认选项和传入的选项
-    for (var i in optionsDefault) {
-      that.options[i] = optionsDefault[i];
-    }
+    $.extend(
+      this.options,
+      optionsDefault,
+      this.appConfig.uploadOptions,
+      this.uploadOptions
+    );
 
     if (this.options.fileNumLimit == 1) {
       that.options.pick.multiple = false;

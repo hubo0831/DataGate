@@ -103,6 +103,7 @@
           style="margin-right:30px"
           :height="height?height - 90:0"
           :label-width="labelWidth"
+          v-on="$listeners"
         >
           <slot name="edit-form-item">
             <!-- UIType='Custome'的组件在edit-from内的插槽 -->

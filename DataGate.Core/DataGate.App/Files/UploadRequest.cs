@@ -5,6 +5,11 @@ namespace DataGate.App.Files
     /// <summary>文件上传请求</summary>
     public class UploadRequest
     {
+        /// <summary>
+        /// ID可以为空
+        /// </summary>
+        public string Id { get; set; }
+
         /// <summary>上传文件的MD5</summary>
         public string Md5 { get; set; }
 

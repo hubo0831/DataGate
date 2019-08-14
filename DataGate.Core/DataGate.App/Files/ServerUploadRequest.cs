@@ -18,6 +18,7 @@ namespace DataGate.App.Files
             this.Chunk = request.Chunk;
             this.Chunks = request.Chunks;
             this.FileName = request.FileName;
+            this.Metadata = request.Metadata;
         }
 
         public ServerUploadRequest()
