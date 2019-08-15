@@ -39,6 +39,7 @@ export default {
   },
   methods: {
     createQuery() {
+      this.urlQuery = {};
       for (var i in this.$route.query) {
         this.urlQuery[i] = this.$route.query[i];
       }

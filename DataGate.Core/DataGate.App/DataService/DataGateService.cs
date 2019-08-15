@@ -1087,6 +1087,7 @@ namespace DataGate.App.DataService
         }
 
         //单表不分页sql
+        // TODO: 处理没有考虑单表的虚拟表情况
         private string BuildSql(DataGateKey gkey)
         {
             var tableMeta = gkey.MainTable;
