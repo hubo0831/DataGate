@@ -2,7 +2,7 @@ import util from "../common/util"
 import * as API from "../api"
 import appConfig from "../appConfig"
 import Vue from "vue"
-
+import lodash from 'lodash';
 //用于批量编辑和批量保存,跟踪和维护对象列表中对列的增删改状态
 export default function editTask() {
   var that = this;
@@ -282,7 +282,7 @@ export default function editTask() {
   this.getSearchMeta = function () {
     return this.metadata
       .filter(m => m.column.searchable)
-      .map(m => $.extend({}, m));
+      .map(m => lodash.cloneDeep(m));
   }
 
   //重新定义元数据属性, 并从原有元数据定义抽取未定义属性
