@@ -2,7 +2,7 @@
   <div v-on:keyup.enter="search" v-if="metadata.length">
     <!-- @*筛选条件组件*@ -->
     <el-form :inline="true">
-      <el-form-item v-for="meta in metaFilter" :key="meta.name" :label="meta.title">
+      <el-form-item v-for="meta in metadata" :key="meta.name" :label="meta.title">
         <template v-if="meta.uitype=='Date'|| meta.uitype=='DateTime'">
           <div v-if="meta.operator=='bt'">
             <span>
@@ -136,7 +136,7 @@
             type="primary"
             icon="fa fa-search"
             title="搜索"
-            v-if="metaFilter.length>1"
+            v-if="metadata.length>1"
             native-type="submit"
             @click.prevent="search"
           ></el-button>
@@ -173,26 +173,19 @@ export default {
     };
   },
   inject: ["urlQuery"],
-  computed: {
-    metaFilter() {
-      //按照原order顺序排序，如果order是负数则取绝对值
-      //因为原不显示出来的字段可能也要参加搜索
-      return util.sort(this.metadata, m => Math.abs(m.order || 0));
-    }
-  },
   watch: {
     metadata(val) {
-      let { r } = this;
       val.forEach(meta => {
         if (!meta.operator) {
           meta.operator = this.getOperators(meta)[0].value;
         }
-        if (!("value" in meta) || r == 0) {
+        if (!("value" in meta) || this.r == 0) {
           this.$set(meta, "value", null); //去掉meta的默认值
           this.$set(meta, "value1", null);
         }
       });
-      r++;
+      this.r++;
+    //  console.log("serach-form created" + this.r);
       task.updateAllOptions(val);
       this.restoreFormValue();
     }
@@ -202,7 +195,7 @@ export default {
     onChange(meta) {
       //如果只有一个框就立即搜
       if (
-        this.metaFilter.length == 1 ||
+        this.metadata.length == 1 ||
         (meta.column && meta.column.fastsearch)
       ) {
         this.search();
@@ -211,19 +204,20 @@ export default {
     onInput(meta) {
       //如果只有一个框，文本框，值输入就开始搜
       if (
-        this.metaFilter.length == 1 ||
+        this.metadata.length == 1 ||
         (meta.column && meta.column.fastsearch)
       ) {
         clearTimeout(timeOut);
         timeOut = setTimeout(this.search, 500);
       }
     },
+    //根据地址栏查询参数恢复查询表单中的值
     restoreFormValue() {
-      var query = this.urlQuery._filter;
+      var query = this.$route.query._filter;
       if (query) query = JSON.parse(query);
       if (!query) return;
       for (var i in query) {
-        var meta = this.metaFilter.find(f => f.name == query[i].n);
+        var meta = this.metadata.find(f => f.name == query[i].n);
         if (!meta) continue;
         meta.value = query[i].v;
         if (query[i].v1) meta.value1 = query[i].v1;
