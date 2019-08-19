@@ -852,9 +852,11 @@ namespace DataGate.App.DataService
                     case "ne":
                         return $"{left}!=@{pName}";
                     case "in":
-                        return $"{left} in @({pName})";
+                        ps[pName] = CommOp.ToStr(ps[pName]).Split(',');
+                        return $"{left} in (@{pName})";
                     case "nin":
-                        return $"{left} not in @({pName})";
+                        ps[pName] = CommOp.ToStr(ps[pName]).Split(',');
+                        return $"{left} not in (@{pName})";
                     case "i":
                         ps[pName] = "%" + r.Value + '%';
                         return $"{left} like @{pName}";

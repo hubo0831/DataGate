@@ -175,6 +175,7 @@ export default {
   inject: ["urlQuery"],
   watch: {
     metadata(val) {
+      //TODO: 此处会多次进入
       val.forEach(meta => {
         if (!meta.operator) {
           meta.operator = this.getOperators(meta)[0].value;
@@ -185,6 +186,7 @@ export default {
         }
       });
       this.r++;
+      
     //  console.log("serach-form created" + this.r);
       task.updateAllOptions(val);
       this.restoreFormValue();
