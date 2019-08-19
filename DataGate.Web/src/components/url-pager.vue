@@ -16,7 +16,6 @@ export default {
   props: {
     total: Number
   },
-  inject: ["urlQuery"],
   data() {
     return {
       pageIndex: 1,
@@ -25,18 +24,18 @@ export default {
   },
   created() {
     this.pageSize =
-      parseInt(this.urlQuery["pagesize"]) ||
+      parseInt(this.$route.query["pagesize"]) ||
       parseInt(Util.getCookie("pageSize")) ||
       20;
   },
   watch: {
     total() {
-      this.pageIndex = parseInt(this.urlQuery.pageindex) || 1;
+      this.pageIndex = parseInt(this.$route.query.pageindex) || 1;
     }
   },
   methods: {
     handleSizeChange(val) {
-      this.urlQuery.pagesize = val;
+      this.$route.query.pagesize = val;
       Util.setCookie("pageSize", val, 24 * 60 * 14);
       //如果不想url分页，则调用此事件,并args.passed=false
       if (
@@ -46,11 +45,15 @@ export default {
         }).passed
       ) {
         //直接url跳转
-        this.$router.replace({ path: this.$route.path, query: this.urlQuery });
+        this.$router.replace({
+          path: this.$route.path,
+          query: this.$route.query
+        });
       }
     },
     handleCurrentChange(val) {
-      this.urlQuery.pageindex = val;
+      let query = $.extend({}, this.$route.query);
+      query.pageindex = val;
       //如果不想url分页，则调用此事件,并args.passed=false
       if (
         this.$emitPass("page-change", {
@@ -59,7 +62,7 @@ export default {
         }).passed
       ) {
         //直接url跳转
-        this.$router.replace({ path: this.$route.path, query: this.urlQuery });
+        this.$router.replace({ path: this.$route.path, query });
       }
     }
   }

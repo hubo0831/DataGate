@@ -172,7 +172,6 @@ export default {
       r: 0 //确保地址栏会更新，在空按搜索按钮时仍然会搜索
     };
   },
-  inject: ["urlQuery"],
   watch: {
     metadata(val) {
       //TODO: 此处会多次进入
@@ -186,8 +185,8 @@ export default {
         }
       });
       this.r++;
-      
-    //  console.log("serach-form created" + this.r);
+
+      //  console.log("serach-form created" + this.r);
       task.updateAllOptions(val);
       this.restoreFormValue();
     }
@@ -321,6 +320,7 @@ export default {
       //   })
       //   .join("`");
       this.validate(valid => {
+        let query = $.extend({}, this.$route.query);
         if (valid && this.$emitPass("search", filter).passed) {
           if (filter.length) {
             var f = JSON.stringify(filter);
@@ -328,14 +328,14 @@ export default {
               this.$message.error("您输入的查询条件过长，请适当减少一些条件。");
               return;
             }
-            this.urlQuery._filter = f;
+            query._filter = f;
           } else {
-            this.$delete(this.urlQuery, "_filter");
+            delete query._filter;
           }
-          this.urlQuery._r = this.r++; //强行修改url让数据能在点按钮时刷新
+          query._r = this.r++; //强行修改url让数据能在点按钮时刷新
           this.$router.replace({
             path: this.$route.path,
-            query: this.urlQuery
+            query
           });
         }
       });
