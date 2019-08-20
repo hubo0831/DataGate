@@ -35,7 +35,8 @@ export default {
   },
   methods: {
     handleSizeChange(val) {
-      this.$route.query.pagesize = val;
+      let query = $.extend({}, this.$route.query);
+      query.pagesize = val;
       Util.setCookie("pageSize", val, 24 * 60 * 14);
       //如果不想url分页，则调用此事件,并args.passed=false
       if (
@@ -47,7 +48,7 @@ export default {
         //直接url跳转
         this.$router.replace({
           path: this.$route.path,
-          query: this.$route.query
+          query
         });
       }
     },
