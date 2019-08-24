@@ -51,7 +51,7 @@ CREATE_DATE=@createDate,PASSWORD_SALT=@passwordSalt WHERE ID=@id", gkey.DataServ
             string passwordSalt = CommOp.NewId();
             string password = Encryption.MD5(pwd + passwordSalt);
             DateTime createDate = DateTime.Now;
-            string id = (string)ps["id"];
+            string id = (string)ps[GetLUKey(ps, "id")];
             gkey.DataService.DB.ExecNonQuery(@"UPDATE APP_USER SET PASSWORD=@password, PASSWORD_SALT=@passwordSalt WHERE ID=@id", gkey.DataService.DB.GetParameter(new
             {
                 password,

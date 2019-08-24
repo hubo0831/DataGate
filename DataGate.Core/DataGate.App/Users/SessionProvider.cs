@@ -330,7 +330,7 @@ namespace DataGate.App
             }
             if (existsUser != null)
             {
-                throw new Exception("该号码被注册过了");
+                throw new Exception("该电话号码被注册过了");
             }
 
             if (!user.Email.IsEmpty())
