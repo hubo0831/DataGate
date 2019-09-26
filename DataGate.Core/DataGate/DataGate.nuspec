@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>$id$</id>
-    <version>0.2.1</version>
+    <version>0.2.2</version>
     <title>$title$</title>
     <authors>$authors$</authors>
     <owners>$author$</owners>
@@ -15,8 +15,8 @@
     <releaseNotes>v0.1.6 数据字典文件自动生成工具</releaseNotes>
     <tags>DataGate Main</tags>
     <dependencies>
-      <dependency id="DataGate.Com" version="0.2.1" />
-      <dependency id="DataGate.App" version="0.2.1" />
+      <dependency id="DataGate.Com" version="0.2.2" />
+      <dependency id="DataGate.App" version="0.2.2" />
     </dependencies>
   </metadata>
 </package>
