@@ -10,7 +10,7 @@ namespace DataGate.Com
     /// </summary>
     public sealed class Frame
     {
-        public const string Version = "0.2.1";
+        public const string Version = "0.2.2";
 
         public const string CompanyName = "bwangel@163.com";
 
