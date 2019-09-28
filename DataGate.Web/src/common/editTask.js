@@ -105,7 +105,7 @@ export default function editTask() {
         m.column.sortable = true;
       }
 
-      if (!m.align) {
+      if (!m.column.align) {
         //数字默认右对齐
         if (m.datatype == "Number") m.column.align = "right";
         //日期默认居中对齐
@@ -460,7 +460,7 @@ export default function editTask() {
 
     for (var i in this.metadata) {
       var d = this.metadata[i];
-      if (d.uitype == "Operator") continue;
+      if (d.datatype == "Operator") continue;
       if (!obj[d.name]) { //防止files字段被重新赋值
         obj[d.name] = d.value;
       }
