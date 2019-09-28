@@ -172,7 +172,7 @@ namespace DataGate.Tests
             }
             HttpResponseMessage response = await SessionClient.GetAsync(url);
             var resultStr = await response.Content.ReadAsStringAsync();
-            Console.WriteLine("HTTPGET-RESULT-STRING=" + resultStr);
+            Debug.WriteLine("HTTPGET-RESULT-STRING=" + resultStr);
             Assert.True(response.IsSuccessStatusCode);
             return await response.Content.ReadAsAsync<T>();
         }

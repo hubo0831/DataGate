@@ -532,7 +532,7 @@ namespace DataGate.App.DataService
                             return null;
                         }
                         //过滤掉自定义操作列
-                        else if (f.UIType == Consts.OperatorUIType)
+                        else if (f.DataType == Consts.OperatorUIType)
                         {
                             return null;
                         }
@@ -563,7 +563,7 @@ namespace DataGate.App.DataService
                     return null;
                 }
                 //过滤掉自定义操作列
-                else if (f.UIType == Consts.OperatorUIType)
+                else if (f.DataType == Consts.OperatorUIType)
                 {
                     return null;
                 }

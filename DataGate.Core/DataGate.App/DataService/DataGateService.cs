@@ -701,7 +701,7 @@ namespace DataGate.App.DataService
                         newRow[fm.Name] = GetChildItems(fm, drs);
                         return;
                     }
-                    else if (fm.UIType == Consts.OperatorUIType)
+                    else if (fm.DataType == Consts.OperatorUIType)
                     {
                         return;
                     }
@@ -791,7 +791,7 @@ namespace DataGate.App.DataService
                         newRow[fm.Name] = GetChildItems(fm, drs);
                         return;
                     }
-                    else if (fm.UIType == Consts.OperatorUIType)
+                    else if (fm.DataType == Consts.OperatorUIType)
                     {
                         return;
                     }
