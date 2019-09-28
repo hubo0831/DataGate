@@ -57,6 +57,7 @@ namespace DataGate.App
                     rng.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                     rng.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(234, 241, 246));  //Set color to dark blue
                     rng.Style.Font.Color.SetColor(Color.FromArgb(51, 51, 51));
+                    rng.AutoFitColumns();
                 }
                 MemoryStream ms = new MemoryStream(pck.GetAsByteArray());
                 return ms;
