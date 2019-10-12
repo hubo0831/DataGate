@@ -20,8 +20,8 @@
         style="width: 100%;"
         v-bind="options"
       >
-        <el-table-column type="selection" v-if="multiSelect"></el-table-column>
-        <el-table-column type="index" v-if="showIndex"></el-table-column>
+        <el-table-column type="selection" :fixed="hasFixedColumn" v-if="multiSelect"></el-table-column>
+        <el-table-column type="index" :fixed="hasFixedColumn" v-if="showIndex"></el-table-column>
         <el-table-column
           :show-overflow-tooltip="meta.column.minWidth>120"
           :prop="meta.name"
@@ -201,6 +201,9 @@ export default {
   computed: {
     dataList() {
       return this.data || this.task.products;
+    },
+    hasFixedColumn(){
+      return this.metaFilter.some(m=>m.column.fixed);
     },
     metaFilter() {
       var metas = this.metadata || this.task.metadata;

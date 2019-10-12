@@ -57,8 +57,19 @@ namespace DataGate.App
                     rng.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                     rng.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(234, 241, 246));  //Set color to dark blue
                     rng.Style.Font.Color.SetColor(Color.FromArgb(51, 51, 51));
-                    rng.AutoFitColumns();
+
+                    for (int i = 1; i <= rng.Columns; i++)
+                    {
+                        int width = CommOp.ToInt(sourceTable.Columns[i - 1].ExtendedProperties["width"]);
+                        if (width > 0)
+                            ws.Column(i).Width = width / 6;
+                        else
+                            ws.Column(i).AutoFit(20);
+                    }
+                    //   rng.AutoFitColumns();
                 }
+
+
                 MemoryStream ms = new MemoryStream(pck.GetAsByteArray());
                 return ms;
                 //Write it back to the client
