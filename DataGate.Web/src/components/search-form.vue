@@ -1,151 +1,144 @@
 <template>
-  <div v-on:keyup.enter.prevent="search" v-if="metadata.length">
-    <!-- @*筛选条件组件*@ -->
-    <el-form :inline="true">
-      <el-form-item v-for="meta in metadata" :key="meta.name" :label="meta.title">
-        <template v-if="meta.uitype=='Date'|| meta.uitype=='DateTime'">
-          <div v-if="meta.operator=='bt'">
-            <span>
-              <el-date-picker
-                v-model="meta.value"
-                type="date"
-                @change="onChange(meta)"
-                clearable
-                placeholder="起始日期"
-              ></el-date-picker>
-            </span> ~
-            <span>
-              <el-date-picker
-                v-model="meta.value1"
-                type="date"
-                @change="onChange(meta)"
-                clearable
-                placeholder="结束日期"
-              ></el-date-picker>
-            </span>
-          </div>
-          <span v-else>
+  <!-- @*筛选条件组件*@ -->
+  <el-form :inline="true" @submit.native.prevent="search" v-if="metadata.length">
+    <el-form-item v-for="meta in metadata" :key="meta.name" :label="meta.title">
+      <template v-if="meta.uitype=='Date'|| meta.uitype=='DateTime'">
+        <div v-if="meta.operator=='bt'">
+          <span>
             <el-date-picker
               v-model="meta.value"
               type="date"
               @change="onChange(meta)"
               clearable
-              :placeholder="getPlaceholder(meta)"
+              placeholder="起始日期"
+            ></el-date-picker>
+          </span> ~
+          <span>
+            <el-date-picker
+              v-model="meta.value1"
+              type="date"
+              @change="onChange(meta)"
+              clearable
+              placeholder="结束日期"
             ></el-date-picker>
           </span>
-        </template>
-        <div :style="{width:itemWidth+'px'}" v-else>
-          <template v-if="meta.uitype=='List'">
-            <el-select
-              v-model="meta.value"
-              multiple
-              filterable
-              @change="onChange"
-              allow-create
-              style="width:100%"
-              :placeholder="getPlaceholder(meta)"
-            >
-              <el-option
-                v-for="sel in meta.options"
-                :key="sel.value"
-                :label="sel.text"
-                :value="sel.value"
-              ></el-option>
-            </el-select>
-          </template>
-          <template v-else-if="meta.uitype=='DropdownList'">
-            <el-select
-              v-model="meta.value"
-              style="width:100%"
-              clearable
-              filterable
-              allow-create
-              @change="onChange(meta)"
-              :placeholder="getPlaceholder(meta)"
-            >
-              <el-option
-                v-for="sel in meta.options"
-                :key="sel.value"
-                :label="sel.text"
-                :value="sel.value"
-              ></el-option>
-            </el-select>
-          </template>
-          <el-checkbox
-            v-else-if="meta.uitype=='CheckBox'"
+        </div>
+        <span v-else>
+          <el-date-picker
             v-model="meta.value"
-            :true-label="'1'"
+            type="date"
             @change="onChange(meta)"
-            :indeterminate="meta.value !=1 && meta.value!=0"
-            :false-label="'0'"
-          ></el-checkbox>
-          <template v-else-if="meta.uitype=='TextBox'">
-            <el-input
-              v-model="meta.value"
-              style="width:100%"
-              clearable
-              :placeholder="getPlaceholder(meta)"
-              @input="onInput(meta)"
-            ></el-input>
-          </template>
-          <template v-else-if="meta.uitype=='TextArea'">
-            <el-input
-              v-model="meta.value"
-              style="width:100%"
-              clearable
-              :placeholder="getPlaceholder(meta)"
-              @change="onChange(meta)"
-            ></el-input>
-          </template>
-          <!-- Custom自定义组件暂时用文本框 -->
-          <template v-else-if="meta.uitype=='Custom'">
-            <el-input
-              @change="onChange(meta)"
-              style="width:100%"
-              v-model="meta.value"
-              clearable
-              :placeholder="getPlaceholder(meta)"
-            ></el-input>
-          </template>
-          <!-- 自定义输入组件 -->
-          <component
-            v-else-if="meta.uitype"
-            :is="meta.uitype"
+            clearable
+            :placeholder="getPlaceholder(meta)"
+          ></el-date-picker>
+        </span>
+      </template>
+      <div :style="{width:itemWidth+'px'}" v-else>
+        <template v-if="meta.uitype=='List'">
+          <el-select
             v-model="meta.value"
-            :meta="meta"
-            :obj="meta"
-            :in-edit="true"
+            multiple
+            filterable
+            @change="onChange"
+            allow-create
+            style="width:100%"
+            :placeholder="getPlaceholder(meta)"
+          >
+            <el-option
+              v-for="sel in meta.options"
+              :key="sel.value"
+              :label="sel.text"
+              :value="sel.value"
+            ></el-option>
+          </el-select>
+        </template>
+        <template v-else-if="meta.uitype=='DropdownList'">
+          <el-select
+            v-model="meta.value"
+            style="width:100%"
+            clearable
+            filterable
+            allow-create
             @change="onChange(meta)"
             :placeholder="getPlaceholder(meta)"
-            v-bind="meta.attr"
-          ></component>
-          <!-- 没有明确定义的组件 -->
-          <template v-else>
-            <el-input
-              v-model="meta.value"
-              clearable
-              :placeholder="meta.title"
-              @input="onInput(meta)"
-            ></el-input>
-          </template>
-        </div>
-      </el-form-item>
-      <el-form-item>
-        <el-button-group>
-          <el-button
-            type="primary"
-            icon="fa fa-search"
-            title="搜索"
-            v-if="metadata.length>1"
-            native-type="submit"
-            @click.prevent="search"
-          ></el-button>
-          <el-button icon="fa fa-rotate-right" title="重置" @click="reset"></el-button>
-        </el-button-group>
-        <slot></slot>
-      </el-form-item>
-    </el-form>
-  </div>
+          >
+            <el-option
+              v-for="sel in meta.options"
+              :key="sel.value"
+              :label="sel.text"
+              :value="sel.value"
+            ></el-option>
+          </el-select>
+        </template>
+        <el-checkbox
+          v-else-if="meta.uitype=='CheckBox'"
+          v-model="meta.value"
+          :true-label="'1'"
+          @change="onChange(meta)"
+          :indeterminate="meta.value !=1 && meta.value!=0"
+          :false-label="'0'"
+        ></el-checkbox>
+        <template v-else-if="meta.uitype=='TextBox'">
+          <el-input
+            v-model="meta.value"
+            style="width:100%"
+            clearable
+            :placeholder="getPlaceholder(meta)"
+            @input="onInput(meta)"
+          ></el-input>
+        </template>
+        <template v-else-if="meta.uitype=='TextArea'">
+          <el-input
+            v-model="meta.value"
+            style="width:100%"
+            clearable
+            :placeholder="getPlaceholder(meta)"
+            @change="onChange(meta)"
+          ></el-input>
+        </template>
+        <!-- Custom自定义组件暂时用文本框 -->
+        <template v-else-if="meta.uitype=='Custom'">
+          <el-input
+            @change="onChange(meta)"
+            style="width:100%"
+            v-model="meta.value"
+            clearable
+            :placeholder="getPlaceholder(meta)"
+          ></el-input>
+        </template>
+        <!-- 自定义输入组件 -->
+        <component
+          v-else-if="meta.uitype"
+          :is="meta.uitype"
+          v-model="meta.value"
+          :meta="meta"
+          :obj="meta"
+          :in-edit="true"
+          @change="onChange(meta)"
+          :placeholder="getPlaceholder(meta)"
+          v-bind="meta.attr"
+        ></component>
+        <!-- 没有明确定义的组件 -->
+        <template v-else>
+          <el-input v-model="meta.value" clearable :placeholder="meta.title" @input="onInput(meta)"></el-input>
+        </template>
+      </div>
+    </el-form-item>
+    <el-form-item>
+      <el-button-group>
+        <el-button
+          type="primary"
+          icon="fa fa-search"
+          title="搜索"
+          v-if="metadata.length>1"
+          native-type="submit"
+          @click.prevent="search"
+        ></el-button>
+        <el-button icon="fa fa-rotate-right" title="重置" @click="reset"></el-button>
+      </el-button-group>
+      <slot></slot>
+    </el-form-item>
+  </el-form>
 </template>
 <script>
 import util from "../common/util.js";
