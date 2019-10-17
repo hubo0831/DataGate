@@ -28,7 +28,7 @@ namespace DataGate.Api.Controllers
         [HttpPost]
         public async Task<UploadResult> Upload(UploadRequest request)
         {
-            var userSession = GetSession();
+            var userSession = await GetSessionAsync();
             BuildMetadata(request);
             ServerUploadRequest request2 = new ServerUploadRequest(request);
             request2.UserId = userSession?.Id;

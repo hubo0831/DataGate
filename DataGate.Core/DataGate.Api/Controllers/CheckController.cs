@@ -47,7 +47,7 @@ namespace DataGate.Api.Controllers
         /// <returns></returns>
         public async Task<bool> Password(string p)
         {
-            var userSession = _session.Get(Token);
+            var userSession = await _session.Get(Token);
 
             var user = await _user.GetAsync(userSession.Account);
             //  ps["Password"] = Encryption.MD5("123456" + ps["PasswordSalt"]);
@@ -62,7 +62,7 @@ namespace DataGate.Api.Controllers
         [HttpPost]
         public async Task<bool> ChangePassword(string p)
         {
-            var userSession = _session.Get(Token);
+            var userSession = await _session.Get(Token);
 
             var user = await _user.GetAsync(userSession.Account);
             //  ps["Password"] = Encryption.MD5("123456" + ps["PasswordSalt"]);
@@ -82,7 +82,7 @@ namespace DataGate.Api.Controllers
         [HttpPost]
         public async Task<bool> ChangeProfile(AppUser u)
         {
-            var userSession = _session.Get(Token);
+            var userSession = await _session.Get(Token);
 
             var user = await _user.GetAsync(userSession.Account);
             //  ps["Password"] = Encryption.MD5("123456" + ps["PasswordSalt"]);
@@ -112,9 +112,9 @@ namespace DataGate.Api.Controllers
         /// 注销登录
         /// </summary>
         [HttpPost]
-        public bool Logout()
+        public async Task<bool> Logout()
         {
-            return _session.Remove(Token);
+            return await _session.Remove(Token);
         }
     }
 }

@@ -22,7 +22,7 @@ namespace DataGate.Com
         /// <param name="value">被序列化的对象</param>
         /// <param name="indent">是否是可读的缩进格式</param>
         /// <returns>json字符串</returns>
-        public static string ToJson(object value, bool indent = true)
+        public static string ToJson(this object value, bool indent = true)
         {
             if (value == null) return null;
             Type type = value.GetType();
@@ -62,7 +62,7 @@ namespace DataGate.Com
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="json">json字符串</param>
         /// <returns>反序列化得到的对象，如果json是空串，则返回T的默认值</returns>
-        public static T FromJson<T>(string json)
+        public static T FromJson<T>(this string json)
         {
             if (String.IsNullOrEmpty(json)) return default(T);
             T t = JsonConvert.DeserializeObject<T>(json);

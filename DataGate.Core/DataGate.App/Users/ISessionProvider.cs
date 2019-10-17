@@ -7,12 +7,12 @@ namespace DataGate.App
     /// </summary>
     public interface ISessionProvider
     {
-        UserSession Get(string token);
+        Task<UserSession> Get(string token);
 
         Task<object> GetUserAsync(string token);
 
         Task<LoginResult> Login(LoginRequest request, bool validate);
 
-        bool Remove(string token);
+        Task<bool> Remove(string token);
     }
 }

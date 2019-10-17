@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Nito.AsyncEx;
 
 namespace DataGate.Api.Controllers
 {
@@ -21,14 +22,14 @@ namespace DataGate.Api.Controllers
     {
         const string LogSaveKey = "ActionLog";
         Stopwatch sw = new Stopwatch();
-        public BaseController()
+        protected BaseController()
         {
         }
 
         /// <summary>
         /// 登录用户的令牌,不要在构造函数使用, 参数需传小写的token在header中或url参数中
         /// </summary>
-        public string Token
+        protected string Token
         {
             get
             {
@@ -41,10 +42,20 @@ namespace DataGate.Api.Controllers
         /// 获取用户的会话，不要在构造函数使用
         /// </summary>
         /// <returns></returns>
+        [NonAction]
         public UserSession GetSession()
         {
+            return AsyncContext.Run(async () => await GetSessionAsync());
+        }
+
+        /// <summary>
+        /// 获取用户的会话，不要在构造函数使用
+        /// </summary>
+        /// <returns></returns>
+        protected async Task<UserSession> GetSessionAsync()
+        {
             if (Token != null)
-                return Consts.Get<SessionProvider>().Get(Token);
+                return await Consts.Get<SessionProvider>().Get(Token);
             return null;
         }
 

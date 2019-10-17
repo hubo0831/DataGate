@@ -19,7 +19,7 @@ namespace DataGate.Api.Filters
     /// <summary>
     /// 暂时用此Filter来拦截记录常规访问日志
     /// </summary>
-    public class DefaultFilter : IActionFilter, IResultFilter,IExceptionFilter
+    public class DefaultFilter : IActionFilter, IResultFilter, IExceptionFilter
     {
         public void OnActionExecuted(ActionExecutedContext context)
         {
@@ -92,7 +92,7 @@ namespace DataGate.Api.Filters
             logInfo.OpTime = DateTime.Now;
             logInfo.LogLevel = LogType.Info;
             logInfo.Request = httpContext.Request.Method + " " + httpContext.Request.QueryString.ToString();
-         //   context.ActionDescriptor.Properties[LogSaveKey] = logInfo;
+            //   context.ActionDescriptor.Properties[LogSaveKey] = logInfo;
             return logInfo;
         }
 

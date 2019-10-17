@@ -1,6 +1,8 @@
 ﻿using DataGate.App.DataService;
 using DataGate.App.Models;
 using DataGate.Com;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -18,82 +20,33 @@ namespace DataGate.App
     /// <summary>
     /// 会话管理类，以Token作为Key的字典来管理会话
     /// </summary>
-    public class SessionProvider : IDisposable, ISingleton, ISessionProvider
+    public class SessionProvider : ISingleton, ISessionProvider
     {
-        ConcurrentDictionary<string, UserSession> _sessionDict
-           = new ConcurrentDictionary<string, UserSession>();
-        readonly HeartBeat _hb;
-        string _sessionTempFile;
         UserMan _user;
         MenuMan _menu;
         int Expires = 30; //session过期时间（分钟）
+        //int SlidingExpiration = 60; //session滑动过期时间（分钟）
         int OnlineSpan = 5; //在线判定标准（分钟）
-        public SessionProvider(UserMan userMan, MenuMan menu)
+
+        private IMemoryCache MemoryCache { get; }
+        private IDistributedCache DistributedCache { get; }
+
+        public SessionProvider(IMemoryCache memoryCache, IDistributedCache distributedCache, UserMan userMan, MenuMan menu)
         {
+            this.MemoryCache = memoryCache;
+            this.DistributedCache = distributedCache;
             _user = userMan;
             _menu = menu;
             Expires = Consts.Config.GetSection("Session:Timeout").Value.ToInt();
             OnlineSpan = Consts.Config.GetSection("Session:OnlineSpan").Value.ToInt();
             if (Expires <= 0) Expires = 30;
             if (OnlineSpan <= 0) OnlineSpan = 5;
-            _hb = new HeartBeat("RemoveAllExpired", 60, RemoveAllExpired);
-            _hb.Start();
-            RestoreSessions();
         }
 
-        /// <summary>
-        /// 服务器重启时，恢复重建上次没过期的session
-        /// </summary>
-        void RestoreSessions()
+        /// <summary>会话缓存键</summary>
+        private string GetCacheKey(string token)
         {
-            _sessionTempFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "usersessions.json");
-            var fileInfo = new FileInfo(_sessionTempFile);
-            if (fileInfo.Exists && fileInfo.LastWriteTime >= DateTime.Now.AddMinutes(-Expires))
-            {
-                string sessionStr = File.ReadAllText(_sessionTempFile);
-                if (!String.IsNullOrEmpty(sessionStr))
-                {
-                    var dict = JsonConvert.DeserializeObject<Dictionary<string, UserSession>>(sessionStr);
-                    _sessionDict = new ConcurrentDictionary<string, UserSession>(dict);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 轮询清理过期session
-        /// </summary>
-        private void RemoveAllExpired()
-        {
-            List<string> expriedKeys = new List<string>();
-            DateTime expireTime = DateTime.Now.AddMinutes(-Expires);
-            foreach (var token in _sessionDict.Keys)
-            {
-                if (_sessionDict[token].LastOpTime < expireTime)
-                {
-                    expriedKeys.Add(token);
-                }
-            }
-            expriedKeys.ForEach(token => _sessionDict.TryRemove(token, out UserSession removed));
-            Persistence();
-        }
-
-        /// <summary>
-        /// 判断session是否过期，如过期则移除并返回true
-        /// </summary>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        private bool TestExpired(string token)
-        {
-            if (!_sessionDict.TryGetValue(token, out UserSession session))
-            {
-                return false;
-            }
-            if (session.LastOpTime < DateTime.Now.AddMinutes(-Expires))
-            {
-                _sessionDict.TryRemove(token, out UserSession removed);
-                return true;
-            }
-            return false;
+            return $"{typeof(UserSession).FullName}:{token}";
         }
 
         /// <summary>
@@ -101,9 +54,12 @@ namespace DataGate.App
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        public bool Remove(string token)
+        public async Task<bool> Remove(string token)
         {
-            return _sessionDict.TryRemove(token, out UserSession session);
+            var cacheKey = GetCacheKey(token);
+            await this.DistributedCache.RemoveAsync(cacheKey);
+            this.MemoryCache.Remove(cacheKey);
+            return true;
         }
 
         /// <summary>
@@ -111,17 +67,20 @@ namespace DataGate.App
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        public UserSession Get(string token)
+        public async Task<UserSession> Get(string token)
         {
-            var r = _sessionDict.TryGetValue(token, out UserSession session);
-            if (r && !TestExpired(token))
+            var cacheKey = GetCacheKey(token);
+            if (this.MemoryCache.TryGetValue(cacheKey, out var sessionObj))
             {
-                session.LastOpTime = DateTime.Now;
+                return sessionObj as UserSession;
             }
-            else
+            var sessionBytes = await this.DistributedCache.GetAsync(cacheKey);
+            if (sessionBytes == null) return null;
+            var session = Encoding.UTF8.GetString(sessionBytes).FromJson<UserSession>();
+            this.MemoryCache.Set(cacheKey, session, new MemoryCacheEntryOptions()
             {
-                session = null;
-            }
+                AbsoluteExpiration = session.LastOpTime + TimeSpan.FromMinutes(this.Expires)
+            });
             return session;
         }
 
@@ -132,7 +91,7 @@ namespace DataGate.App
         /// <returns></returns>
         public async Task<object> GetUserAsync(string token)
         {
-            var userSession = Get(token);
+            var userSession = await Get(token);
             if (userSession == null)
             {
                 return MSG.SessionExpired;
@@ -177,7 +136,7 @@ namespace DataGate.App
         }
 
         /// <summary>
-        /// 登录,根据用户名，手机，邮箱来登录，当同一手机，邮箱不止一个用户使用时，将不成登录成功
+        /// 登录,根据用户名，手机，邮箱来登录，当同一手机，邮箱不止一个用户使用时，将登录不成功
         /// </summary>
         /// <param name="request"></param>
         /// <param name="validate">验证密码</param>
@@ -227,21 +186,22 @@ namespace DataGate.App
                 Id = user.Id,
                 LastOpTime = DateTime.Now
             };
-            _sessionDict.TryAdd(session.Token, session);
+            var cacheKey = GetCacheKey(session.Token);
+            var sessionBytes = Encoding.UTF8.GetBytes(session.ToJson(false));
+            await this.DistributedCache.SetAsync(cacheKey, sessionBytes, new DistributedCacheEntryOptions()
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(this.Expires)
+            });
+            this.MemoryCache.Set(cacheKey, session);
 
             DataGateService ds = Consts.Get<DataGateService>();
 
             //写最后登录时间，并进一步判断用户是否存在
-            int exists =  await ds.UpdateAsync("UpdateLastLoginTime", new
+            await ds.UpdateAsync("UpdateLastLoginTime", new
             {
                 id = user.Id,
                 LastLoginDate = session.LastOpTime
             });
-
-            if (exists == 0)
-            {
-                return MSG.UserNotExists;
-            }
 
             //要求“记住我”时，将登录信息加密回传,根据服务端的加密
             if (request.Remember == "1")
@@ -366,49 +326,5 @@ namespace DataGate.App
             result.Message = "注册成功";
             return result;
         }
-
-        /// <summary>
-        /// 将登录的session数据保存到文件中，主要为了服务器重启时能恢复会话信息
-        /// </summary>
-        private void Persistence()
-        {
-            string sessionStr = JsonConvert.SerializeObject(_sessionDict, Formatting.Indented);
-            File.WriteAllText(_sessionTempFile, sessionStr);
-        }
-
-        #region IDisposable Support
-        private bool disposedValue = false; // 要检测冗余调用
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    // TODO: 释放托管状态(托管对象)。
-                    Persistence();
-                    _sessionDict = null;
-                    disposedValue = true;
-                }
-                // TODO: 释放未托管的资源(未托管的对象)并在以下内容中替代终结器。
-                // TODO: 将大型字段设置为 null。
-            }
-        }
-
-        // TODO: 仅当以上 Dispose(bool disposing) 拥有用于释放未托管资源的代码时才替代终结器。
-        // ~SessionProvider() {
-        //   // 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
-        //   Dispose(false);
-        // }
-
-        // 添加此代码以正确实现可处置模式。
-        public void Dispose()
-        {
-            // 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
-            Dispose(true);
-            // TODO: 如果在以上内容中替代了终结器，则取消注释以下行。
-            // GC.SuppressFinalize(this);
-        }
-        #endregion
     }
 }
