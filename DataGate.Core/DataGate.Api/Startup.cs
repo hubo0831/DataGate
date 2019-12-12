@@ -123,12 +123,15 @@ namespace DataGate.Api
             }
             else
             {
-                app.UseHsts();
+                //app.UseHsts();
             }
 
-            app.UseHttpsRedirection().UseCors(builder =>
-              builder.AllowAnyOrigin()
-              .AllowAnyMethod().AllowAnyHeader());//.WithOrigins("http://example.com"));
+            //app.UseHttpsRedirection();
+            app.UseCors(builder =>
+            {
+                //.WithOrigins("http://example.com"));
+                builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+            });
 
             //GlobalDiagnosticsContext.Set("configDir", Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs"));
             //GlobalDiagnosticsContext.Set("connectionString", Configuration.GetConnectionString("Default"));
