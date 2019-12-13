@@ -1,4 +1,4 @@
-import 'babel-polyfill' //解决IE有些方法不支持，如startsWith,endsWith
+//import 'babel-polyfill' //解决IE有些方法不支持，如startsWith,endsWith
 // import "html5shiv"
 global.jQuery = require('jquery');
 global.$ = global.jQuery;

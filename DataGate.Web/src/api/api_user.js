@@ -15,11 +15,13 @@ function getUserInfo() {
       return;
     }
     API.GET('/api/Check/GetUser').then(user => {
-      if (!user.$code) {
-        resolve(user);
-      } else {
+      if (user.$code) {
         reject(user);
+      } else {
+        resolve(user);
       }
+    }).catch(error => {
+      reject(error);
     });
   });
 }
@@ -32,15 +34,16 @@ function login(account) {
 //使用指定的url地址登录
 function loginUrl(url, param) {
   return new Promise((resolve, reject) => {
-    API.POST(url, param)
-      .then(result => {
-        if (!result.$code) {
-          loginSuccess(result);
-          resolve(result);
-        } else {
-          reject(result);
-        }
-      });
+    API.POST(url, param).then(result => {
+      if (result.$code) {
+        reject(result);
+        return;
+      }
+      loginSuccess(result);
+      resolve(result);
+    }).catch(error => {
+      reject(error);
+    });
   });
 }
 
@@ -55,9 +58,8 @@ function rememberLogin() {
   var remember = util.getCookie("remember");
   if ((remember || '').length < 10) {
     return Promise.reject(0);
-  } else return loginUrl('/api/Check/Login', {
-    remember
-  });
+  }
+  return loginUrl('/api/Check/Login', { remember });
 }
 
 //退出登录，主动退出或超时退出都会进入此方法，则需要保留是否记住我的勾选状态同时清空记住我的内容
