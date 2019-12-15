@@ -14,12 +14,8 @@ function getUserInfo() {
       resolve(userState.currentUser);
       return;
     }
-    API.GET('/api/Check/GetUser').then(user => {
-      if (user.$code) {
-        reject(user);
-      } else {
-        resolve(user);
-      }
+    API.P_GET('/api/Check/GetUser').then(user => {
+      resolve(user);
     }).catch(error => {
       reject(error);
     });
@@ -33,17 +29,9 @@ function login(account) {
 
 //使用指定的url地址登录
 function loginUrl(url, param) {
-  return new Promise((resolve, reject) => {
-    API.POST(url, param).then(result => {
-      if (result.$code) {
-        reject(result);
-        return;
-      }
-      loginSuccess(result);
-      resolve(result);
-    }).catch(error => {
-      reject(error);
-    });
+  return API.P_POST(url, param).then(result => {
+    loginSuccess(result);
+    return Promise.resolve(result);
   });
 }
 

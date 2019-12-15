@@ -22,7 +22,7 @@ function showError(xhr, err, e) {
   } else {
     bus.$emit('invalid-result', '请求出错:' + (e || err));
   }
-  return Promise.reject();
+  return Promise.reject(e);
 }
 
 function closeAll() {
@@ -36,38 +36,38 @@ export const setContext = function (vue) {
 
 //post 键-值对传参
 export const POST = (url, params) => {
-  context.loading = true;
+  // context.loading = true;
   url = formatUrl(url);
   return $.ajax({
-      headers: {
-        token: userState.token
-      },
-      cache: false,
-      data: params,
-      url: url,
-      crossDomain: true,
-      context,
-      type: 'post'
-    }).fail(showError)
-    .always(closeAll);
+    headers: {
+      token: userState.token
+    },
+    cache: false,
+    data: params,
+    url: url,
+    crossDomain: true,
+    // context,
+    type: 'post'
+  }).fail(showError);
+  // .always(closeAll);
 }
 
 //get方法url传参
 export const GET = (url, params) => {
-  context.loading = true;
+  // context.loading = true;
   url = formatUrl(url);
   return $.ajax({
-      headers: {
-        token: userState.token
-      },
-      cache: false,
-      data: params,
-      url: url,
-      crossDomain: true,
-      context,
-      type: 'get'
-    }).fail(showError)
-    .always(closeAll);
+    headers: {
+      token: userState.token
+    },
+    cache: false,
+    data: params,
+    url: url,
+    crossDomain: true,
+    // context,
+    type: 'get'
+  }).fail(showError);
+  // .always(closeAll);
 }
 //解决JSON.stringify序列化日期时转成了ISO时间的问㓳
 //注意中间要加T，否则Oracle会报错
@@ -76,21 +76,21 @@ Date.prototype.toJSON = function () {
 }
 //json传值提交
 export const JPOST = (url, params) => {
-  context.loading = true;
+  // context.loading = true;
   url = formatUrl(url);
   return $.ajax({
-      headers: {
-        token: userState.token
-      },
-      cache: false,
-      data: JSON.stringify(params),
-      url: url,
-      crossDomain: true,
-      contentType: 'application/json',
-      context,
-      type: 'post'
-    }).fail(showError)
-    .always(closeAll);
+    headers: {
+      token: userState.token
+    },
+    cache: false,
+    data: JSON.stringify(params),
+    url: url,
+    crossDomain: true,
+    contentType: 'application/json',
+    // context,
+    type: 'post'
+  }).fail(showError);
+  // .always(closeAll);
 }
 
 function filterResult(result) {
@@ -140,7 +140,39 @@ export const EXPORT = (key, params) => {
   });
 }
 
-export const getDownloadUrl = file => {  
-  file.url = `${appConfig.apiUrl}/api/dg/d/${file.id}/${encodeURI(file.name)}?token=${userState.token}`;
+export const getDownloadUrl = file => {
+  file.url = `${appConfig.apiUrl}/api/dg/d/${file.id}/${file.name}?token=${userState.token}`;
   return file;
+}
+
+const p_ajax = (type, url, params) => {
+  return new Promise((resolve, reject) => {
+    url = formatUrl(url);
+    $.ajax({
+      headers: {
+        token: userState.token
+      },
+      cache: false,
+      data: params,
+      url: url,
+      crossDomain: true,
+      type
+    }).done(data => {
+      if (data && data.$code) {
+        reject(new Error(data.$code + ":" + data.$message));
+      } else {
+        resolve(data);
+      }
+    }).fail((jqXHR, textStatus, error) => {
+      reject(error);
+    });
+  });
+}
+
+export const P_POST = (url, params) => {
+  return p_ajax('post', url, params);
+}
+
+export const P_GET = (url, params) => {
+  return p_ajax('get', url, params);
 }
