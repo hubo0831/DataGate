@@ -105,8 +105,16 @@ namespace DataGate.Api.Controllers
             Log.ObjectId = key;
             //string requestString = IOHelper.StreamToStr(Request.Body);
             //var request = JsonConvert.DeserializeObject<DataSaveRequest>(requestString);
-            var result = await _dg.SubmitAsync(key, request);
-            return result as object;
+            try
+            {
+                var result = await _dg.SubmitAsync(key, request);
+                return result as object;
+            }
+            catch (Exception ex)
+            {
+                ex.Data["request"] = request.ToJson(false);
+                throw;
+            }
         }
 
         /// <summary>

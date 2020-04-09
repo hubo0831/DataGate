@@ -451,7 +451,7 @@ namespace DataGate.App.DataService
             if (!getMaxIdSql.IsEmpty())
             {
                 id = CommOp.ToStr(await DB.ExecGetObjectAsync(getMaxIdSql));
-                psin[id] = id;
+                psin["id"] = id;
             }
 
             gkey.DataGate.OnAdded(gkey, psin);

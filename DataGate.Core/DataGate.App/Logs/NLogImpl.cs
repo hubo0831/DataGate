@@ -27,6 +27,15 @@ namespace DataGate.App.Logs
             {
                 logInfo.Exception += ex.GetType().Name + Environment.NewLine
                     + ex.Message + Environment.NewLine + ex.StackTrace;
+                foreach (var key in ex.Data.Keys)
+                {
+                    var value = ex.Data[key];
+                    if (value != null)
+                    {
+                        logInfo.Message += Environment.NewLine + key.ToString() + ":"
+                            + value.ToString() + ";";
+                    }
+                }
                 logInfo.LogLevel = LogType.Error;
             }
 
