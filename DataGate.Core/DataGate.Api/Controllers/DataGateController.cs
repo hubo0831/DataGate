@@ -112,6 +112,7 @@ namespace DataGate.Api.Controllers
             }
             catch (Exception ex)
             {
+                ex.Data["key"] = key;
                 ex.Data["request"] = request.ToJson(false);
                 throw;
             }
