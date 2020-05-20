@@ -25,17 +25,17 @@ namespace DataGate.App.Logs
             LogEventInfo logEvent = new LogEventInfo(LogLevel.Info, "", logInfo.Message);
             if (ex != null)
             {
-                logInfo.Exception += ex.GetType().Name + Environment.NewLine
-                    + ex.Message + Environment.NewLine + ex.StackTrace;
-                foreach (var key in ex.Data.Keys)
-                {
-                    var value = ex.Data[key];
-                    if (value != null)
-                    {
-                        logInfo.Message += Environment.NewLine + key.ToString() + ":"
-                            + value.ToString() + ";";
-                    }
-                }
+                //logInfo.Exception += ex.GetType().Name + Environment.NewLine
+                //    + ex.Message + Environment.NewLine + ex.StackTrace;
+                //foreach (var key in ex.Data.Keys)
+                //{
+                //    var value = ex.Data[key];
+                //    if (value != null)
+                //    {
+                //        logInfo.Message += Environment.NewLine + key.ToString() + ":"
+                //            + value.ToString() + ";";
+                //    }
+                //}
                 logInfo.LogLevel = LogType.Error;
             }
 
